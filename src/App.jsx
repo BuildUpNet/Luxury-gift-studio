@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import HeroBanner from './components/HeroBanner';
+import Header from './components/Header';
+import HeroSlider from './components/HeroSlider';
 import ProductGrid from './components/ProductGrid';
 import CelebritySection from './components/CelebritySection';
 import HamperBuilder from './components/HamperBuilder';
@@ -179,8 +179,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Navbar with authentic logo and navigation */}
-      <Navbar
+      {/* Header from gift project */}
+      <Header
         cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
         wishlistCount={wishlist.length}
         onOpenCart={() => setIsCartOpen(true)}
@@ -191,11 +191,12 @@ export default function App() {
         activeCategory={activeCategory}
       />
 
-      {/* Hero Banner */}
-      <HeroBanner
+      {/* Hero Slider from gift project */}
+      <HeroSlider
         onExploreClick={() => {
           setActiveCategory('all');
-          window.scrollTo({ top: 580, behavior: 'smooth' });
+          const el = document.getElementById('shop-now') || document.querySelector('.product-grid-section');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
         onBuildCustomClick={scrollToHamperBuilder}
       />

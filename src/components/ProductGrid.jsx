@@ -32,7 +32,7 @@ export default function ProductGrid({
   const displayedProducts = sortedProducts.slice(0, visibleCount);
 
   return (
-    <section className="product-grid-section">
+    <section id="shop-now" className="product-grid-section">
       {/* Top Header & Sort Toolbar */}
       <div style={{
         display: 'flex',
