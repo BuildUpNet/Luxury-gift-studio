@@ -1,16 +1,10 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import Header from './components/Header';
-import HeroSlider from './components/HeroSlider';
-import ProductGrid from './components/ProductGrid';
-import CelebritySection from './components/CelebritySection';
-import HamperBuilder from './components/HamperBuilder';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import DiwaliHampersPage from './pages/collections/diwali-hampers';
 import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
 import ProductModal from './components/ProductModal';
-import Testimonials from './components/Testimonials';
-import Footer from './components/Footer';
-
-import { PRODUCTS, ORIGINAL_NAV_LINKS } from './data/giftStudioData';
 
 export default function App() {
   const [cart, setCart] = useState(() => {
@@ -31,8 +25,6 @@ export default function App() {
     }
   });
 
-  const [activeCategory, setActiveCategory] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWishlistOpen, setIsWishlistOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState(null);
@@ -103,169 +95,122 @@ export default function App() {
     setWishlist((prev) => prev.filter((p) => p.id !== id));
   };
 
-  const scrollToHamperBuilder = () => {
-    const el = document.getElementById('build-hamper-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleCategorySelect = (id) => {
-    if (id === 'create-own') {
-      scrollToHamperBuilder();
-    } else {
-      setActiveCategory(id);
-      setSearchQuery('');
-    }
-  };
-
-  const handleDesignerSelect = (designerName) => {
-    setSearchQuery(designerName);
-    window.scrollTo({ top: 600, behavior: 'smooth' });
-  };
-
   const handleCheckout = (total) => {
     alert(`Order placed! Total: ₹${total.toLocaleString('en-IN')}. Redirecting to secure checkout...`);
     setCart([]);
     setIsCartOpen(false);
   };
 
-  // Filter products based on search & category
-  const filteredProducts = useMemo(() => {
-    let list = PRODUCTS;
-
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter((p) =>
-        p.title.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-      );
-    }
-
-    if (activeCategory !== 'all') {
-      const navItem = ORIGINAL_NAV_LINKS.find((l) => l.id === activeCategory);
-      if (navItem && !navItem.isBuilder) {
-        list = list.filter((p) => p.category.toLowerCase() === navItem.label.toLowerCase());
-      }
-    }
-
-    return list;
-  }, [searchQuery, activeCategory]);
-
-  const activeCategoryName = useMemo(() => {
-    const navItem = ORIGINAL_NAV_LINKS.find((l) => l.id === activeCategory);
-    return navItem ? navItem.label : "All Hampers";
-  }, [activeCategory]);
-
   return (
-    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
-      {/* Toast */}
-      {toastMessage && (
-        <div style={{
-          position: 'fixed',
-          bottom: '24px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#020919',
-          color: '#ffffff',
-          padding: '10px 22px',
-          borderRadius: '4px',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-          zIndex: 200,
-          fontWeight: 600,
-          fontSize: '0.85rem'
-        }}>
-          {toastMessage}
-        </div>
-      )}
+    <Router>
+      <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
+        {/* Global Toast */}
+        {toastMessage && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#020919',
+              color: '#ffffff',
+              padding: '10px 22px',
+              borderRadius: '4px',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+              zIndex: 200,
+              fontWeight: 600,
+              fontSize: '0.85rem'
+            }}
+          >
+            {toastMessage}
+          </div>
+        )}
 
-      {/* Header from gift project */}
-      <Header
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        wishlistCount={wishlist.length}
-        onOpenCart={() => setIsCartOpen(true)}
-        onOpenWishlist={() => setIsWishlistOpen(true)}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onSelectCategory={handleCategorySelect}
-        activeCategory={activeCategory}
-      />
+        {/* Application Routes */}
+        <Routes>
+          {/* 1. Dedicated Home Page Route (Original Landing Sections Only) */}
+          <Route
+            path="/"
+            element={
+              <HomePage
+                cart={cart}
+                wishlist={wishlist}
+                onAddToCart={handleAddToCart}
+                onUpdateQty={handleUpdateQty}
+                onRemoveFromCart={handleRemoveFromCart}
+                onToggleWishlist={handleToggleWishlist}
+                onRemoveFromWishlist={handleRemoveFromWishlist}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenWishlist={() => setIsWishlistOpen(true)}
+                onQuickView={(product) => setQuickViewProduct(product)}
+              />
+            }
+          />
 
-      {/* Hero Slider from gift project */}
-      <HeroSlider
-        onExploreClick={() => {
-          setActiveCategory('all');
-          const el = document.getElementById('shop-now') || document.querySelector('.product-grid-section');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
-        onBuildCustomClick={scrollToHamperBuilder}
-      />
+          {/* 2. Dedicated Diwali Gift Hampers Collection Page */}
+          <Route
+            path="/collections/diwali-hampers"
+            element={
+              <DiwaliHampersPage
+                cart={cart}
+                wishlist={wishlist}
+                onAddToCart={handleAddToCart}
+                onToggleWishlist={handleToggleWishlist}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenWishlist={() => setIsWishlistOpen(true)}
+                onQuickView={(product) => setQuickViewProduct(product)}
+              />
+            }
+          />
 
-      {/* Main Products Grid */}
-      <ProductGrid
-        products={filteredProducts}
-        onAddToCart={handleAddToCart}
-        onToggleWishlist={handleToggleWishlist}
-        wishlistIds={wishlist.map((p) => p.id)}
-        onQuickView={(product) => setQuickViewProduct(product)}
-        activeCategoryName={activeCategoryName}
-        searchQuery={searchQuery}
-        onClearFilters={() => {
-          setActiveCategory('all');
-          setSearchQuery('');
-        }}
-      />
+          {/* Fallback Route */}
+          <Route
+            path="*"
+            element={
+              <HomePage
+                cart={cart}
+                wishlist={wishlist}
+                onAddToCart={handleAddToCart}
+                onUpdateQty={handleUpdateQty}
+                onRemoveFromCart={handleRemoveFromCart}
+                onToggleWishlist={handleToggleWishlist}
+                onRemoveFromWishlist={handleRemoveFromWishlist}
+                onOpenCart={() => setIsCartOpen(true)}
+                onOpenWishlist={() => setIsWishlistOpen(true)}
+                onQuickView={(product) => setQuickViewProduct(product)}
+              />
+            }
+          />
+        </Routes>
 
-      {/* Celebrity Designers Collection */}
-      <CelebritySection
-        onSelectDesigner={handleDesignerSelect}
-      />
-
-      {/* Create Your Own Hamper Studio */}
-      <HamperBuilder
-        onAddCustomHamperToCart={(customHamper) => {
-          handleAddToCart(customHamper);
-          setIsCartOpen(true);
-        }}
-      />
-
-      {/* Testimonials */}
-      <Testimonials />
-
-      {/* Footer */}
-      <Footer
-        onSelectCategory={handleCategorySelect}
-      />
-
-      {/* Cart Drawer */}
-      <CartDrawer
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        cart={cart}
-        onUpdateQty={handleUpdateQty}
-        onRemoveItem={handleRemoveFromCart}
-        onCheckout={handleCheckout}
-      />
-
-      {/* Wishlist Drawer */}
-      <WishlistDrawer
-        isOpen={isWishlistOpen}
-        onClose={() => setIsWishlistOpen(false)}
-        wishlistItems={wishlist}
-        onAddToCart={handleAddToCart}
-        onRemoveFromWishlist={handleRemoveFromWishlist}
-      />
-
-      {/* Quick View Modal */}
-      {quickViewProduct && (
-        <ProductModal
-          product={quickViewProduct}
-          onClose={() => setQuickViewProduct(null)}
-          onAddToCart={handleAddToCart}
-          onToggleWishlist={handleToggleWishlist}
-          isWishlisted={wishlist.some((p) => p.id === quickViewProduct.id)}
+        {/* Shared Drawers & Modals */}
+        <CartDrawer
+          isOpen={isCartOpen}
+          onClose={() => setIsCartOpen(false)}
+          cart={cart}
+          onUpdateQty={handleUpdateQty}
+          onRemoveItem={handleRemoveFromCart}
+          onCheckout={handleCheckout}
         />
-      )}
-    </div>
+
+        <WishlistDrawer
+          isOpen={isWishlistOpen}
+          onClose={() => setIsWishlistOpen(false)}
+          wishlistItems={wishlist}
+          onAddToCart={handleAddToCart}
+          onRemoveFromWishlist={handleRemoveFromWishlist}
+        />
+
+        {quickViewProduct && (
+          <ProductModal
+            product={quickViewProduct}
+            onClose={() => setQuickViewProduct(null)}
+            onAddToCart={handleAddToCart}
+            onToggleWishlist={handleToggleWishlist}
+            isWishlisted={wishlist.some((p) => p.id === quickViewProduct.id)}
+          />
+        )}
+      </div>
+    </Router>
   );
 }

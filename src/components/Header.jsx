@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Search,
   MapPin,
@@ -211,13 +212,14 @@ const Header = ({
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
             
-            <button
+            <Link
+              to="/"
               onClick={() => {
                 if (onSelectCategory) onSelectCategory('all');
                 if (setSearchQuery) setSearchQuery('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer p-0"
+              className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer p-0 no-underline text-inherit"
             >
               <span className="font-serif text-lg sm:text-xl md:text-2xl font-bold tracking-wider text-gray-950">
                 THE GIFT STUDIO
@@ -226,7 +228,7 @@ const Header = ({
               <span className="hidden sm:inline text-xs sm:text-sm font-medium text-emerald-800 tracking-wide">
                 Nature's Basket
               </span>
-            </button>
+            </Link>
           </div>
 
           {/* Center: Search Bar */}
@@ -376,7 +378,8 @@ const Header = ({
               onMouseLeave={() => setActiveDropdown(null)}
             >
               <button
-                onClick={() => handleItemClick('diwali')}
+                type="button"
+                onClick={() => setActiveDropdown(activeDropdown === 'diwali' ? null : 'diwali')}
                 className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
                   activeCategory === 'diwali' ? 'font-bold text-black border-b-2 border-black' : ''
                 }`}
@@ -384,16 +387,31 @@ const Header = ({
                 Diwali <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
               </button>
               {activeDropdown === 'diwali' && (
-                <div className="absolute top-full left-0 w-48 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.diwali.items.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  ))}
+                <div className="absolute top-full left-0 w-52 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  {standardDropdowns.diwali.items.map((item, idx) => {
+                    if (item === 'Diwali Hampers') {
+                      return (
+                        <Link
+                          key={idx}
+                          to="/collections/diwali-hampers"
+                          onClick={() => setActiveDropdown(null)}
+                          className="block w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-900 transition no-underline"
+                        >
+                          Diwali Hampers
+                        </Link>
+                      );
+                    }
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </li>
@@ -626,15 +644,33 @@ const Header = ({
                 <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
               </summary>
               <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.diwali.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
-                    className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                  >
-                    {item}
-                  </button>
-                ))}
+                {standardDropdowns.diwali.items.map((item, idx) => {
+                  if (item === 'Diwali Hampers') {
+                    return (
+                      <Link
+                        key={idx}
+                        to="/collections/diwali-hampers"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setActiveDropdown(null);
+                        }}
+                        className="block w-full text-left py-1.5 font-medium text-gray-700 hover:text-amber-800 no-underline"
+                      >
+                        Diwali Hampers
+                      </Link>
+                    );
+                  }
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
+                      className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
               </div>
             </details>
 

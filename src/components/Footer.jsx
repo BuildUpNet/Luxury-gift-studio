@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Phone, Mail, Send } from 'lucide-react';
 import { STORE_INFO } from '../data/giftStudioData';
 
@@ -113,9 +114,9 @@ export default function Footer({ onSelectCategory }) {
               Curated Hampers
             </h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.84rem' }}>
-              <li><span onClick={() => onSelectCategory('celebrity')} style={{ cursor: 'pointer', color: '#555' }}>Celebrity Hampers</span></li>
-              <li><span onClick={() => onSelectCategory('diwali')} style={{ cursor: 'pointer', color: '#555' }}>Diwali Hampers</span></li>
-              <li><span onClick={() => onSelectCategory('birthdays')} style={{ cursor: 'pointer', color: '#555' }}>Birthday Hampers</span></li>
+              <li><span onClick={() => onSelectCategory && onSelectCategory('celebrity')} style={{ cursor: 'pointer', color: '#555' }}>Celebrity Hampers</span></li>
+              <li><Link to="/collections/diwali-hampers" style={{ textDecoration: 'none', color: '#555', cursor: 'pointer' }} className="hover:text-amber-800">Diwali Hampers</Link></li>
+              <li><span onClick={() => onSelectCategory && onSelectCategory('birthdays')} style={{ cursor: 'pointer', color: '#555' }}>Birthday Hampers</span></li>
               <li><span onClick={() => onSelectCategory('anniversary')} style={{ cursor: 'pointer', color: '#555' }}>Anniversary Hampers</span></li>
               <li><a href="#build-hamper-section" style={{ color: '#555', textDecoration: 'none' }}>Create Your Own Hamper</a></li>
             </ul>
