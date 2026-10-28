@@ -6,7 +6,7 @@ import CelebritySection from '../components/CelebritySection';
 import HamperBuilder from '../components/HamperBuilder';
 import Testimonials from '../components/Testimonials';
 import Footer from '../components/Footer';
-
+import { useProducts } from '../context/ProductContext';
 import { PRODUCTS, ORIGINAL_NAV_LINKS } from '../data/giftStudioData';
 
 export default function HomePage({
@@ -18,6 +18,7 @@ export default function HomePage({
   onOpenWishlist,
   onQuickView
 }) {
+  const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,7 +45,7 @@ export default function HomePage({
 
   // Filter products based on search & category
   const filteredProducts = useMemo(() => {
-    let list = PRODUCTS;
+    let list = products && products.length > 0 ? products : PRODUCTS;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();

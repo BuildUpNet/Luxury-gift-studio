@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
-import { DIWALI_HAMPERS, DIWALI_GIFTING_IDEAS } from '../../data/diwaliHampersData';
+import { useProducts } from '../../context/ProductContext';
+import { DIWALI_GIFTING_IDEAS } from '../../data/diwaliHampersData';
 
 // Price tier definitions matching requirements
 const PRICE_TIERS = [
@@ -38,6 +39,12 @@ export default function DiwaliHampersPage({
   onOpenWishlist,
   onQuickView
 }) {
+  const { products } = useProducts();
+
+  const diwaliProducts = useMemo(() => {
+    return products.filter((p) => p.category && p.category.toLowerCase().includes('diwali'));
+  }, [products]);
+
   // Filters & Sorting state
   const [selectedPriceTier, setSelectedPriceTier] = useState('all');
   const [isPricePopoverOpen, setIsPricePopoverOpen] = useState(false);
@@ -64,22 +71,20 @@ export default function DiwaliHampersPage({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-
-
-  // Calculate count for each price tier
+  // Calculate count for each price tier dynamically
   const tierCounts = useMemo(() => {
     const counts = {};
     PRICE_TIERS.forEach((tier) => {
-      counts[tier.id] = DIWALI_HAMPERS.filter(
+      counts[tier.id] = diwaliProducts.filter(
         (p) => p.priceNum >= tier.min && p.priceNum <= tier.max
       ).length;
     });
     return counts;
-  }, []);
+  }, [diwaliProducts]);
 
   // Filtered and Sorted products
   const filteredProducts = useMemo(() => {
-    let list = [...DIWALI_HAMPERS];
+    let list = [...diwaliProducts];
 
     // Search query filter
     if (searchQuery.trim()) {
@@ -111,7 +116,7 @@ export default function DiwaliHampersPage({
     }
 
     return list;
-  }, [selectedPriceTier, sortBy, searchQuery]);
+  }, [diwaliProducts, selectedPriceTier, sortBy, searchQuery]);
 
   const activeTierObj = PRICE_TIERS.find((t) => t.id === selectedPriceTier);
 

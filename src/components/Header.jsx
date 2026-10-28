@@ -186,8 +186,8 @@ const Header = ({
   return (
     <header className="w-full bg-white relative z-40 shadow-sm">
       {/* 1. Top Announcement Bar */}
-      <div className="bg-slate-900 text-white text-xs md:text-sm py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-2">
-        <span>FOR QUERIES PLEASE CALL OR WHATSAPP - 7506210892</span>
+      <div className="bg-black text-white text-xs md:text-sm py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-2">
+        <span>FOR QUERIES PLEASE CALL OR WHATSAPP: 7506210892</span>
         <a
           href="https://wa.me/917506210892"
           target="_blank"
@@ -239,7 +239,7 @@ const Header = ({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-                placeholder="Search gifts, hampers, flowers..."
+                placeholder="Search Gifts"
                 className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 focus:outline-none"
               />
               {searchQuery && (
@@ -351,7 +351,7 @@ const Header = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-              placeholder="Search gifts, hampers..."
+              placeholder="Search Gifts"
               className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 focus:outline-none"
             />
             {searchQuery && (
@@ -371,47 +371,44 @@ const Header = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ul className="flex items-center justify-between text-xs xl:text-sm font-medium text-gray-700 list-none m-0 p-0">
             
-            {/* 1. Diwali Dropdown */}
+            {/* 1. Diwali Dropdown (Links to Home Decor Collection) */}
             <li
               className="relative py-3.5 group cursor-pointer"
               onMouseEnter={() => setActiveDropdown('diwali')}
               onMouseLeave={() => setActiveDropdown(null)}
             >
-              <button
-                type="button"
-                onClick={() => setActiveDropdown(activeDropdown === 'diwali' ? null : 'diwali')}
-                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
+              <Link
+                to="/collections/tgs-home"
+                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline ${
                   activeCategory === 'diwali' ? 'font-bold text-black border-b-2 border-black' : ''
                 }`}
               >
                 Diwali <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
+              </Link>
               {activeDropdown === 'diwali' && (
-                <div className="absolute top-full left-0 w-52 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  {standardDropdowns.diwali.items.map((item, idx) => {
-                    if (item === 'Diwali Hampers') {
-                      return (
-                        <Link
-                          key={idx}
-                          to="/collections/diwali-hampers"
-                          onClick={() => setActiveDropdown(null)}
-                          className="block w-full text-left px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-amber-50 hover:text-amber-900 transition no-underline"
-                        >
-                          Diwali Hampers
-                        </Link>
-                      );
-                    }
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                      >
-                        {item}
-                      </button>
-                    );
-                  })}
+                <div className="absolute top-full left-0 w-56 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                  <Link
+                    to="/collections/tgs-home"
+                    onClick={() => setActiveDropdown(null)}
+                    className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-amber-950 bg-amber-50/70 hover:bg-amber-100/70 transition no-underline flex items-center justify-between"
+                  >
+                    <span>Home Decor</span>
+                    <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded">Featured</span>
+                  </Link>
+                  <Link
+                    to="/collections/diwali-hampers"
+                    onClick={() => setActiveDropdown(null)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
+                  >
+                    Diwali Hampers
+                  </Link>
+                  <Link
+                    to="/collections/tgs-home"
+                    onClick={() => setActiveDropdown(null)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
+                  >
+                    View All
+                  </Link>
                 </div>
               )}
             </li>
@@ -584,14 +581,14 @@ const Header = ({
 
             {/* 9. Home Decor */}
             <li className="py-3.5">
-              <button
-                onClick={() => handleItemClick('home-decor')}
-                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'home-decor' ? 'font-bold text-black border-b-2 border-black' : ''
+              <Link
+                to="/collections/tgs-home"
+                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline inline-block ${
+                  activeCategory === 'home-decor' ? 'font-bold text-black border-b-2 border-black pb-0.5' : ''
                 }`}
               >
                 Home Decor
-              </button>
+              </Link>
             </li>
 
             {/* 10. More Gifts Dropdown */}
@@ -605,15 +602,29 @@ const Header = ({
               </span>
               {activeDropdown === 'moreGifts' && (
                 <div className="absolute top-full right-0 w-64 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.moreGifts.items.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick(null, item)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  ))}
+                  {standardDropdowns.moreGifts.items.map((item, idx) => {
+                    if (item === 'Home Decor') {
+                      return (
+                        <Link
+                          key={idx}
+                          to="/collections/tgs-home"
+                          onClick={() => setActiveDropdown(null)}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
+                        >
+                          Home Decor
+                        </Link>
+                      );
+                    }
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => handleItemClick(null, item)}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
+                      >
+                        {item}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </li>
@@ -657,6 +668,21 @@ const Header = ({
                         className="block w-full text-left py-1.5 font-medium text-gray-700 hover:text-amber-800 no-underline"
                       >
                         Diwali Hampers
+                      </Link>
+                    );
+                  }
+                  if (item === 'Home Decor' || item === 'View All') {
+                    return (
+                      <Link
+                        key={idx}
+                        to="/collections/tgs-home"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setActiveDropdown(null);
+                        }}
+                        className="block w-full text-left py-1.5 font-medium text-amber-950 hover:text-amber-800 no-underline"
+                      >
+                        {item}
                       </Link>
                     );
                   }
@@ -778,12 +804,16 @@ const Header = ({
               </div>
             </details>
 
-            <button
-              onClick={() => handleItemClick('home-decor')}
-              className="block w-full text-left py-2 hover:text-black bg-transparent border-none cursor-pointer font-medium"
+            <Link
+              to="/collections/tgs-home"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setActiveDropdown(null);
+              }}
+              className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
             >
               Home Decor
-            </button>
+            </Link>
 
             {/* Mobile More Gifts */}
             <details className="group">
@@ -792,15 +822,32 @@ const Header = ({
                 <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
               </summary>
               <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.moreGifts.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleItemClick(null, item)}
-                    className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                  >
-                    {item}
-                  </button>
-                ))}
+                {standardDropdowns.moreGifts.items.map((item, idx) => {
+                  if (item === 'Home Decor') {
+                    return (
+                      <Link
+                        key={idx}
+                        to="/collections/tgs-home"
+                        onClick={() => {
+                          setIsMobileMenuOpen(false);
+                          setActiveDropdown(null);
+                        }}
+                        className="block w-full text-left py-1 hover:text-black no-underline text-gray-700"
+                      >
+                        Home Decor
+                      </Link>
+                    );
+                  }
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => handleItemClick(null, item)}
+                      className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
+                    >
+                      {item}
+                    </button>
+                  );
+                })}
               </div>
             </details>
           </div>
