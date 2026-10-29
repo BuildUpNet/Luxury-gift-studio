@@ -5,8 +5,6 @@ import {
   Filter,
   Check,
   Star,
-  ShoppingBag,
-  Heart,
   Eye,
   Truck,
   Sparkles,
@@ -25,15 +23,9 @@ import {
   HOME_DECOR_PRICE_TIERS,
   HOME_DECOR_SORT_OPTIONS,
   HOME_DECOR_SEO_CONTENT
-} from '../../data/homeDecorData';
+} from '../../data/giftStudioData';
 
 export default function HomeDecorPage({
-  cart = [],
-  wishlist = [],
-  onAddToCart,
-  onToggleWishlist,
-  onOpenCart,
-  onOpenWishlist,
   onQuickView
 }) {
   const { products } = useProducts();
@@ -181,10 +173,6 @@ export default function HomeDecorPage({
     <div className="min-h-screen bg-[#fafaf9] flex flex-col text-gray-900 font-sans selection:bg-amber-100 selection:text-amber-900">
       {/* 1. Header & Navigation with active Category 'home-decor' */}
       <Header
-        cartCount={cart.reduce((sum, item) => sum + (item.quantity || 1), 0)}
-        wishlistCount={wishlist.length}
-        onOpenCart={onOpenCart}
-        onOpenWishlist={onOpenWishlist}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         activeCategory="home-decor"
@@ -448,7 +436,6 @@ export default function HomeDecorPage({
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
             {filteredProducts.map((product) => {
-              const isWishlisted = wishlist.some((item) => item.id === product.id);
               const currentImage =
                 hoveredProductImage[product.id] && product.hoverImage
                   ? product.hoverImage
@@ -487,24 +474,6 @@ export default function HomeDecorPage({
                         {product.discountBadge}
                       </span>
                     )}
-
-                    {/* Wishlist Button (Top Right) */}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleWishlist && onToggleWishlist(product);
-                      }}
-                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 hover:bg-white text-gray-700 hover:text-rose-600 shadow-sm flex items-center justify-center transition cursor-pointer border-none z-10"
-                      aria-label="Wishlist"
-                      title={isWishlisted ? "Remove from Wishlist" : "Save to Wishlist"}
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition ${
-                          isWishlisted ? 'text-rose-600 fill-rose-600 scale-110' : 'text-gray-600'
-                        }`}
-                      />
-                    </button>
 
                     {/* Quick View Button Hover Overlay */}
                     <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 flex gap-2">
@@ -586,14 +555,14 @@ export default function HomeDecorPage({
                         <span>Earliest delivery: {product.earliestDelivery || 'Today'}</span>
                       </div>
 
-                      {/* Add to Bag Button */}
+                      {/* View Details Button */}
                       <button
                         type="button"
-                        onClick={() => onAddToCart && onAddToCart(product)}
+                        onClick={() => onQuickView && onQuickView(product)}
                         className="w-full bg-black hover:bg-gray-800 text-white text-xs font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2 shadow-xs cursor-pointer active:scale-98"
                       >
-                        <ShoppingBag className="w-3.5 h-3.5 text-amber-300" />
-                        <span>Add to Bag</span>
+                        <Eye className="w-3.5 h-3.5 text-amber-300" />
+                        <span>View Details</span>
                       </button>
                     </div>
                   </div>

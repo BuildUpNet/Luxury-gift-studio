@@ -108,7 +108,7 @@ export default function AdminLogin() {
                   setIdentifier(e.target.value);
                   if (error) setError('');
                 }}
-                placeholder="admin or admin@thegiftstudio.com"
+                placeholder="Enter username or email"
                 className="w-full bg-[#07111E] border border-white/10 rounded-lg px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400/80 transition"
               />
             </div>
@@ -168,13 +168,6 @@ export default function AdminLogin() {
               </button>
             </div>
           </form>
-
-          {/* Seed Record Hint for Reviewers */}
-          <div className="mt-6 pt-5 border-t border-white/5 text-center">
-            <span className="text-[11px] text-gray-400 block">
-              Default access: <code className="text-gray-300 bg-white/5 px-1.5 py-0.5 rounded">admin</code> / <code className="text-gray-300 bg-white/5 px-1.5 py-0.5 rounded">Admin@123</code>
-            </span>
-          </div>
         </div>
       </div>
 

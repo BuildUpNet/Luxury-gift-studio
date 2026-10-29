@@ -32,7 +32,8 @@ export default function Footer({ onSelectCategory }) {
           <div className="w-full md:w-auto md:min-w-[420px]">
             {subscribed ? (
               <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-5 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
-                <span>✓ Thank you for subscribing to our newsletter!</span>
+                <i className="fa-solid fa-check text-emerald-700"></i>
+                <span>Thank you for subscribing to our newsletter!</span>
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5">

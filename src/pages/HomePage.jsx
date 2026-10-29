@@ -10,12 +10,6 @@ import { useProducts } from '../context/ProductContext';
 import { PRODUCTS, ORIGINAL_NAV_LINKS } from '../data/giftStudioData';
 
 export default function HomePage({
-  cart,
-  wishlist,
-  onAddToCart,
-  onToggleWishlist,
-  onOpenCart,
-  onOpenWishlist,
   onQuickView
 }) {
   const { products } = useProducts();
@@ -75,10 +69,6 @@ export default function HomePage({
     <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
       {/* Shared Header */}
       <Header
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        wishlistCount={wishlist.length}
-        onOpenCart={onOpenCart}
-        onOpenWishlist={onOpenWishlist}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onSelectCategory={handleCategorySelect}
@@ -98,9 +88,6 @@ export default function HomePage({
       {/* Main Products Grid (General hampers / regular catalog) */}
       <ProductGrid
         products={filteredProducts}
-        onAddToCart={onAddToCart}
-        onToggleWishlist={onToggleWishlist}
-        wishlistIds={wishlist.map((p) => p.id)}
         onQuickView={onQuickView}
         activeCategoryName={activeCategoryName}
         searchQuery={searchQuery}
@@ -114,12 +101,7 @@ export default function HomePage({
       <CelebritySection onSelectDesigner={handleDesignerSelect} />
 
       {/* Create Your Own Hamper Studio */}
-      <HamperBuilder
-        onAddCustomHamperToCart={(customHamper) => {
-          onAddToCart(customHamper);
-          onOpenCart();
-        }}
-      />
+      <HamperBuilder />
 
       {/* Testimonials */}
       <Testimonials />

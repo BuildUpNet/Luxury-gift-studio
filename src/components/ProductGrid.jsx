@@ -3,9 +3,6 @@ import ProductCard from './ProductCard';
 
 export default function ProductGrid({
   products,
-  onAddToCart,
-  onToggleWishlist,
-  wishlistIds,
   onQuickView,
   activeCategoryName,
   searchQuery,
@@ -88,9 +85,6 @@ export default function ProductGrid({
               <ProductCard
                 key={product.id}
                 product={product}
-                onAddToCart={onAddToCart}
-                onToggleWishlist={onToggleWishlist}
-                isWishlisted={wishlistIds.includes(product.id)}
                 onQuickView={onQuickView}
               />
             ))}

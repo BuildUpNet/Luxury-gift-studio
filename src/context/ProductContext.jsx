@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { HOME_DECOR_PRODUCTS } from '../data/homeDecorData';
-import { DIWALI_HAMPERS } from '../data/diwaliHampersData';
+import { PRODUCTS } from '../data/giftStudioData';
 
 const SEED_HAMPERS = [
   {
@@ -144,25 +143,12 @@ const SEED_HAMPERS = [
 ];
 
 export const INITIAL_PRODUCTS = [
-  // 1. All Home Decor items
-  ...HOME_DECOR_PRODUCTS.map((p) => ({
+  ...PRODUCTS.map((p) => ({
     ...p,
-    category: 'Home Decor',
     stock: p.stock ?? 15,
     inStock: p.inStock !== false,
     sameDayDelivery: p.sameDayDelivery ?? true
   })),
-
-  // 2. All Diwali Hampers
-  ...DIWALI_HAMPERS.map((p) => ({
-    ...p,
-    category: 'Diwali',
-    stock: p.stock ?? 12,
-    inStock: p.inStock !== false,
-    sameDayDelivery: true
-  })),
-
-  // 3. All Curated Hampers
   ...SEED_HAMPERS
 ];
 

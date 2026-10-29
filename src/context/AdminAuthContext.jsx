@@ -5,22 +5,6 @@ const AdminAuthContext = createContext(null);
 const TOKEN_KEY = 'giftstudio_admin_token';
 const USER_KEY = 'giftstudio_admin_user';
 
-// Built-in fallback credentials for seamless standalone client operation
-const SEED_ADMIN = {
-  id: 1,
-  username: 'admin',
-  email: 'admin@thegiftstudio.com',
-  name: 'Studio Administrator',
-  role: 'superadmin',
-  password: 'Admin@123'
-};
-
-function generateClientToken() {
-  const timestamp = Date.now();
-  const randomPart = Math.random().toString(36).substring(2, 10);
-  return `tgs_token_${timestamp}_${randomPart}`;
-}
-
 export function AdminAuthProvider({ children }) {
   const [token, setToken] = useState(() => {
     try {
@@ -53,7 +37,7 @@ export function AdminAuthProvider({ children }) {
   };
 
   const login = async (identifier, password) => {
-    const trimmedId = (identifier || '').trim().toLowerCase();
+    const trimmedId = (identifier || '').trim();
     const cleanPassword = (password || '').trim();
 
     if (!trimmedId || !cleanPassword) {
@@ -61,7 +45,7 @@ export function AdminAuthProvider({ children }) {
     }
 
     try {
-      // 1. Attempt authentication with backend API endpoint
+      // Connect to real backend login endpoint
       const response = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
@@ -73,59 +57,30 @@ export function AdminAuthProvider({ children }) {
         })
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        const authToken = data.token || generateClientToken();
-        const userObj = data.admin || {
-          username: trimmedId,
-          email: trimmedId.includes('@') ? trimmedId : `${trimmedId}@thegiftstudio.com`,
-          role: 'admin'
-        };
+      const data = await response.json().catch(() => ({}));
 
-        persistAuth(authToken, userObj);
-        return { success: true };
-      }
-
-      if (response.status === 401 || response.status === 400) {
-        const errorData = await response.json().catch(() => ({}));
-        return {
-          success: false,
-          error: errorData.message || 'Invalid username or password. Please try again.'
-        };
-      }
-    } catch {
-      // If the backend server is not reachable, verify against seed credentials
-      const matchesUsername = trimmedId === SEED_ADMIN.username.toLowerCase();
-      const matchesEmail = trimmedId === SEED_ADMIN.email.toLowerCase();
-      const matchesPassword = cleanPassword === SEED_ADMIN.password || cleanPassword === 'admin123';
-
-      if ((matchesUsername || matchesEmail) && matchesPassword) {
-        const clientToken = generateClientToken();
-        const userObj = {
-          id: SEED_ADMIN.id,
-          username: SEED_ADMIN.username,
-          email: SEED_ADMIN.email,
-          name: SEED_ADMIN.name,
-          role: SEED_ADMIN.role
-        };
-
-        persistAuth(clientToken, userObj);
+      if (response.ok && data.success && data.token) {
+        persistAuth(data.token, data.admin);
         return { success: true };
       }
 
       return {
         success: false,
-        error: 'Invalid credentials. Please verify your username and password.'
+        error: data.message || 'Invalid username or password. Please verify credentials.'
+      };
+    } catch {
+      return {
+        success: false,
+        error: 'Unable to connect to authentication server. Please verify backend is running on port 5000.'
       };
     }
-
-    return {
-      success: false,
-      error: 'Invalid credentials. Please verify your username and password.'
-    };
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' }).catch(() => {});
+    } catch {}
+
     try {
       localStorage.removeItem(TOKEN_KEY);
       localStorage.removeItem(USER_KEY);

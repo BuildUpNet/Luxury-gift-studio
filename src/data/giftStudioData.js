@@ -80,10 +80,10 @@ export const HAMPER_BUILDER_OPTIONS = {
   items: [
     { id: "item-1", name: "Artisanal Belgian Truffles Box", category: "Chocolates", price: 950, image: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&auto=format&fit=crop&q=80" },
     { id: "item-2", name: "Imported Scented Candle (Vanilla & Oud)", category: "Decor", price: 1250, image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-3", name: "Roasted Truffle Almonds & Cashews Jar", category: "Gourmet", price: 850, image: "https://images.unsplash.com/photo-1508061252445-535e6f4ab356?w=400&auto=format&fit=crop&q=80" },
+    { id: "item-3", name: "Roasted Truffle Almonds & Cashews Jar", category: "Gourmet", price: 850, image: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&auto=format&fit=crop&q=80" },
     { id: "item-4", name: "Sparkling Botanical White Grape Nectar", category: "Beverages", price: 1100, image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&auto=format&fit=crop&q=80" },
     { id: "item-5", name: "Hammered Brass Cocktail Shaker & Tumbler", category: "Barware", price: 1850, image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-6", name: "Himalayan Pink Salt Dark Chocolate Bar", category: "Chocolates", price: 450, image: "https://images.unsplash.com/photo-1587132137056-bfbf0166836e?w=400&auto=format&fit=crop&q=80" }
+    { id: "item-6", name: "Himalayan Pink Salt Dark Chocolate Bar", category: "Chocolates", price: 450, image: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=600&auto=format&fit=crop&q=80" }
   ],
   ribbons: [
     { id: "rib-gold", name: "Champagne Gold Ribbon", hex: "#D4AF37" },
@@ -2986,3 +2986,66 @@ export const PRODUCTS = [
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
   }
 ];
+
+
+export const DIWALI_GIFTING_IDEAS = [
+  {
+    id: 'blog-1',
+    date: '17 October 2026',
+    title: 'Top 10 Unique Diwali Gift Hamper Ideas for Family & Friends',
+    category: 'Gifting Guide',
+    readTime: '4 min read',
+    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80',
+    excerpt: 'From handcrafted brass diyas and aromatic soy candles to artisanal pistachio baklava and silver keepsakes, discover meaningful gifting inspirations for your dearest.'
+  },
+  {
+    id: 'blog-2',
+    date: '19 October 2026',
+    title: 'Luxury Corporate Diwali Gifts That Leave a Lasting Impression',
+    category: 'Corporate Excellence',
+    readTime: '5 min read',
+    image: 'https://thegiftstudio.com/cdn/shop/files/TheArtfulIndulgenceHamperbyGRIRANNA_1461810_1.jpg?v=1784541565&width=800',
+    excerpt: 'Elevate your corporate gifting strategy this festive season. Explore bespoke branded leather trunks, temperature-controlled gourmet treats, and personalized gratitude notes.'
+  },
+  {
+    id: 'blog-3',
+    date: '21 October 2026',
+    title: 'How to Curate the Perfect Eco-Friendly & Artisanal Diwali Hamper',
+    category: 'Festive Trends',
+    readTime: '3 min read',
+    image: 'https://thegiftstudio.com/cdn/shop/files/Savoir_Faire_1456433_01.png?v=1768807625&width=800',
+    excerpt: 'Sustainable celebrations meet pure luxury: learn how handmade terracotta diyas, organic dry fruits, and reusable keepsake storage boxes are defining modern festive gifting.'
+  }
+];
+
+export const HOME_DECOR_PRICE_TIERS = [
+  { id: 'all', label: 'All Prices', min: 0, max: Infinity },
+  { id: 'under-1500', label: 'Under ₹1,500', min: 0, max: 1499 },
+  { id: '1500-2499', label: '₹1,500 - ₹2,499', min: 1500, max: 2499 },
+  { id: '2500-3499', label: '₹2,500 - ₹3,499', min: 2500, max: 3499 },
+  { id: 'above-3500', label: 'Above ₹3,500', min: 3500, max: Infinity }
+];
+
+export const HOME_DECOR_SORT_OPTIONS = [
+  { id: 'featured', label: 'Featured' },
+  { id: 'price-asc', label: 'Price: Low to High' },
+  { id: 'price-desc', label: 'Price: High to Low' },
+  { id: 'rating', label: 'Highest Rated' },
+  { id: 'bestselling', label: 'Best Selling' }
+];
+
+export const HOME_DECOR_SEO_CONTENT = {
+  mainHeading: 'Transform Homes with Thoughtful Home Décor Gifts',
+  introParagraphs: [
+    'A home is a sanctuary where memories are woven and celebratory moments unfold. At The Gift Studio, our Home Décor collection is thoughtfully curated to infuse luxury, warmth, and artistic panache into every living space.',
+    'From hand-carved marble cheeseboards with genuine blue lapis inlays to glowing pure brass lotus diyas and mother-of-pearl photo frames, each piece blends heritage Indian craftsmanship with sleek contemporary aesthetics.'
+  ],
+  whyChooseHeading: 'Why Choose Our Home Décor Presents?',
+  features: [
+    { title: '1. Same Day Delivery', description: 'Enjoy reliable same-day delivery across Mumbai, Delhi NCR, Bengaluru, Kolkata, and major Indian metros.' },
+    { title: '2. Handpicked Gifts', description: 'Every item in our collection is meticulously handpicked and inspected for flawless craftsmanship.' },
+    { title: '3. Wide Variety', description: 'Discover versatile pieces suited for diverse interiors.' },
+    { title: '4. Elegant Packaging', description: 'Our signature luxury gift boxing ensures an unforgettable unboxing experience.' },
+    { title: '5. Pan-India Delivery', description: 'Specialized shock-proof packaging ensures fragile pieces arrive safely across India.' }
+  ]
+};

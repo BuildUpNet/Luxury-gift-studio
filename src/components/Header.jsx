@@ -4,18 +4,11 @@ import {
   Search,
   MapPin,
   ChevronDown,
-  ShoppingCart,
-  Heart,
-  User,
   Menu,
   X
 } from 'lucide-react';
 
 const Header = ({
-  cartCount = 0,
-  wishlistCount = 0,
-  onOpenCart,
-  onOpenWishlist,
   searchQuery = '',
   setSearchQuery,
   onSelectCategory,
@@ -301,45 +294,28 @@ const Header = ({
               Bulk/Corporate Enquiry
             </a>
 
-            {/* Wishlist Icon Button */}
-            <button
-              onClick={onOpenWishlist}
-              className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-full transition cursor-pointer border-none bg-transparent"
-              aria-label="Wishlist"
-              title="Wishlist"
+            {/* Social FA Icons: Facebook & WhatsApp */}
+            <a
+              href="https://facebook.com/thegiftstudio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#1877F2] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
+              aria-label="Facebook"
+              title="Follow us on Facebook"
             >
-              <Heart className={`w-5 h-5 ${wishlistCount > 0 ? 'text-rose-600 fill-rose-600' : ''}`} />
-              {wishlistCount > 0 && (
-                <span className="absolute top-0 right-0 bg-rose-600 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {wishlistCount}
-                </span>
-              )}
-            </button>
+              <i className="fa-brands fa-facebook-f text-base"></i>
+            </a>
 
-            {/* Shopping Cart Icon with Badge */}
-            <button
-              onClick={onOpenCart}
-              className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-full transition cursor-pointer border-none bg-transparent"
-              aria-label="Shopping Cart"
-              title="Cart Bag"
+            <a
+              href="https://wa.me/917506210892"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#25D366] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
+              aria-label="WhatsApp"
+              title="Chat with us on WhatsApp"
             >
-              <ShoppingCart className="w-5 h-5" />
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-amber-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* User Profile Icon */}
-            <button
-              onClick={() => alert("The Gift Studio Member Account")}
-              className="p-2 text-gray-700 hover:text-black hover:bg-gray-100 rounded-full transition cursor-pointer border-none bg-transparent"
-              aria-label="User Profile"
-              title="Account"
-            >
-              <User className="w-5 h-5" />
-            </button>
+              <i className="fa-brands fa-whatsapp text-lg"></i>
+            </a>
           </div>
         </div>
 

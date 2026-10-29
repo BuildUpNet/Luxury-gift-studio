@@ -26,7 +26,9 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
     }
   };
 
-  const totalPrice = selectedBox.price + selectedItems.reduce((sum, item) => sum + item.price, 0);
+  const boxPrice = Number(selectedBox?.price || 0);
+  const itemsPrice = selectedItems.reduce((sum, item) => sum + Number(item?.price || 0), 0);
+  const totalPrice = boxPrice + itemsPrice;
 
   const handleCompleteHamper = () => {
     if (selectedItems.length < 2) {
@@ -218,7 +220,15 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                       }}>
                         {isSelected ? <Check size={12} strokeWidth={3} /> : <Plus size={12} />}
                       </div>
-                      <img src={item.image} alt={item.name} style={{ width: '100%', height: '90px', objectFit: 'cover', borderRadius: '4px', marginBottom: '6px' }} />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80";
+                        }}
+                      />
                       <h4 style={{ fontSize: '0.82rem', fontWeight: 600, color: '#020919', minHeight: '2.4em' }}>{item.name}</h4>
                       <div style={{ fontWeight: 700, fontSize: '0.86rem', color: '#020919' }}>+₹{item.price}</div>
                     </div>
@@ -317,15 +327,25 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
             Hamper Summary
           </h4>
           <img src={selectedBox.image} alt={selectedBox.name} style={{ width: '100%', height: '170px', objectFit: 'cover', borderRadius: '4px', marginBottom: '12px' }} />
-          <h5 style={{ fontSize: '1rem', fontWeight: 600 }}>{selectedBox.name}</h5>
-          <div style={{ fontSize: '0.82rem', color: '#666', marginTop: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h5 style={{ fontSize: '1rem', fontWeight: 600, margin: 0 }}>{selectedBox.name}</h5>
+            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#020919' }}>
+              ₹{(selectedBox.price || 0).toLocaleString('en-IN')}
+            </span>
+          </div>
+
+          <div style={{ fontSize: '0.82rem', color: '#666', marginTop: '10px' }}>
             Included Items ({selectedItems.length}):
           </div>
-          <ul style={{ listStyle: 'none', fontSize: '0.8rem', color: '#555', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <ul style={{ listStyle: 'none', fontSize: '0.8rem', color: '#555', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '4px', padding: 0 }}>
+            <li style={{ display: 'flex', justifyContent: 'space-between', color: '#444' }}>
+              <span>• Base Box / Trunk</span>
+              <span style={{ fontWeight: 600 }}>₹{(selectedBox.price || 0).toLocaleString('en-IN')}</span>
+            </li>
             {selectedItems.map((item) => (
               <li key={item.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span>• {item.name}</span>
-                <span style={{ fontWeight: 600 }}>₹{item.price}</span>
+                <span style={{ fontWeight: 600 }}>₹{(item.price || 0).toLocaleString('en-IN')}</span>
               </li>
             ))}
           </ul>

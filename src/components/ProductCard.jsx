@@ -5,9 +5,6 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd4
 
 export default function ProductCard({
   product,
-  onAddToCart,
-  onToggleWishlist,
-  isWishlisted,
   onQuickView
 }) {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -37,7 +34,7 @@ export default function ProductCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Top Badges & Wishlist */}
+      {/* Top Badges */}
       <div style={{
         position: 'absolute',
         top: '10px',
@@ -58,30 +55,6 @@ export default function ProductCard({
             Curated
           </span>
         )}
-
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleWishlist(product); }}
-          style={{
-            pointerEvents: 'auto',
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.9)',
-            border: '1px solid #e0e0e0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)'
-          }}
-          title={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          <Heart
-            size={16}
-            color={isWishlisted ? '#c1121f' : '#333'}
-            fill={isWishlisted ? '#c1121f' : 'none'}
-          />
-        </button>
       </div>
 
       {/* Image Container with Slider */}
@@ -254,7 +227,7 @@ export default function ProductCard({
           </div>
 
           <button
-            onClick={() => onAddToCart(product)}
+            onClick={() => onQuickView(product)}
             style={{
               background: '#020919',
               color: '#ffffff',
@@ -272,8 +245,8 @@ export default function ProductCard({
             onMouseEnter={(e) => e.currentTarget.style.background = '#333'}
             onMouseLeave={(e) => e.currentTarget.style.background = '#020919'}
           >
-            <ShoppingBag size={14} />
-            <span>Add</span>
+            <Eye size={14} />
+            <span>View</span>
           </button>
         </div>
       </div>

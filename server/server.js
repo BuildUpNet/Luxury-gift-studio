@@ -9,10 +9,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  console.warn('WARNING: JWT_SECRET environment variable is not defined in .env');
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'the_gift_studio_secure_jwt_key_env';
 const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
 app.use(cors({
@@ -21,16 +18,6 @@ app.use(cors({
 }));
 
 app.use(express.json());
-
-// In-memory fallback if MySQL is not currently connected
-const SEED_FALLBACK_USER = {
-  id: 1,
-  username: 'admin',
-  email: 'admin@thegiftstudio.com',
-  name: 'Studio Administrator',
-  role: 'superadmin',
-  password_hash: '$2a$10$wEslVzHqgBfv1xTq5L2xge5u1rW8fO8eC1f4eX7f9m8hQ1a2b3c4d'
-};
 
 let dbPool = null;
 
@@ -46,22 +33,19 @@ try {
     queueLimit: 0
   });
 
-  // Test connection
   dbPool.getConnection()
     .then((conn) => {
       console.log('Connected to MySQL Database: ' + (process.env.DB_NAME || 'luxury_gift_studio'));
       conn.release();
     })
     .catch((err) => {
-      console.warn('MySQL connection failed (' + err.message + '). Operating with in-memory fallback credentials.');
-      dbPool = null;
+      console.error('MySQL connection error:', err.message);
     });
 } catch (poolErr) {
-  console.warn('MySQL pool initialization error:', poolErr.message);
-  dbPool = null;
+  console.error('MySQL pool initialization error:', poolErr.message);
 }
 
-// Authentication Token Verification Middleware
+// Token Verification Middleware
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -93,51 +77,32 @@ app.post('/api/admin/login', async (req, res) => {
   const queryIdentifier = username.trim().toLowerCase();
 
   try {
-    let adminRecord = null;
-
-    if (dbPool) {
-      const [rows] = await dbPool.execute(
-        `SELECT id, username, email, password_hash, name, role, status 
-         FROM admin_users 
-         WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND status = 'active' 
-         LIMIT 1`,
-        [queryIdentifier, queryIdentifier]
-      );
-
-      if (rows.length > 0) {
-        adminRecord = rows[0];
-      }
-    } else {
-      // Fallback check against seed user
-      if (
-        queryIdentifier === SEED_FALLBACK_USER.username.toLowerCase() ||
-        queryIdentifier === SEED_FALLBACK_USER.email.toLowerCase()
-      ) {
-        adminRecord = SEED_FALLBACK_USER;
-      }
+    if (!dbPool) {
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection not initialized. Please verify MySQL configuration.'
+      });
     }
 
-    if (!adminRecord) {
+    const [rows] = await dbPool.execute(
+      `SELECT id, username, email, password_hash, name, role, status 
+       FROM admin_users 
+       WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND status = 'active' 
+       LIMIT 1`,
+      [queryIdentifier, queryIdentifier]
+    );
+
+    if (!rows || rows.length === 0) {
       return res.status(401).json({
         success: false,
         message: 'Invalid credentials. Please verify your username and password.'
       });
     }
 
-    // Verify Password (supports bcrypt and fallback dev password 'Admin@123' / 'admin123')
-    let isMatch = false;
-    if (adminRecord.password_hash) {
-      try {
-        isMatch = await bcrypt.compare(password, adminRecord.password_hash);
-      } catch {
-        isMatch = false;
-      }
-    }
+    const adminRecord = rows[0];
 
-    if (!isMatch && (password === 'Admin@123' || password === 'admin123')) {
-      isMatch = true;
-    }
-
+    // Strictly verify password hash with bcrypt
+    const isMatch = await bcrypt.compare(password, adminRecord.password_hash);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -145,15 +110,13 @@ app.post('/api/admin/login', async (req, res) => {
       });
     }
 
-    // Update last_login timestamp if connected to DB
-    if (dbPool) {
-      try {
-        await dbPool.execute(
-          'UPDATE admin_users SET last_login = NOW() WHERE id = ?',
-          [adminRecord.id]
-        );
-      } catch {}
-    }
+    // Update last_login timestamp
+    try {
+      await dbPool.execute(
+        'UPDATE admin_users SET last_login = NOW() WHERE id = ?',
+        [adminRecord.id]
+      );
+    } catch {}
 
     // Sign JWT Token
     const payload = {
@@ -180,12 +143,12 @@ app.post('/api/admin/login', async (req, res) => {
     console.error('Login error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Server error during authentication.'
+      message: 'Internal server error during authentication.'
     });
   }
 });
 
-// 2. GET /api/admin/verify (Verifies active session)
+// 2. GET /api/admin/verify
 app.get('/api/admin/verify', authenticateToken, (req, res) => {
   res.json({
     success: true,
@@ -205,7 +168,7 @@ app.post('/api/admin/logout', (req, res) => {
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
-    database: dbPool ? 'connected' : 'fallback_mode',
+    database: dbPool ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
@@ -213,4 +176,3 @@ app.get('/api/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Luxury Gift Studio Auth Server running on http://localhost:${PORT}`);
 });
-

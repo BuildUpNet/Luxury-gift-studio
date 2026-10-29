@@ -1,12 +1,8 @@
 import React from 'react';
-import { Search, ShoppingBag, Heart, User, X, Phone } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { STORE_INFO, ORIGINAL_NAV_LINKS } from '../data/giftStudioData';
 
 export default function Navbar({
-  cartCount,
-  wishlistCount,
-  onOpenCart,
-  onOpenWishlist,
   searchQuery,
   setSearchQuery,
   onSelectCategory,
@@ -102,75 +98,53 @@ export default function Navbar({
           />
         </div>
 
-        {/* Right Actions: Login, Wishlist, Cart */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '280px', justifyContent: 'flex-end' }}>
-          <button
-            onClick={() => alert("Login modal / customer authentication")}
-            className="btn-icon"
-            title="Log in"
-          >
-            <User size={20} />
-          </button>
-
-          <button
-            onClick={onOpenWishlist}
-            className="btn-icon"
-            style={{ position: 'relative' }}
-            title="Wishlist"
-          >
-            <Heart size={20} color={wishlistCount > 0 ? '#c1121f' : 'currentColor'} fill={wishlistCount > 0 ? '#c1121f' : 'none'} />
-            {wishlistCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '4px',
-                right: '4px',
-                background: '#c1121f',
-                color: '#fff',
-                fontSize: '0.62rem',
-                fontWeight: 700,
-                width: '16px',
-                height: '16px',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                {wishlistCount}
-              </span>
-            )}
-          </button>
-
-          {/* Cart Bag */}
-          <button
-            onClick={onOpenCart}
+        {/* Right Actions: Facebook & WhatsApp FA Icons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', width: '280px', justifyContent: 'flex-end' }}>
+          <a
+            href="https://facebook.com/thegiftstudio"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Follow us on Facebook"
             style={{
-              background: '#020919',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '8px 14px',
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: '#f8f8f8',
+              border: '1px solid #e2e2e2',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
-              cursor: 'pointer',
-              fontWeight: 700,
-              fontSize: '0.85rem'
+              justifyContent: 'center',
+              color: '#1877F2',
+              textDecoration: 'none',
+              fontSize: '1rem',
+              transition: 'all 0.2s'
             }}
           >
-            <ShoppingBag size={16} />
-            <span>Bag</span>
-            <span style={{
-              background: '#ffffff',
-              color: '#020919',
-              fontSize: '0.72rem',
-              fontWeight: 800,
-              padding: '1px 6px',
-              borderRadius: '2px',
-              marginLeft: '2px'
-            }}>
-              {cartCount}
-            </span>
-          </button>
+            <i className="fa-brands fa-facebook-f"></i>
+          </a>
+
+          <a
+            href={`https://wa.me/91${STORE_INFO.phone}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Chat on WhatsApp"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: '#f8f8f8',
+              border: '1px solid #e2e2e2',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#25D366',
+              textDecoration: 'none',
+              fontSize: '1.2rem',
+              transition: 'all 0.2s'
+            }}
+          >
+            <i className="fa-brands fa-whatsapp"></i>
+          </a>
         </div>
       </div>
 

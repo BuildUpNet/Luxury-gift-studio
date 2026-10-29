@@ -5,8 +5,6 @@ import {
   Filter,
   Check,
   Star,
-  ShoppingBag,
-  Heart,
   Eye,
   Clock,
   Sparkles,
@@ -19,7 +17,7 @@ import {
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useProducts } from '../../context/ProductContext';
-import { DIWALI_GIFTING_IDEAS } from '../../data/diwaliHampersData';
+import { DIWALI_GIFTING_IDEAS } from '../../data/giftStudioData';
 
 // Price tier definitions matching requirements
 const PRICE_TIERS = [
@@ -31,12 +29,6 @@ const PRICE_TIERS = [
 ];
 
 export default function DiwaliHampersPage({
-  cart,
-  wishlist,
-  onAddToCart,
-  onToggleWishlist,
-  onOpenCart,
-  onOpenWishlist,
   onQuickView
 }) {
   const { products } = useProducts();
@@ -140,10 +132,6 @@ export default function DiwaliHampersPage({
     <div className="min-h-screen flex flex-col bg-white text-gray-900 font-sans">
       {/* 1. Shared Header */}
       <Header
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
-        wishlistCount={wishlist.length}
-        onOpenCart={onOpenCart}
-        onOpenWishlist={onOpenWishlist}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         activeCategory="diwali"
@@ -376,34 +364,17 @@ export default function DiwaliHampersPage({
             {filteredProducts.map((product) => {
               const images = product.images && product.images.length > 0 ? product.images : [product.image];
               const currentIndex = activeImageIndices[product.id] || 0;
-              const isWishlisted = wishlist.some((item) => item.id === product.id);
 
               return (
                 <div
                   key={product.id}
                   className="group bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative"
                 >
-                  {/* Top Badges (Festive badge + Wishlist Button) */}
+                  {/* Top Badges */}
                   <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
                     <span className="pointer-events-auto px-2.5 py-1 rounded bg-slate-900/90 text-white text-[11px] font-bold tracking-wide uppercase shadow-sm backdrop-blur-sm">
                       {product.badge || 'Diwali Special'}
                     </span>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onToggleWishlist(product);
-                      }}
-                      className="pointer-events-auto w-8 h-8 rounded-full bg-white/90 hover:bg-white border border-gray-200 flex items-center justify-center text-gray-700 shadow-sm transition hover:scale-110 cursor-pointer"
-                      title={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                      <Heart
-                        className={`w-4 h-4 transition ${
-                          isWishlisted ? 'text-red-600 fill-red-600' : 'text-gray-600'
-                        }`}
-                      />
-                    </button>
                   </div>
 
                   {/* Product Image Container */}
@@ -504,11 +475,11 @@ export default function DiwaliHampersPage({
 
                       <button
                         type="button"
-                        onClick={() => onAddToCart(product)}
+                        onClick={() => onQuickView && onQuickView(product)}
                         className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded bg-slate-900 hover:bg-amber-600 text-white text-xs font-bold transition shadow-sm cursor-pointer"
                       >
-                        <ShoppingBag className="w-3.5 h-3.5" />
-                        <span>Add</span>
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
                       </button>
                     </div>
                   </div>

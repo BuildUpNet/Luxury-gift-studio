@@ -5,23 +5,13 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd4
 
 export default function ProductModal({
   product,
-  onClose,
-  onAddToCart,
-  onToggleWishlist,
-  isWishlisted
+  onClose
 }) {
   const images = product?.images && product.images.length > 0 ? product.images : [product?.image || FALLBACK_IMAGE];
   const [selectedImg, setSelectedImg] = useState(images[0]);
   const [qty, setQty] = useState(1);
 
   if (!product) return null;
-
-  const handleAdd = () => {
-    for (let i = 0; i < qty; i++) {
-      onAddToCart(product);
-    }
-    onClose();
-  };
 
   return (
     <div style={{
@@ -163,25 +153,16 @@ export default function ProductModal({
 
             {/* Action Buttons */}
             <div style={{ marginTop: 'auto', display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '4px' }}>
-                <button onClick={() => setQty(Math.max(1, qty - 1))} style={{ background: 'none', border: 'none', padding: '8px 12px', cursor: 'pointer' }}>-</button>
-                <span style={{ padding: '0 8px', fontWeight: 700 }}>{qty}</span>
-                <button onClick={() => setQty(qty + 1)} style={{ background: 'none', border: 'none', padding: '8px 12px', cursor: 'pointer' }}>+</button>
-              </div>
-
-              <button onClick={handleAdd} className="btn-primary" style={{ flex: 1, padding: '12px' }}>
-                <ShoppingBag size={16} />
-                <span>Add to Bag</span>
-              </button>
-
-              <button
-                onClick={() => onToggleWishlist(product)}
-                className="btn-outline"
-                style={{ padding: '11px 14px' }}
-                title="Wishlist"
+              <a
+                href={`https://wa.me/917506210892?text=Hi,%20I%20am%20interested%20in%20${encodeURIComponent(product.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary"
+                style={{ flex: 1, padding: '12px', textAlign: 'center', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                <Heart size={18} color={isWishlisted ? '#c1121f' : '#333'} fill={isWishlisted ? '#c1121f' : 'none'} />
-              </button>
+                <i className="fa-brands fa-whatsapp" style={{ fontSize: '1.2rem' }}></i>
+                <span>Enquire on WhatsApp</span>
+              </a>
             </div>
           </div>
         </div>
