@@ -261,7 +261,7 @@ export default function Footer({ onSelectCategory }) {
             <span className="hover:text-white transition cursor-pointer">Terms of Service</span>
             <span className="hover:text-white transition cursor-pointer">Shipping & Delivery</span>
             <span className="hover:text-white transition cursor-pointer">Cancellation Policy</span>
-            <Link to="/admin" className="hover:text-amber-300 text-gray-400 transition no-underline">
+            <Link to="/admin/login" className="hover:text-amber-300 text-gray-400 transition no-underline">
               Admin Portal
             </Link>
           </div>

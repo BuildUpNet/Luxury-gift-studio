@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -20,12 +20,20 @@ import {
   X
 } from 'lucide-react';
 import { useProducts } from '../../context/ProductContext';
+import { useAdminAuth } from '../../context/AdminAuthContext';
 
 export default function AdminDashboard() {
+  const { logout, adminUser } = useAdminAuth();
+  const navigate = useNavigate();
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/admin/login', { replace: true });
+  };
 
   // 1. Shared Unified Products Context
   const {
@@ -305,7 +313,7 @@ export default function AdminDashboard() {
             <span>View Public Store</span>
           </Link>
           <button
-            onClick={() => showToast('Session active')}
+            onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-400 hover:text-rose-300 rounded-lg hover:bg-rose-950/20 transition cursor-pointer border-none bg-transparent text-left"
           >
             <LogOut className="w-4 h-4" />
@@ -406,11 +414,11 @@ export default function AdminDashboard() {
             {/* Admin User Avatar */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
               <div className="w-8 h-8 rounded-full bg-[#07111E] text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                AD
+                {(adminUser?.name || adminUser?.username || 'AD').substring(0, 2).toUpperCase()}
               </div>
               <div className="hidden sm:block text-left text-xs">
-                <p className="font-semibold text-gray-900 leading-none">Admin Concierge</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">admin@thegiftstudio.com</p>
+                <p className="font-semibold text-gray-900 leading-none">{adminUser?.name || 'Studio Admin'}</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">{adminUser?.email || 'admin@thegiftstudio.com'}</p>
               </div>
             </div>
           </div>

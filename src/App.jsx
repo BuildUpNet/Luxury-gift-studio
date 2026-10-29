@@ -4,10 +4,13 @@ import HomePage from './pages/HomePage';
 import DiwaliHampersPage from './pages/collections/diwali-hampers';
 import HomeDecorPage from './pages/collections/tgs-home';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
 import CartDrawer from './components/CartDrawer';
 import WishlistDrawer from './components/WishlistDrawer';
 import ProductModal from './components/ProductModal';
 import { ProductProvider } from './context/ProductContext';
+import { AdminAuthProvider } from './context/AdminAuthContext';
 
 export default function App() {
   const [cart, setCart] = useState(() => {
@@ -119,8 +122,9 @@ export default function App() {
   };
 
   return (
-    <ProductProvider>
-      <Router>
+    <AdminAuthProvider>
+      <ProductProvider>
+        <Router>
         <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
           {/* Global Toast */}
           {toastMessage && (
@@ -197,9 +201,24 @@ export default function App() {
               }
             />
 
-            {/* 4. Admin Dashboard Panel */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            {/* 4. Admin Authentication & Dashboard Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <AdminProtectedRoute>
+                  <AdminDashboard />
+                </AdminProtectedRoute>
+              }
+            />
 
             {/* Fallback Route */}
             <Route
@@ -251,5 +270,6 @@ export default function App() {
         </div>
       </Router>
     </ProductProvider>
-  );
+  </AdminAuthProvider>
+);
 }

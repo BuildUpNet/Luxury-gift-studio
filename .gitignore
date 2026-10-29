@@ -15,7 +15,12 @@ dist-ssr
 # Environment & Secret files
 .env
 .env.*
+*.env
+*.env.*
+server/.env
+server/.env.*
 !.env.example
+!server/.env.example
 *.pem
 *.key
 *.cert
