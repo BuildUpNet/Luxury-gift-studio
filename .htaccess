@@ -1,0 +1,153 @@
+# ==============================================================================
+# Security, Canonical WWW Redirect, and 403 Forbidden Fix for modient93.com
+# ==============================================================================
+
+# Ensure default index file is recognized (Resolves 403 Forbidden when accessing root)
+DirectoryIndex index.html index.htm index.php
+
+# Disable directory browsing (Prevents unauthorized browsing of files)
+<IfModule mod_autoindex.c>
+    Options -Indexes
+</IfModule>
+
+# Prevent multi-view conflicts
+<IfModule mod_negotiation.c>
+    Options -MultiViews
+</IfModule>
+
+# Allow symlinks if owner matches (Avoids 403/500 errors on shared hosts like cPanel)
+<IfModule mod_dir.c>
+    Options +SymLinksIfOwnerMatch
+</IfModule>
+
+# Ensure public access is granted (Fixes Apache 2.4 "403 Forbidden" permission issues)
+<IfModule mod_authz_core.c>
+    <RequireAll>
+        Require all granted
+    </RequireAll>
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# Security Headers
+# ------------------------------------------------------------------------------
+<IfModule mod_headers.c>
+    # Prevent Clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # Enable XSS filtering in browsers
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Force HTTPS (HSTS - 1 year)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    
+    # Restrict unnecessary browser features
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# Rewrite Engine Rules: HTTPS, WWW, SQL Injection & Routing
+# ------------------------------------------------------------------------------
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # --------------------------------------------------------------------------
+    # 1. Block SQL Injection Attacks, Common Exploits & Malicious Query Strings
+    # --------------------------------------------------------------------------
+
+    # Block SQL Injection keywords and syntax in query strings
+    RewriteCond %{QUERY_STRING} (select|union|insert|update|delete|drop|alter|create|truncate|rename|benchmark|sleep|load_file|outfile)\s*(\(.*\)|.*from|.*into|.*set) [NC,OR]
+    RewriteCond %{QUERY_STRING} (union(.*)select) [NC,OR]
+    RewriteCond %{QUERY_STRING} (concat|group_concat|char|cast|convert)\s*\( [NC,OR]
+    RewriteCond %{QUERY_STRING} (information_schema|sysobjects|sysdatabases|schema_name) [NC,OR]
+    RewriteCond %{QUERY_STRING} (1=1|1=0|\'\s*or\s*\'|\"\s*or\s*\"|\'\s*=\s*\') [NC,OR]
+    RewriteCond %{QUERY_STRING} (waitfor\s+delay) [NC,OR]
+    RewriteCond %{QUERY_STRING} (sp_executesql|xp_cmdshell) [NC,OR]
+    RewriteCond %{QUERY_STRING} (\%27|\%22|\%3C|\%3E|\%00|\%2F\*|\*\/|--|#) [NC,OR]
+    RewriteCond %{QUERY_STRING} (0x[0-9a-fA-F]+) [NC,OR]
+
+    # Block Cross-Site Scripting (XSS) attempts
+    RewriteCond %{QUERY_STRING} (<|%3C)([^s]*s)+cript.*(>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} (javascript:|vbscript:|onload=|onerror=|expression\() [NC,OR]
+
+    # Block Directory Traversal and Sensitive File Probing
+    RewriteCond %{QUERY_STRING} (\.\./|\.\.\\) [NC,OR]
+    RewriteCond %{QUERY_STRING} (boot\.ini|etc/passwd|win\.ini|environ|proc/self) [NC]
+
+    # Deny access with 403 Forbidden if malicious pattern detected
+    RewriteRule ^ - [F,L]
+
+    # --------------------------------------------------------------------------
+    # 2. Canonical Redirection: Force HTTPS and WWW for modient93.com
+    # --------------------------------------------------------------------------
+
+    # A) Redirect HTTP to HTTPS (with www)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} ^(www\.)?modient93\.com$ [NC]
+    RewriteRule ^(.*)$ https://www.modient93.com/$1 [R=301,L]
+
+    # B) Redirect non-www HTTPS to www HTTPS (https://modient93.com -> https://www.modient93.com)
+    RewriteCond %{HTTP_HOST} ^modient93\.com$ [NC]
+    RewriteRule ^(.*)$ https://www.modient93.com/$1 [R=301,L]
+
+    # Fallback for any other non-www host accessing the server
+    RewriteCond %{HTTP_HOST} !^www\. [NC]
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^[0-9]+(\.[0-9]+){3} [NC]
+    RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+
+    # --------------------------------------------------------------------------
+    # 3. Single Page Application (SPA / React) Fallback
+    # Resolves 403 Forbidden / 404 on page refresh and direct URL access
+    # --------------------------------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
+</IfModule>
+
+# ------------------------------------------------------------------------------
+# Block Direct Access to Sensitive & Hidden Files
+# ------------------------------------------------------------------------------
+<FilesMatch "(\.env|\.git|\.htaccess|\.htpasswd|\.sql|\.log|\.bak|\.swp|\.yml|\.yaml|\.json)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Allow public manifest or icon JSON files if present
+<FilesMatch "^(manifest|site)\.webmanifest$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>
+
+# ------------------------------------------------------------------------------
+# Leverage Browser Caching for Fast Performance
+# ------------------------------------------------------------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    ExpiresByType text/html "access plus 0 seconds"
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
+
