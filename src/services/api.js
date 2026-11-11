@@ -1,5 +1,5 @@
 // API Base URL dynamically resolved from environment variable with fallback
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? (import.meta.env.DEV ? 'http://localhost:5002' : '');
 
 // Standardized API client with centralized error and status handling
 export async function apiClient(endpoint, options = {}) {

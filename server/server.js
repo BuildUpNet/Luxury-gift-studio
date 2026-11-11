@@ -86,6 +86,15 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve the built React frontend (vite build -> ../dist) with SPA fallback
+const distDir = path.join(__dirname, '../dist');
+app.use(express.static(distDir));
+app.get(/^\/(?!api\/).*/, (req, res, next) => {
+  res.sendFile(path.join(distDir, 'index.html'), (err) => {
+    if (err) next(err);
+  });
+});
+
 // Centralized error handling middleware
 app.use(errorHandler);
 
