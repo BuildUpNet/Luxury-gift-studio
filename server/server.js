@@ -11,6 +11,8 @@ import contactRoutes from './routes/contact.js';
 
 import { uploadMiddleware } from './middlewares/upload.js';
 import { errorHandler } from './middlewares/errorHandler.js';
+import dbPool from './config/db.js';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -86,6 +88,47 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Diagnostics: /api/debug?key=<DEBUG_KEY> (disabled unless DEBUG_KEY env is set)
+app.get('/api/debug', async (req, res) => {
+  if (!process.env.DEBUG_KEY || req.query.key !== process.env.DEBUG_KEY) {
+    return res.status(404).json({ success: false, message: 'Not found' });
+  }
+
+  const envKeys = [
+    'PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD',
+    'DB_NAME', 'JWT_SECRET', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS',
+    'ADMIN_EMAIL', 'EMAIL_FROM'
+  ];
+  const visible = new Set(['PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'DB_HOST', 'DB_PORT', 'SMTP_HOST', 'SMTP_PORT']);
+  const env = Object.fromEntries(
+    envKeys.map((k) => [
+      k,
+      process.env[k] === undefined ? '(missing)' : visible.has(k) ? process.env[k] : '(set)'
+    ])
+  );
+
+  let database;
+  try {
+    const [rows] = await dbPool.query('SHOW TABLES');
+    database = { connected: true, tables: rows.map((r) => Object.values(r)[0]) };
+  } catch (error) {
+    database = { connected: false, code: error.code, message: error.message };
+  }
+
+  const distIndex = path.join(__dirname, '../dist/index.html');
+
+  return res.json({
+    node: process.version,
+    cwd: process.cwd(),
+    uptimeSeconds: Math.round(process.uptime()),
+    boot: globalThis.__bootInfo || null,
+    frontendBuilt: fs.existsSync(distIndex),
+    env,
+    database,
+    logs: globalThis.__bootLogs || []
+  });
+});
+
 // Serve the built React frontend (vite build -> ../dist) with SPA fallback
 const distDir = path.join(__dirname, '../dist');
 app.use(express.static(distDir));
@@ -98,6 +141,10 @@ app.get(/^\/(?!api\/).*/, (req, res, next) => {
 // Centralized error handling middleware
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`The Gift Studio server running on port ${PORT}`);
+});
+
+server.on('error', (error) => {
+  console.error(`Failed to listen on port ${PORT}:`, error);
 });
