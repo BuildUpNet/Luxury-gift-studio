@@ -35,8 +35,8 @@ try {
 
   connection.release();
 } catch (error) {
-  console.error('MySQL connection failed:', error.message);
-  throw error;
+  // Log but keep the server running so the site and /api/health stay reachable
+  console.error('MySQL connection failed:', error.code, error.message);
 }
 
 export default dbPool;
