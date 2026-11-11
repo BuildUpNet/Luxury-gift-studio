@@ -1,178 +1,94 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import mysql from 'mysql2/promise';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+import authRoutes from './routes/auth.js';
+import productsRoutes from './routes/products.js';
+import categoriesRoutes from './routes/categories.js';
+import contactRoutes from './routes/contact.js';
+
+import { uploadMiddleware } from './middlewares/upload.js';
+import { errorHandler } from './middlewares/errorHandler.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'the_gift_studio_secure_jwt_key_env';
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
-app.use(cors({
-  origin: CLIENT_ORIGIN,
-  credentials: true
-}));
+const PORT = Number(process.env.PORT) || 5002;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
 
-app.use(express.json());
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-let dbPool = null;
+// Dynamic CORS configuration from environment variables
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+  CLIENT_ORIGIN
+].filter(Boolean);
 
-try {
-  dbPool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT) || 3306,
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'luxury_gift_studio',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  });
-
-  dbPool.getConnection()
-    .then((conn) => {
-      console.log('Connected to MySQL Database: ' + (process.env.DB_NAME || 'luxury_gift_studio'));
-      conn.release();
-    })
-    .catch((err) => {
-      console.error('MySQL connection error:', err.message);
-    });
-} catch (poolErr) {
-  console.error('MySQL pool initialization error:', poolErr.message);
-}
-
-// Token Verification Middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'Access token required.' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ success: false, message: 'Token is invalid or expired.' });
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
     }
-    req.user = user;
-    next();
-  });
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// 1. POST /api/admin/login
-app.post('/api/admin/login', async (req, res) => {
-  const { username, password } = req.body;
+app.use(cors(corsOptions));
+app.use(express.json({ limit: process.env.REQUEST_SIZE_LIMIT || '2mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-  if (!username || !password) {
+// Serve uploaded public static images
+const uploadsDir = process.env.UPLOAD_DIR || path.join(__dirname, '../public');
+app.use(express.static(uploadsDir));
+
+// API routes
+app.use('/api/admin', authRoutes);
+app.use('/api/products', productsRoutes);
+app.use('/api/categories', categoriesRoutes);
+app.use('/api/contact', contactRoutes);
+
+// Image upload endpoint
+app.post('/api/upload', uploadMiddleware.single('image'), (req, res) => {
+  if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: 'Both username/email and password are required.'
+      message: 'No file uploaded'
     });
   }
 
-  const queryIdentifier = username.trim().toLowerCase();
+  const relativePath = `/images/${req.file.filename}`;
 
-  try {
-    if (!dbPool) {
-      return res.status(500).json({
-        success: false,
-        message: 'Database connection not initialized. Please verify MySQL configuration.'
-      });
-    }
-
-    const [rows] = await dbPool.execute(
-      `SELECT id, username, email, password_hash, name, role, status 
-       FROM admin_users 
-       WHERE (LOWER(username) = ? OR LOWER(email) = ?) AND status = 'active' 
-       LIMIT 1`,
-      [queryIdentifier, queryIdentifier]
-    );
-
-    if (!rows || rows.length === 0) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials. Please verify your username and password.'
-      });
-    }
-
-    const adminRecord = rows[0];
-
-    // Strictly verify password hash with bcrypt
-    const isMatch = await bcrypt.compare(password, adminRecord.password_hash);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials. Please verify your username and password.'
-      });
-    }
-
-    // Update last_login timestamp
-    try {
-      await dbPool.execute(
-        'UPDATE admin_users SET last_login = NOW() WHERE id = ?',
-        [adminRecord.id]
-      );
-    } catch {}
-
-    // Sign JWT Token
-    const payload = {
-      id: adminRecord.id,
-      username: adminRecord.username,
-      email: adminRecord.email,
-      role: adminRecord.role || 'superadmin'
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
-
-    return res.status(200).json({
-      success: true,
-      token,
-      admin: {
-        id: adminRecord.id,
-        username: adminRecord.username,
-        email: adminRecord.email,
-        name: adminRecord.name || 'Studio Administrator',
-        role: adminRecord.role || 'superadmin'
-      }
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Internal server error during authentication.'
-    });
-  }
-});
-
-// 2. GET /api/admin/verify
-app.get('/api/admin/verify', authenticateToken, (req, res) => {
-  res.json({
+  return res.status(200).json({
     success: true,
-    user: req.user
+    message: 'Image uploaded successfully',
+    url: relativePath,
+    filename: req.file.filename,
+    originalName: req.file.originalname,
+    size: req.file.size
   });
 });
 
-// 3. POST /api/admin/logout
-app.post('/api/admin/logout', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Session invalidated successfully.'
-  });
-});
-
-// 4. GET /api/health
+// Health check
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'healthy',
-    database: dbPool ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString()
   });
 });
 
+// Centralized error handling middleware
+app.use(errorHandler);
+
 app.listen(PORT, () => {
-  console.log(`Luxury Gift Studio Auth Server running on http://localhost:${PORT}`);
+  console.log(`The Gift Studio server running on port ${PORT}`);
 });

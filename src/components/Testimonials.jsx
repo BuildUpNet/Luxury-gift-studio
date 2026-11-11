@@ -53,13 +53,13 @@ export default function Testimonials() {
               "{t.quote}"
             </p>
 
-            <div style={{ paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-              <h4 style={{ fontSize: '0.92rem', fontWeight: 700, color: '#020919' }}>
+            <div style={{ borderTop: '1px solid #eee', paddingTop: '12px' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#020919' }}>
                 {t.author}
-              </h4>
-              <span style={{ fontSize: '0.74rem', color: '#777' }}>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#888' }}>
                 {t.location}
-              </span>
+              </div>
             </div>
           </div>
         ))}

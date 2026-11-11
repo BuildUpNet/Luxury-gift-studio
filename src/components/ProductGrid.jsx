@@ -3,6 +3,8 @@ import ProductCard from './ProductCard';
 
 export default function ProductGrid({
   products,
+  isLoading,
+  error,
   onQuickView,
   activeCategoryName,
   searchQuery,
@@ -13,14 +15,14 @@ export default function ProductGrid({
 
   // Sorting
   const sortedProducts = useMemo(() => {
-    let list = [...products];
+    let list = Array.isArray(products) ? [...products] : [];
 
     if (sortBy === 'price-low') {
-      list.sort((a, b) => a.priceNum - b.priceNum);
+      list.sort((a, b) => Number(a.priceNum || 0) - Number(b.priceNum || 0));
     } else if (sortBy === 'price-high') {
-      list.sort((a, b) => b.priceNum - a.priceNum);
+      list.sort((a, b) => Number(b.priceNum || 0) - Number(a.priceNum || 0));
     } else if (sortBy === 'rating') {
-      list.sort((a, b) => b.rating - a.rating);
+      list.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
     }
 
     return list;
@@ -47,7 +49,7 @@ export default function ProductGrid({
             {searchQuery ? `Search results for "${searchQuery}"` : activeCategoryName}
           </h2>
           <span style={{ fontSize: '0.82rem', color: '#777' }}>
-            {products.length} Products
+            {isLoading ? 'Loading products...' : `${products.length} Products`}
           </span>
         </div>
 
@@ -57,6 +59,7 @@ export default function ProductGrid({
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
+            disabled={isLoading}
             style={{
               padding: '6px 12px',
               border: '1px solid #ccc',
@@ -77,8 +80,29 @@ export default function ProductGrid({
         </div>
       </div>
 
-      {/* Grid */}
-      {displayedProducts.length > 0 ? (
+      {/* Loading Skeleton */}
+      {isLoading ? (
+        <div className="product-grid">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="card-clean animate-pulse"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '360px',
+                background: '#fafafa',
+                borderRadius: '8px',
+                padding: '16px'
+              }}
+            >
+              <div style={{ width: '100%', height: '220px', background: '#eaeaea', borderRadius: '4px', marginBottom: '16px' }} />
+              <div style={{ width: '70%', height: '18px', background: '#eaeaea', borderRadius: '4px', marginBottom: '8px' }} />
+              <div style={{ width: '40%', height: '14px', background: '#eaeaea', borderRadius: '4px' }} />
+            </div>
+          ))}
+        </div>
+      ) : displayedProducts.length > 0 ? (
         <>
           <div className="product-grid">
             {displayedProducts.map((product) => (
@@ -105,8 +129,12 @@ export default function ProductGrid({
         </>
       ) : (
         <div style={{ textAlign: 'center', padding: '60px 20px', border: '1px dashed #ddd', borderRadius: '8px' }}>
-          <h3 className="font-heading" style={{ fontSize: '1.25rem', marginBottom: '8px' }}>No products found</h3>
-          <p style={{ color: '#777', fontSize: '0.88rem', marginBottom: '16px' }}>Try searching with different keywords.</p>
+          <h3 className="font-heading" style={{ fontSize: '1.25rem', marginBottom: '8px' }}>
+            {error ? 'Unable to load products' : 'No products found'}
+          </h3>
+          <p style={{ color: '#777', fontSize: '0.88rem', marginBottom: '16px' }}>
+            {error || 'Try searching with different keywords.'}
+          </p>
           <button onClick={onClearFilters} className="btn-primary">
             View All Hampers
           </button>

@@ -605,6 +605,16 @@ const Header = ({
               )}
             </li>
 
+            {/* 11. Contact Us */}
+            <li className="py-3.5">
+              <Link
+                to="/contact"
+                className="bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline inline-block"
+              >
+                Contact Us
+              </Link>
+            </li>
+
           </ul>
         </div>
       </nav>
@@ -826,6 +836,17 @@ const Header = ({
                 })}
               </div>
             </details>
+            {/* Mobile Contact Us */}
+            <Link
+              to="/contact"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                setActiveDropdown(null);
+              }}
+              className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
+            >
+              Contact Us
+            </Link>
           </div>
         </div>
       )}

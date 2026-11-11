@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Star, Heart, ShoppingBag, Truck, ShieldCheck, Check } from 'lucide-react';
+import { resolveImageUrl } from '../utils/image';
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80";
 
@@ -7,7 +8,8 @@ export default function ProductModal({
   product,
   onClose
 }) {
-  const images = product?.images && product.images.length > 0 ? product.images : [product?.image || FALLBACK_IMAGE];
+  const rawImages = product?.images && product.images.length > 0 ? product.images : [product?.image || FALLBACK_IMAGE];
+  const images = rawImages.map(img => resolveImageUrl(img, FALLBACK_IMAGE));
   const [selectedImg, setSelectedImg] = useState(images[0]);
   const [qty, setQty] = useState(1);
 

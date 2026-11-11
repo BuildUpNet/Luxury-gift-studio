@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
-  ShoppingCart,
   FolderTree,
   Settings,
   LogOut,
@@ -13,18 +12,20 @@ import {
   Trash2,
   Edit3,
   AlertCircle,
-  Truck,
-  IndianRupee,
   ExternalLink,
   Menu,
   X
 } from 'lucide-react';
+
 import { useProducts } from '../../context/ProductContext';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { API_BASE_URL } from '../../config/api';
+import CategoriesPage from './CategoriesPage';
 
 export default function AdminDashboard() {
   const { logout, adminUser } = useAdminAuth();
   const navigate = useNavigate();
+
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -45,57 +46,36 @@ export default function AdminDashboard() {
     toggleStockStatus
   } = useProducts();
 
-  // 2. Dynamic Orders State (persisted in localStorage, default: empty array)
-  const [orders, setOrders] = useState(() => {
-    try {
-      const saved = localStorage.getItem('giftstudio_orders');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  // Persist orders
-  useEffect(() => {
-    try {
-      localStorage.setItem('giftstudio_orders', JSON.stringify(orders));
-    } catch {}
-  }, [orders]);
+  // 2. Dynamic Orders State (persisted in localStorage, default: empty array) - REMOVED
+  // Orders management functionality has been disabled
 
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-  // 3. Dynamic Stat Calculations (Directly connected to real state & products)
-  const stats = useMemo(() => {
-    const totalRevenue = orders.reduce((sum, order) => sum + Number(order.total || 0), 0);
-    const totalOrders = orders.length;
-    const sameDayDeliveries = orders.filter(
-      (order) => order.deliveryType === 'same-day' && order.status !== 'Delivered'
-    ).length;
-    const outOfStock = products.filter(
-      (product) => Number(product.stock ?? 0) <= 0 || product.inStock === false
-    ).length;
-
-    return {
-      revenue: totalRevenue,
-      orders: totalOrders,
-      sameDayDeliveries: sameDayDeliveries,
-      outOfStock: outOfStock
-    };
-  }, [orders, products]);
+  // 3. Dynamic Stat Calculations (removed - stats cards deleted)
+  // Stats were removed from the dashboard
 
   // Filter & Search states
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All');
 
+  // Categories state for dynamic dropdown
+  const [categories, setCategories] = useState([]);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+
   // Modal State for Add / Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [formData, setFormData] = useState({
     title: '',
     category: 'Home Decor',
+    category_id: null,
     originalPrice: '',
     priceNum: '',
     stock: 10,
@@ -113,34 +93,51 @@ export default function AdminDashboard() {
         (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase()));
 
       let matchCategory = true;
-      if (categoryFilter === 'Home Decor') {
-        matchCategory =
-          p.category &&
-          (p.category.toLowerCase().includes('home decor') ||
-            p.category.toLowerCase().includes('decor') ||
-            p.category.toLowerCase().includes('pooja') ||
-            p.category.toLowerCase().includes('tableware') ||
-            p.category.toLowerCase().includes('candle') ||
-            p.category.toLowerCase().includes('frames'));
-      } else if (categoryFilter === 'Diwali') {
-        matchCategory = p.category && p.category.toLowerCase().includes('diwali');
-      } else if (categoryFilter === 'Hampers') {
-        matchCategory =
-          p.category &&
-          (p.category.toLowerCase().includes('hamper') ||
-            p.category.toLowerCase().includes('box') ||
-            p.category.toLowerCase().includes('celebrity'));
+
+      if (categoryFilter !== 'All') {
+        // Filter by exact category name match
+        matchCategory = p.category === categoryFilter;
       }
 
       return matchSearch && matchCategory;
     });
   }, [products, searchQuery, categoryFilter]);
 
+  // Fetch categories on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const token = localStorage.getItem('giftstudio_admin_token');
+
+        const response = await fetch(`${API_BASE_URL}/api/categories`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+
+          if (data.success) {
+            setCategories(data.categories || []);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
   const handleOpenAddModal = () => {
     setEditingProductId(null);
+
     setFormData({
       title: '',
-      category: 'Home Decor',
+      category: categories.length > 0 ? categories[0].name : 'Home Decor',
+      category_id: categories.length > 0 ? categories[0].id : null,
       originalPrice: '',
       priceNum: '',
       stock: 10,
@@ -149,14 +146,31 @@ export default function AdminDashboard() {
       image: '',
       description: ''
     });
+
+    setUploadError('');
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (product) => {
     setEditingProductId(product.id);
+
+    // Find the category in our categories list or default to first category
+    let categoryId = null;
+    let categoryName = product.category || 'Home Decor';
+
+    if (product.category_name && categories.length > 0) {
+      const foundCategory = categories.find(cat => cat.name === product.category_name);
+
+      if (foundCategory) {
+        categoryId = foundCategory.id;
+        categoryName = foundCategory.name;
+      }
+    }
+
     setFormData({
       title: product.title,
-      category: product.category,
+      category: categoryName,
+      category_id: categoryId,
       originalPrice: product.originalPrice ? String(product.originalPrice).replace(/[^0-9]/g, '') : '',
       priceNum: product.priceNum,
       stock: product.stock ?? (product.inStock ? 10 : 0),
@@ -165,22 +179,56 @@ export default function AdminDashboard() {
       image: product.image || '',
       description: product.description || ''
     });
+
     setIsModalOpen(true);
   };
 
-  const handleSaveProduct = (e) => {
+  const handleSaveProduct = async (e) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.priceNum) return;
 
-    if (editingProductId) {
-      updateProduct(editingProductId, formData);
-      showToast('Product updated in shared catalogue');
-    } else {
-      addProduct(formData);
-      showToast('New product added to shared catalogue');
+    if (isSubmitting) return;
+
+    if (!formData.title.trim() || !formData.priceNum || !formData.image) {
+      showToast('Product title, price, and image are required');
+      return;
     }
 
-    setIsModalOpen(false);
+    // Find category_id from the selected category name
+    let categoryId = formData.category_id;
+
+    if (!categoryId && categories.length > 0) {
+      const selectedCategory = categories.find(cat => cat.name === formData.category);
+
+      if (selectedCategory) {
+        categoryId = selectedCategory.id;
+      } else {
+        categoryId = categories[0].id; // Default to first category
+      }
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const productData = {
+        ...formData,
+        category_id: categoryId
+      };
+
+      if (editingProductId) {
+        await updateProduct(editingProductId, productData);
+        showToast('Product updated successfully');
+      } else {
+        await addProduct(productData);
+        showToast('Product added successfully');
+      }
+
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      showToast('Error saving product');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDeleteProduct = (id) => {
@@ -196,31 +244,53 @@ export default function AdminDashboard() {
     toggleStockStatus(id);
   };
 
-  // Orders Actions
-  const handleCreateTestOrder = () => {
-    const testOrder = {
-      id: `TGS-${Math.floor(100000 + Math.random() * 900000)}`,
-      customerName: 'Aarav Sharma',
-      itemsCount: 2,
-      total: 2499,
-      deliveryType: 'same-day',
-      status: 'Processing',
-      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
-    };
-    setOrders((prev) => [testOrder, ...prev]);
-    showToast(`Created order #${testOrder.id}`);
-  };
+  // Image Upload Handler - AVIF support added
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o))
-    );
-    showToast(`Order #${orderId} marked as ${newStatus}`);
-  };
+    const isImage = file.type.startsWith('image/');
+    const isAvif = file.type === 'image/avif' || /\.avif$/i.test(file.name);
 
-  const handleClearOrders = () => {
-    setOrders([]);
-    showToast('Orders cleared');
+    if (!isImage && !isAvif) {
+      setUploadError('Please select a valid image file (AVIF is supported).');
+      e.target.value = '';
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadError('');
+
+    const formDataUpload = new FormData();
+    formDataUpload.append('image', file);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formDataUpload
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const imageUrl = `${API_BASE_URL}${data.url}`;
+        setFormData({ ...formData, image: imageUrl });
+        showToast('Image uploaded successfully');
+      } else {
+        setUploadError(data.message || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setUploadError(`Upload failed: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
   };
 
   return (
@@ -249,6 +319,7 @@ export default function AdminDashboard() {
                 Admin Panel
               </span>
             </div>
+
             <button
               onClick={() => setIsSidebarOpen(false)}
               className="lg:hidden text-gray-400 hover:text-white"
@@ -262,17 +333,12 @@ export default function AdminDashboard() {
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'products', label: 'Products', icon: Package },
-              {
-                id: 'orders',
-                label: 'Orders',
-                icon: ShoppingCart,
-                badge: stats.orders > 0 ? String(stats.orders) : null
-              },
               { id: 'categories', label: 'Categories', icon: FolderTree },
               { id: 'settings', label: 'Settings', icon: Settings }
             ].map((item) => {
               const Icon = item.icon;
               const isActive = currentTab === item.id;
+
               return (
                 <button
                   key={item.id}
@@ -290,6 +356,7 @@ export default function AdminDashboard() {
                     <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-gray-400'}`} />
                     <span>{item.label}</span>
                   </div>
+
                   {item.badge && (
                     <span className="bg-amber-400 text-gray-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                       {item.badge}
@@ -312,6 +379,7 @@ export default function AdminDashboard() {
             <ExternalLink className="w-4 h-4 text-gray-400" />
             <span>View Public Store</span>
           </Link>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-400 hover:text-rose-300 rounded-lg hover:bg-rose-950/20 transition cursor-pointer border-none bg-transparent text-left"
@@ -341,6 +409,7 @@ export default function AdminDashboard() {
             >
               <Menu className="w-5 h-5" />
             </button>
+
             <div>
               <h1 className="text-base sm:text-lg font-bold text-gray-900 capitalize">
                 {currentTab === 'dashboard' ? 'Overview Dashboard' : `${currentTab} Management`}
@@ -364,51 +433,16 @@ export default function AdminDashboard() {
               />
             </div>
 
-            {/* Notification Bell with Dropdown (No fake alerts) */}
+            {/* Notification Bell - Disabled */}
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 className="p-2 text-gray-600 hover:text-black rounded-full hover:bg-gray-100 relative cursor-pointer border-none bg-transparent"
                 title="Notifications"
+                disabled
               >
                 <Bell className="w-4 h-4" />
-                {(stats.sameDayDeliveries > 0 || stats.outOfStock > 0) && (
-                  <span className="w-2 h-2 rounded-full bg-amber-500 absolute top-1.5 right-1.5" />
-                )}
               </button>
-
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white border border-[#E5E7EB] rounded-xl shadow-xl p-4 z-50 text-xs">
-                  <div className="flex items-center justify-between pb-2 mb-2 border-b border-gray-100">
-                    <span className="font-bold text-gray-900">Notifications</span>
-                    <button
-                      onClick={() => setIsNotificationsOpen(false)}
-                      className="text-gray-400 hover:text-black"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  {stats.sameDayDeliveries === 0 && stats.outOfStock === 0 ? (
-                    <p className="text-gray-500 py-3 text-center">No pending alerts</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {stats.sameDayDeliveries > 0 && (
-                        <div className="p-2 bg-amber-50 text-amber-900 rounded-lg flex items-start gap-2">
-                          <Truck className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
-                          <span>{stats.sameDayDeliveries} same-day order(s) pending dispatch</span>
-                        </div>
-                      )}
-                      {stats.outOfStock > 0 && (
-                        <div className="p-2 bg-rose-50 text-rose-900 rounded-lg flex items-start gap-2">
-                          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
-                          <span>{stats.outOfStock} product(s) are currently out of stock</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Admin User Avatar */}
@@ -416,9 +450,14 @@ export default function AdminDashboard() {
               <div className="w-8 h-8 rounded-full bg-[#07111E] text-white flex items-center justify-center text-xs font-bold shadow-xs">
                 {(adminUser?.name || adminUser?.username || 'AD').substring(0, 2).toUpperCase()}
               </div>
+
               <div className="hidden sm:block text-left text-xs">
-                <p className="font-semibold text-gray-900 leading-none">{adminUser?.name || 'Studio Admin'}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">{adminUser?.email || 'admin@thegiftstudio.com'}</p>
+                <p className="font-semibold text-gray-900 leading-none">
+                  {adminUser?.name || 'Studio Admin'}
+                </p>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  {adminUser?.email || 'admin@thegiftstudio.com'}
+                </p>
               </div>
             </div>
           </div>
@@ -426,167 +465,27 @@ export default function AdminDashboard() {
 
         {/* 3. Main Body Content */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-8 flex-1">
-          {/* Stat Cards (Directly connected to real state / localStorage) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {/* 1. Total Revenue */}
-            <div className="bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-xs flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</p>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-950 mt-1">
-                  ₹{stats.revenue.toLocaleString('en-IN')}
-                </h3>
-                <span className="text-[11px] text-gray-400 mt-1.5 block">
-                  From confirmed orders
-                </span>
-              </div>
-              <div className="w-11 h-11 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <IndianRupee className="w-5 h-5" />
+          {/* Dashboard Tab */}
+          {currentTab === 'dashboard' && (
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-6">
+                <h2 className="text-base font-bold text-gray-900 mb-4">
+                  Welcome to Admin Dashboard
+                </h2>
+                <p className="text-xs text-gray-500">
+                  Manage your luxury gifting catalogue, categories, and store settings from here.
+                </p>
               </div>
             </div>
+          )}
 
-            {/* 2. Total Orders */}
-            <div className="bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-xs flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</p>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-950 mt-1">
-                  {stats.orders}
-                </h3>
-                <span className="text-[11px] text-gray-400 mt-1.5 block">
-                  Lifetime orders placed
-                </span>
-              </div>
-              <div className="w-11 h-11 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <ShoppingCart className="w-5 h-5" />
-              </div>
-            </div>
+          {/* Categories Tab */}
+          {currentTab === 'categories' && (
+            <CategoriesPage />
+          )}
 
-            {/* 3. Same-Day Deliveries */}
-            <div className="bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-xs flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Same-Day Deliveries</p>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-950 mt-1">
-                  {stats.sameDayDeliveries}
-                </h3>
-                <span className="text-[11px] text-gray-400 mt-1.5 block">
-                  Pending dispatch today
-                </span>
-              </div>
-              <div className="w-11 h-11 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <Truck className="w-5 h-5" />
-              </div>
-            </div>
-
-            {/* 4. Out of Stock */}
-            <div className="bg-white rounded-xl p-5 border border-[#E5E7EB] shadow-xs flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Out of Stock</p>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-950 mt-1">
-                  {stats.outOfStock}
-                </h3>
-                <span className="text-[11px] text-gray-400 mt-1.5 block">
-                  {stats.outOfStock > 0 ? 'Requires restocking' : 'All inventory in stock'}
-                </span>
-              </div>
-              <div className="w-11 h-11 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
-                <AlertCircle className="w-5 h-5" />
-              </div>
-            </div>
-          </div>
-
-          {/* Conditional Views based on Tab */}
-          {currentTab === 'orders' ? (
-            /* Orders Management View */
-            <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-bold text-gray-900">Orders Management</h2>
-                  <p className="text-xs text-gray-500">Live order queue from store checkout</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleCreateTestOrder}
-                    className="bg-[#0B1320] hover:bg-[#1a2638] text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Create Test Order</span>
-                  </button>
-                  {orders.length > 0 && (
-                    <button
-                      onClick={handleClearOrders}
-                      className="text-xs text-gray-500 hover:text-rose-600 px-2 py-1.5 cursor-pointer bg-transparent border-none"
-                    >
-                      Clear
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse text-xs">
-                  <thead>
-                    <tr className="bg-gray-50 border-b border-[#E5E7EB] text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                      <th className="py-3 px-4">Order ID</th>
-                      <th className="py-3 px-4">Customer</th>
-                      <th className="py-3 px-4">Date</th>
-                      <th className="py-3 px-4">Items</th>
-                      <th className="py-3 px-4">Total</th>
-                      <th className="py-3 px-4">Delivery</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E5E7EB] text-gray-700">
-                    {orders.length === 0 ? (
-                      <tr>
-                        <td colSpan="8" className="py-12 text-center text-gray-400">
-                          No orders placed yet. Place an order on the storefront or click "Create Test Order".
-                        </td>
-                      </tr>
-                    ) : (
-                      orders.map((order) => (
-                        <tr key={order.id} className="hover:bg-gray-50/80">
-                          <td className="py-3 px-4 font-semibold text-gray-900">{order.id}</td>
-                          <td className="py-3 px-4">{order.customerName}</td>
-                          <td className="py-3 px-4 text-gray-500">{order.date}</td>
-                          <td className="py-3 px-4">{order.itemsCount} items</td>
-                          <td className="py-3 px-4 font-semibold text-gray-900">
-                            ₹{Number(order.total).toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="capitalize text-emerald-700 font-medium">{order.deliveryType}</span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span
-                              className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
-                                order.status === 'Delivered'
-                                  ? 'bg-emerald-50 text-emerald-800'
-                                  : 'bg-amber-50 text-amber-800'
-                              }`}
-                            >
-                              {order.status}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            {order.status !== 'Delivered' ? (
-                              <button
-                                onClick={() => handleUpdateOrderStatus(order.id, 'Delivered')}
-                                className="text-xs text-emerald-700 hover:text-emerald-900 font-medium cursor-pointer border-none bg-transparent"
-                              >
-                                Mark Delivered
-                              </button>
-                            ) : (
-                              <span className="text-gray-400 text-xs">Completed</span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          ) : (
-            /* Products Catalogue Table (Main / Products Tab) */
+          {/* Products Catalogue Table (Main / Products Tab) */}
+          {currentTab === 'products' && (
             <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
               {/* Header Controls */}
               <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -612,18 +511,31 @@ export default function AdminDashboard() {
 
                   {/* Category Filter Tabs */}
                   <div className="flex items-center gap-1 bg-gray-100 p-0.5 rounded-lg text-xs">
-                    {['All', 'Home Decor', 'Diwali', 'Hampers'].map((cat) => (
+                    <button
+                      key="All"
+                      type="button"
+                      onClick={() => setCategoryFilter('All')}
+                      className={`px-3 py-1 rounded-md font-medium transition cursor-pointer border-none ${
+                        categoryFilter === 'All'
+                          ? 'bg-white text-gray-900 shadow-xs font-semibold'
+                          : 'bg-transparent text-gray-600 hover:text-black'
+                      }`}
+                    >
+                      All
+                    </button>
+
+                    {categories.map((category) => (
                       <button
-                        key={cat}
+                        key={category.id}
                         type="button"
-                        onClick={() => setCategoryFilter(cat)}
+                        onClick={() => setCategoryFilter(category.name)}
                         className={`px-3 py-1 rounded-md font-medium transition cursor-pointer border-none ${
-                          categoryFilter === cat
+                          categoryFilter === category.name
                             ? 'bg-white text-gray-900 shadow-xs font-semibold'
                             : 'bg-transparent text-gray-600 hover:text-black'
                         }`}
                       >
-                        {cat}
+                        {category.name}
                       </button>
                     ))}
                   </div>
@@ -648,21 +560,20 @@ export default function AdminDashboard() {
                       <th className="py-3.5 px-4">Category</th>
                       <th className="py-3.5 px-4">Price (₹)</th>
                       <th className="py-3.5 px-4">Stock Qty</th>
-                      <th className="py-3.5 px-4">Status</th>
                       <th className="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
+
                   <tbody className="divide-y divide-[#E5E7EB] text-xs text-gray-700">
                     {filteredProducts.length === 0 ? (
                       <tr>
-                        <td colSpan="6" className="text-center py-12 text-gray-400">
+                        <td colSpan="5" className="text-center py-12 text-gray-400">
                           No products found matching "{searchQuery}".
                         </td>
                       </tr>
                     ) : (
                       filteredProducts.map((p) => {
                         const stockQty = Number(p.stock ?? 0);
-                        const isStockAvailable = stockQty > 0 && p.inStock;
 
                         return (
                           <tr key={p.id} className="hover:bg-gray-50/80 transition">
@@ -678,6 +589,7 @@ export default function AdminDashboard() {
                                       'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80';
                                   }}
                                 />
+
                                 <div>
                                   <p className="font-semibold text-gray-900 line-clamp-1">{p.title}</p>
                                   <p className="text-[11px] text-gray-400">ID: {p.id}</p>
@@ -713,9 +625,11 @@ export default function AdminDashboard() {
                                 >
                                   -
                                 </button>
+
                                 <span className="w-8 text-center font-semibold text-gray-900">
                                   {stockQty}
                                 </span>
+
                                 <button
                                   type="button"
                                   onClick={() => handleUpdateStockQty(p.id, 1)}
@@ -725,27 +639,6 @@ export default function AdminDashboard() {
                                   +
                                 </button>
                               </div>
-                            </td>
-
-                            {/* Stock Status Button */}
-                            <td className="py-3 px-4">
-                              <button
-                                type="button"
-                                onClick={() => handleToggleStockStatus(p.id)}
-                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border-none transition ${
-                                  isStockAvailable
-                                    ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
-                                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
-                                }`}
-                                title="Click to toggle stock"
-                              >
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    isStockAvailable ? 'bg-emerald-500' : 'bg-rose-500'
-                                  }`}
-                                />
-                                {isStockAvailable ? 'In Stock' : 'Out of Stock'}
-                              </button>
                             </td>
 
                             {/* Actions */}
@@ -758,6 +651,7 @@ export default function AdminDashboard() {
                                 >
                                   <Edit3 className="w-3.5 h-3.5" />
                                 </button>
+
                                 <button
                                   onClick={() => handleDeleteProduct(p.id)}
                                   className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-md transition cursor-pointer border-none bg-transparent"
@@ -790,6 +684,7 @@ export default function AdminDashboard() {
                 </h3>
                 <p className="text-xs text-gray-500">Enter product information and inventory</p>
               </div>
+
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-gray-400 hover:text-black p-1 rounded-md"
@@ -803,6 +698,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Product Title *
                 </label>
+
                 <input
                   type="text"
                   required
@@ -815,17 +711,36 @@ export default function AdminDashboard() {
 
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">Category *</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black bg-white"
-                >
-                  <option value="Home Decor">Home Decor</option>
-                  <option value="Diwali">Diwali</option>
-                  <option value="Hampers">Hampers</option>
-                  <option value="Tableware & Serving">Tableware & Serving</option>
-                  <option value="Corporate Gifts">Corporate Gifts</option>
-                </select>
+
+                {isLoadingCategories ? (
+                  <div className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+                    Loading categories...
+                  </div>
+                ) : categories.length === 0 ? (
+                  <div className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg bg-gray-50 text-gray-500">
+                    No categories available. Please add categories first.
+                  </div>
+                ) : (
+                  <select
+                    value={formData.category}
+                    onChange={(e) => {
+                      const selectedCategory = categories.find(cat => cat.name === e.target.value);
+
+                      setFormData({ 
+                        ...formData, 
+                        category: e.target.value,
+                        category_id: selectedCategory ? selectedCategory.id : null
+                      });
+                    }}
+                    className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black bg-white"
+                  >
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.name}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               <div className="grid grid-cols-3 gap-3">
@@ -833,6 +748,7 @@ export default function AdminDashboard() {
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Selling Price (₹) *
                   </label>
+
                   <input
                     type="number"
                     required
@@ -842,10 +758,12 @@ export default function AdminDashboard() {
                     className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Original Price (₹)
                   </label>
+
                   <input
                     type="number"
                     placeholder="1699"
@@ -854,10 +772,12 @@ export default function AdminDashboard() {
                     className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black"
                   />
                 </div>
+
                 <div>
                   <label className="block text-xs font-semibold text-gray-700 mb-1">
                     Stock Units *
                   </label>
+
                   <input
                     type="number"
                     required
@@ -871,16 +791,49 @@ export default function AdminDashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Product Image URL
+                <label className="block text-xs font-semibold text-gray-700 mb-2">
+                  Product Image *
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://..."
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black"
-                />
+
+                <div className="space-y-2">
+                  {/* File Upload */}
+                  <label className="flex items-center justify-center px-3 py-3 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg hover:bg-gray-100 hover:border-gray-400 cursor-pointer transition">
+                    <input
+                      type="file"
+                      accept="image/*,.avif,image/avif"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                      className="hidden"
+                      required={!formData.image}
+                    />
+
+                    <span className="text-xs font-medium text-gray-600">
+                      {isUploading ? '⏳ Uploading...' : '📸 Click to upload'}
+                    </span>
+                  </label>
+
+                  {/* Error Message */}
+                  {uploadError && (
+                    <div className="text-xs text-rose-600 bg-rose-50 p-2 rounded border border-rose-200">
+                      {uploadError}
+                    </div>
+                  )}
+
+                  {/* Image Status */}
+                  {formData.image && (
+                    <div className="flex items-center justify-between p-2 bg-green-50 rounded border border-green-200">
+                      <span className="text-xs font-medium text-green-700">✓ Image ready</span>
+
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image: '' })}
+                        className="text-xs text-green-600 hover:text-green-800 underline cursor-pointer border-none bg-transparent"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -911,6 +864,7 @@ export default function AdminDashboard() {
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Description
                 </label>
+
                 <textarea
                   rows="3"
                   placeholder="Product description and craftsmanship..."
@@ -924,15 +878,18 @@ export default function AdminDashboard() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-black rounded-lg transition cursor-pointer border-none bg-transparent"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-xs font-semibold text-gray-600 hover:text-black rounded-lg transition cursor-pointer border-none bg-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
+
                 <button
                   type="submit"
-                  className="bg-[#0B1320] hover:bg-[#1a2638] text-white text-xs font-semibold px-5 py-2 rounded-lg transition shadow-xs cursor-pointer"
+                  disabled={isSubmitting || isUploading}
+                  className="bg-[#0B1320] hover:bg-[#1a2638] text-white text-xs font-semibold px-5 py-2 rounded-lg transition shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {editingProductId ? 'Save Changes' : 'Create Product'}
+                  {isSubmitting ? 'Saving...' : editingProductId ? 'Save Changes' : 'Create Product'}
                 </button>
               </div>
             </form>

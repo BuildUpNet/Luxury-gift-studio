@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import ContactPage from './pages/ContactPage';
 import DiwaliHampersPage from './pages/collections/diwali-hampers';
 import HomeDecorPage from './pages/collections/tgs-home';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ProductModal from './components/ProductModal';
+import ErrorBoundary from './components/ErrorBoundary';
 import { ProductProvider } from './context/ProductContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 
@@ -24,7 +26,8 @@ export default function App() {
   return (
     <AdminAuthProvider>
       <ProductProvider>
-        <Router>
+        <ErrorBoundary>
+          <Router>
           <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
             {/* Global Toast */}
             {toastMessage && (
@@ -80,7 +83,10 @@ export default function App() {
                 }
               />
 
-              {/* 4. Admin Authentication & Dashboard Routes */}
+              {/* 4. Contact Us Page Route */}
+              <Route path="/contact" element={<ContactPage />} />
+
+              {/* 5. Admin Authentication & Dashboard Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
               <Route
                 path="/admin"
@@ -119,7 +125,8 @@ export default function App() {
             )}
           </div>
         </Router>
-      </ProductProvider>
-    </AdminAuthProvider>
+      </ErrorBoundary>
+    </ProductProvider>
+  </AdminAuthProvider>
   );
 }

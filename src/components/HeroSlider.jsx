@@ -53,97 +53,97 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
     setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
   };
 
-  const current = slides[currentSlide];
-
   const handleButtonClick = (slide) => {
     if (slide.action === 'build' && onBuildCustomClick) {
       onBuildCustomClick();
-      return;
-    }
-    if (slide.action === 'explore' && onExploreClick) {
+    } else if (onExploreClick) {
       onExploreClick();
-      return;
-    }
-    const target = document.querySelector(slide.link) || document.getElementById('shop-now') || document.querySelector('.product-grid-section');
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   return (
-    <section className="relative w-full h-[500px] sm:h-[560px] md:h-[620px] overflow-hidden bg-gray-900 select-none">
-      {/* Background Image with smooth fade and subtle dark overlay */}
-      <div className="absolute inset-0 transition-opacity duration-700 ease-in-out">
-        <img
-          src={current.image}
-          alt={current.title}
-          className="w-full h-full object-cover object-center"
-        />
-        {/* Dark gradient overlay for text readability */}
-        <div className="absolute inset-0 bg-black/45 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
-      </div>
-
-      {/* Content Overlay */}
-      <div className="relative h-full max-w-5xl mx-auto px-6 sm:px-12 flex flex-col items-center justify-center text-center text-white z-10">
-        
-        {/* Subtitle */}
-        <p className="text-xs sm:text-sm font-semibold tracking-[0.25em] text-amber-300 uppercase mb-3">
-          {current.subtitle}
-        </p>
-
-        {/* Title */}
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal tracking-wide text-white mb-4 max-w-3xl leading-tight">
-          {current.title}
-        </h1>
-
-        {/* Description */}
-        <p className="text-sm sm:text-base md:text-lg text-gray-200 font-light max-w-2xl mb-8 leading-relaxed">
-          {current.description}
-        </p>
-
-        {/* Outlined Rectangular Button */}
-        <div>
-          <button
-            onClick={() => handleButtonClick(current)}
-            className="inline-block border-2 border-white hover:bg-white hover:text-gray-950 text-white text-xs sm:text-sm font-semibold tracking-[0.2em] px-8 py-3.5 uppercase transition-colors duration-300 bg-transparent cursor-pointer"
+    <div className="relative w-full h-[540px] md:h-[620px] lg:h-[680px] overflow-hidden bg-[#0A101D]">
+      {/* Slides */}
+      {slides.map((slide, index) => {
+        const isActive = index === currentSlide;
+        return (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+              isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+            }`}
           >
-            {current.buttonText}
-          </button>
-        </div>
-      </div>
+            {/* Background Image with Dark Gradient Overlay */}
+            <div
+              className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-10000 ease-out"
+              style={{
+                backgroundImage: `url(${slide.image})`,
+                transform: isActive ? 'scale(1)' : 'scale(1.05)',
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30" />
+            </div>
 
-      {/* Left Arrow Button */}
+            {/* Slide Content */}
+            <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-col justify-center items-start text-white">
+              <div className="max-w-2xl space-y-4 md:space-y-6">
+                <span className="inline-block text-xs md:text-sm font-semibold tracking-widest text-[#E5A823] uppercase">
+                  {slide.subtitle}
+                </span>
+
+                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
+                  {slide.title}
+                </h1>
+
+                <p className="text-sm md:text-base text-gray-200 leading-relaxed max-w-xl font-light">
+                  {slide.description}
+                </p>
+
+                <div className="pt-2">
+                  <button
+                    onClick={() => handleButtonClick(slide)}
+                    className="inline-flex items-center justify-center px-8 py-3.5 bg-[#C59D5F] hover:bg-[#b08b50] text-[#0A101D] font-bold text-xs md:text-sm tracking-widest uppercase transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                  >
+                    {slide.buttonText}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Navigation Arrows */}
       <button
         onClick={handlePrev}
-        className="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white/20 hover:bg-white text-white hover:text-black backdrop-blur-sm transition-all duration-200 cursor-pointer border-none"
-        aria-label="Previous Slide"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition border border-white/20 cursor-pointer"
+        aria-label="Previous slide"
       >
-        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        <ChevronLeft className="w-5 h-5" />
       </button>
 
-      {/* Right Arrow Button */}
       <button
         onClick={handleNext}
-        className="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full bg-white/20 hover:bg-white text-white hover:text-black backdrop-blur-sm transition-all duration-200 cursor-pointer border-none"
-        aria-label="Next Slide"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition border border-white/20 cursor-pointer"
+        aria-label="Next slide"
       >
-        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+        <ChevronRight className="w-5 h-5" />
       </button>
 
       {/* Dots Indicator */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 flex items-center justify-center gap-2.5">
-        {slides.map((slide, index) => (
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {slides.map((_, idx) => (
           <button
-            key={slide.id}
-            onClick={() => setCurrentSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
-            className={`transition-all duration-300 h-2 rounded-full border-none cursor-pointer p-0 ${
-              currentSlide === index ? 'w-8 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
+            key={idx}
+            onClick={() => setCurrentSlide(idx)}
+            className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer border-none ${
+              idx === currentSlide ? 'w-8 bg-[#C59D5F]' : 'w-2 bg-white/50 hover:bg-white/80'
             }`}
+            aria-label={`Go to slide ${idx + 1}`}
           />
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 

@@ -1,20 +1,24 @@
 {
   "name": "luxury-gift-studio-api",
   "version": "1.0.0",
-  "description": "Backend API for Luxury Gift Studio Admin Authentication",
+  "description": "Backend API for The Gift Studio E-Commerce Platform",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test-email": "node test-email.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "express-rate-limit": "^8.7.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql2": "^3.11.3"
+    "multer": "^2.5.0",
+    "mysql2": "^3.11.3",
+    "nodemailer": "^10.3.1",
+    "slugify": "^1.6.9"
   }
 }
-

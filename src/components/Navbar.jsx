@@ -1,6 +1,7 @@
-import React from 'react';
-import { Search, X } from 'lucide-react';
-import { STORE_INFO, ORIGINAL_NAV_LINKS } from '../data/giftStudioData';
+import React, { useState, useEffect } from 'react';
+import { Search, X, ChevronDown } from 'lucide-react';
+import { STORE_INFO } from '../data/giftStudioData';
+import { apiService } from '../services/api';
 
 export default function Navbar({
   searchQuery,
@@ -8,6 +9,38 @@ export default function Navbar({
   onSelectCategory,
   activeCategory
 }) {
+  const [categories, setCategories] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+
+  // Fetch categories dynamically on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoading(true);
+        const data = await apiService.getCategories();
+        if (data.success) {
+          setCategories(data.categories || []);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  // Navigation links - main categories from database + some special ones
+  const navLinks = [
+    { id: 'all', label: 'All Hampers' },
+    ...categories.map(cat => ({ id: `cat-${cat.id}`, label: cat.name })),
+    { id: 'best-sellers', label: 'Best Sellers' },
+    { id: 'create-own', label: 'Create Your Own Hamper', isBuilder: true },
+    { id: 'corporate', label: 'Corporate Gifts' }
+  ];
+
   return (
     <header style={{ position: 'sticky', top: 0, zIndex: 50, background: '#ffffff', borderBottom: '1px solid var(--color-border)' }}>
       {/* 1. Top Announcement Bar (Matching Original) */}
@@ -148,7 +181,7 @@ export default function Navbar({
         </div>
       </div>
 
-      {/* 3. Bottom Navigation Links (Exact Original) */}
+      {/* 3. Bottom Navigation Links (Dynamic from Database) */}
       <nav style={{
         borderTop: '1px solid #f0f0f0',
         background: '#ffffff',
@@ -164,35 +197,56 @@ export default function Navbar({
           gap: '24px',
           padding: '0 24px'
         }}>
-          {ORIGINAL_NAV_LINKS.map((link) => {
-            const isActive = activeCategory === link.id;
-            return (
-              <button
-                key={link.id}
-                onClick={() => onSelectCategory(link.id)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  padding: '12px 2px',
-                  fontSize: '0.86rem',
-                  fontWeight: isActive ? 700 : 500,
-                  color: isActive ? '#020919' : '#444444',
-                  borderBottom: isActive ? '2px solid #020919' : '2px solid transparent',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all var(--transition)'
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) e.currentTarget.style.color = '#020919';
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) e.currentTarget.style.color = '#444444';
-                }}
-              >
-                {link.label}
-              </button>
-            );
-          })}
+          {isLoading ? (
+            <div style={{ display: 'flex', gap: '24px', padding: '12px 0' }}>
+              {[...Array(5)].map((_, i) => (
+                <div key={i} style={{
+                  width: '80px',
+                  height: '16px',
+                  background: '#f0f0f0',
+                  borderRadius: '2px',
+                  animation: 'pulse 1.5s infinite'
+                }}></div>
+              ))}
+            </div>
+          ) : (
+            navLinks.map((link) => {
+              const isActive = activeCategory === link.id;
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => {
+                    if (link.id.startsWith('cat-')) {
+                      const categoryId = link.id.replace('cat-', '');
+                      onSelectCategory(categoryId);
+                    } else {
+                      onSelectCategory(link.id);
+                    }
+                  }}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '12px 2px',
+                    fontSize: '0.86rem',
+                    fontWeight: isActive ? 700 : 500,
+                    color: isActive ? '#020919' : '#444444',
+                    borderBottom: isActive ? '2px solid #020919' : '2px solid transparent',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    transition: 'all var(--transition)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.color = '#020919';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.color = '#444444';
+                  }}
+                >
+                  {link.label}
+                </button>
+              );
+            })
+          )}
         </div>
       </nav>
     </header>

@@ -223,6 +223,14 @@ export default function Footer({ onSelectCategory }) {
             </h4>
             <ul className="space-y-3 text-sm text-[#D1D5DB] list-none p-0 m-0">
               <li>
+                <Link
+                  to="/contact"
+                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
+                >
+                  Contact Us
+                </Link>
+              </li>
+              <li>
                 <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
                   Track Order
                 </span>
@@ -262,9 +270,6 @@ export default function Footer({ onSelectCategory }) {
             <span className="hover:text-white transition cursor-pointer">Terms of Service</span>
             <span className="hover:text-white transition cursor-pointer">Shipping & Delivery</span>
             <span className="hover:text-white transition cursor-pointer">Cancellation Policy</span>
-            <Link to="/admin/login" className="hover:text-amber-300 text-gray-400 transition no-underline">
-              Admin Portal
-            </Link>
           </div>
         </div>
       </div>

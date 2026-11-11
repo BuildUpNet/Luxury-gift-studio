@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Heart, Star, ShoppingBag, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
+import { resolveImageUrl } from '../utils/image';
 
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80";
 
@@ -10,7 +11,8 @@ export default function ProductCard({
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
-  const images = product.images && product.images.length > 0 ? product.images : [product.image || FALLBACK_IMAGE];
+  const rawImages = product.images && product.images.length > 0 ? product.images : [product.image || FALLBACK_IMAGE];
+  const images = rawImages.map(img => resolveImageUrl(img, FALLBACK_IMAGE));
 
   const nextImage = (e) => {
     e.stopPropagation();

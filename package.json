@@ -1,8 +1,20 @@
 {
   "name": "luxury-gift-studio",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "",
+  "homepage": "https://github.com/BuildUpNet/Luxury-gift-studio#readme",
+  "bugs": {
+    "url": "https://github.com/BuildUpNet/Luxury-gift-studio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BuildUpNet/Luxury-gift-studio.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "module",
+  "main": "postcss.config.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
