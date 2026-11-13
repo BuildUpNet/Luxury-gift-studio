@@ -42,3 +42,7 @@ server/.env.*
 *.njsproj
 *.sln
 *.sw?
+
+# Archive & zip files
+*.zip
+server/serverenv.zip

@@ -118,12 +118,12 @@ export default function ContactPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
+    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
       {/* Shared Header */}
       <Header />
 
       {/* Main Content Area */}
-      <main className="flex-1 bg-[#FAFAFA] py-12 md:py-16">
+      <main className="flex-1 py-12 md:py-16" style={{ backgroundColor: '#FAF7F2' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Breadcrumb & Title Header */}

@@ -58,10 +58,7 @@ export const API_ENDPOINTS = {
   CATEGORIES: '/api/categories',
   CATEGORIES_BY_ID: (id) => `/api/categories/${id}`,
   CATEGORIES_PRODUCTS: (id) => `/api/categories/${id}/products`,
-
-  // Products
-  PRODUCTS: '/api/products',
-  PRODUCTS_BY_ID: (id) => `/api/products/${id}`,
+  CATEGORIES_UPLOAD_IMAGE: '/api/categories/upload-image',
 
   // Upload
   UPLOAD: '/api/upload',
@@ -72,17 +69,46 @@ export const API_ENDPOINTS = {
   ADMIN_ME: '/api/admin/me',
 
   // Contact Us
-  CONTACT: '/api/contact'
+  CONTACT: '/api/contact',
+
+  // Gifting Banner & Inquiries
+  GIFTING_BANNER: '/api/gifting-banner',
+  ADMIN_GIFTING_BANNER: '/api/admin/gifting-banner',
+  GIFTING_INQUIRIES: '/api/gifting-inquiries',
+  ADMIN_GIFTING_INQUIRIES: '/api/admin/gifting-inquiries',
+  ADMIN_GIFTING_INQUIRY_STATUS: (id) => `/api/admin/gifting-inquiries/${id}/status`,
+  ADMIN_GIFTING_INQUIRY_BY_ID: (id) => `/api/admin/gifting-inquiries/${id}`
 };
 
 // Convenient API service wrappers
 export const apiService = {
-  // Products
-  getProducts: (category) => apiClient(category ? `${API_ENDPOINTS.PRODUCTS}?category=${encodeURIComponent(category)}` : API_ENDPOINTS.PRODUCTS),
-  getProductById: (id) => apiClient(API_ENDPOINTS.PRODUCTS_BY_ID(id)),
-  createProduct: (productData) => apiClient(API_ENDPOINTS.PRODUCTS, { method: 'POST', body: JSON.stringify(productData) }),
-  updateProduct: (id, productData) => apiClient(API_ENDPOINTS.PRODUCTS_BY_ID(id), { method: 'PUT', body: JSON.stringify(productData) }),
-  deleteProduct: (id) => apiClient(API_ENDPOINTS.PRODUCTS_BY_ID(id), { method: 'DELETE' }),
+  // Gifting Banner
+  getGiftingBanner: () => apiClient(API_ENDPOINTS.GIFTING_BANNER),
+  updateGiftingBanner: (body) => apiClient(API_ENDPOINTS.ADMIN_GIFTING_BANNER, {
+    method: 'PUT',
+    body: body instanceof FormData ? body : JSON.stringify(body)
+  }),
+
+  // Gifting Inquiries
+  submitGiftingInquiry: (data) => apiClient(API_ENDPOINTS.GIFTING_INQUIRIES, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+  getAdminGiftingInquiries: (params = {}) => {
+    const searchParams = new URLSearchParams();
+    if (params.search) searchParams.append('search', params.search);
+    if (params.status) searchParams.append('status', params.status);
+    if (params.gifting_type) searchParams.append('gifting_type', params.gifting_type);
+    const queryString = searchParams.toString();
+    return apiClient(`${API_ENDPOINTS.ADMIN_GIFTING_INQUIRIES}${queryString ? `?${queryString}` : ''}`);
+  },
+  updateGiftingInquiryStatus: (id, status, notes) => apiClient(API_ENDPOINTS.ADMIN_GIFTING_INQUIRY_STATUS(id), {
+    method: 'PATCH',
+    body: JSON.stringify({ status, notes })
+  }),
+  deleteGiftingInquiry: (id) => apiClient(API_ENDPOINTS.ADMIN_GIFTING_INQUIRY_BY_ID(id), {
+    method: 'DELETE'
+  }),
 
   // Categories
   getCategories: () => apiClient(API_ENDPOINTS.CATEGORIES),
@@ -90,6 +116,7 @@ export const apiService = {
   createCategory: (catData) => apiClient(API_ENDPOINTS.CATEGORIES, { method: 'POST', body: JSON.stringify(catData) }),
   updateCategory: (id, catData) => apiClient(API_ENDPOINTS.CATEGORIES_BY_ID(id), { method: 'PUT', body: JSON.stringify(catData) }),
   deleteCategory: (id) => apiClient(API_ENDPOINTS.CATEGORIES_BY_ID(id), { method: 'DELETE' }),
+  uploadCategoryImage: (formData) => apiClient(API_ENDPOINTS.CATEGORIES_UPLOAD_IMAGE, { method: 'POST', body: formData }),
 
   // Contact
   submitContact: (data) => apiClient(API_ENDPOINTS.CONTACT, { method: 'POST', body: JSON.stringify(data) }),

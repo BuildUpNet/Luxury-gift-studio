@@ -10,10 +10,10 @@ export default function Testimonials() {
       padding: '0 24px'
     }}>
       <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <span style={{ fontSize: '0.78rem', color: '#a11414', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+        <span style={{ fontSize: '0.78rem', color: '#C62828', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
           Words Of Acclaim
         </span>
-        <h2 className="font-heading" style={{ fontSize: '2rem', color: '#020919', fontWeight: 600, marginTop: '6px' }}>
+        <h2 className="font-heading" style={{ fontSize: '2rem', color: '#1E1E1E', fontWeight: 600, marginTop: '6px' }}>
           Celebrated Voices Echo Their Admiration
         </h2>
       </div>
@@ -39,7 +39,7 @@ export default function Testimonials() {
                   <Star key={idx} size={14} fill="var(--color-star)" color="var(--color-star)" />
                 ))}
               </div>
-              <Quote size={18} color="#999" />
+              <Quote size={18} color="#C62828" style={{ opacity: 0.6 }} />
             </div>
 
             <p style={{
@@ -53,8 +53,8 @@ export default function Testimonials() {
               "{t.quote}"
             </p>
 
-            <div style={{ borderTop: '1px solid #eee', paddingTop: '12px' }}>
-              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#020919' }}>
+            <div style={{ borderTop: '1px solid #E8DFD3', paddingTop: '12px' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1E1E1E' }}>
                 {t.author}
               </div>
               <div style={{ fontSize: '0.74rem', color: '#888' }}>

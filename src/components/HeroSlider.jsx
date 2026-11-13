@@ -62,7 +62,7 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
   };
 
   return (
-    <div className="relative w-full h-[540px] md:h-[620px] lg:h-[680px] overflow-hidden bg-[#0A101D]">
+    <div className="relative w-full h-[430px] sm:h-[470px] md:h-[500px] lg:h-[520px] xl:h-[535px] overflow-hidden bg-[#0A101D]">
       {/* Slides */}
       {slides.map((slide, index) => {
         const isActive = index === currentSlide;
@@ -73,50 +73,55 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
               isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
-            {/* Background Image with Dark Gradient Overlay */}
-            <div
-              className="absolute inset-0 bg-cover bg-center scale-105 transition-transform duration-10000 ease-out"
-              style={{
-                backgroundImage: `url(${slide.image})`,
-                transform: isActive ? 'scale(1)' : 'scale(1.05)',
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/30" />
+            {/* Background Image with Ken Burns Motion and Dark Gradient Overlay */}
+            <div className="absolute inset-0 overflow-hidden">
+              <img
+                key={`img-${slide.id}-${isActive}`}
+                src={slide.image}
+                alt={slide.title}
+                className={`w-full h-full object-cover object-center ${
+                  isActive ? 'hero-ken-burns' : 'scale-100'
+                }`}
+                loading={index === 0 ? 'eager' : 'lazy'}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35" />
             </div>
 
-            {/* Slide Content */}
-            <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 flex flex-col justify-center items-start text-white">
-              <div className="max-w-2xl space-y-4 md:space-y-6">
-                <span className="inline-block text-xs md:text-sm font-semibold tracking-widest text-[#E5A823] uppercase">
-                  {slide.subtitle}
-                </span>
+            {/* Slide Content with Staggered Entrance */}
+            <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 lg:py-12 flex flex-col justify-center items-start text-white">
+              {isActive && (
+                <div key={`text-${slide.id}-${currentSlide}`} className="max-w-2xl space-y-3 sm:space-y-3.5 md:space-y-4">
+                  <span className="hero-stagger-1 inline-block text-xs md:text-sm font-semibold tracking-widest text-[#E5A823] uppercase">
+                    {slide.subtitle}
+                  </span>
 
-                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-white">
-                  {slide.title}
-                </h1>
+                  <h1 className="hero-stagger-2 font-serif text-2xl sm:text-3xl md:text-4xl lg:text-[46px] font-bold leading-tight tracking-tight text-white">
+                    {slide.title}
+                  </h1>
 
-                <p className="text-sm md:text-base text-gray-200 leading-relaxed max-w-xl font-light">
-                  {slide.description}
-                </p>
+                  <p className="hero-stagger-3 text-xs sm:text-sm md:text-base text-gray-200 leading-relaxed max-w-xl font-light">
+                    {slide.description}
+                  </p>
 
-                <div className="pt-2">
-                  <button
-                    onClick={() => handleButtonClick(slide)}
-                    className="inline-flex items-center justify-center px-8 py-3.5 bg-[#C59D5F] hover:bg-[#b08b50] text-[#0A101D] font-bold text-xs md:text-sm tracking-widest uppercase transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
-                  >
-                    {slide.buttonText}
-                  </button>
+                  <div className="hero-stagger-4 pt-2 sm:pt-3">
+                    <button
+                      onClick={() => handleButtonClick(slide)}
+                      className="hero-luxury-cta inline-flex items-center justify-center px-8 sm:px-9 py-3.5 rounded-full font-bold text-xs md:text-sm tracking-widest uppercase"
+                    >
+                      {slide.buttonText}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
       })}
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows with Frosted Glass Effects */}
       <button
         onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition border border-white/20 cursor-pointer"
+        className="hero-frosted-arrow absolute left-3 sm:left-5 top-1/2 z-20 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
         aria-label="Previous slide"
       >
         <ChevronLeft className="w-5 h-5" />
@@ -124,20 +129,22 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
 
       <button
         onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition border border-white/20 cursor-pointer"
+        className="hero-frosted-arrow absolute right-3 sm:right-5 top-1/2 z-20 w-11 h-11 md:w-12 md:h-12 rounded-full flex items-center justify-center cursor-pointer shadow-lg"
         aria-label="Next slide"
       >
         <ChevronRight className="w-5 h-5" />
       </button>
 
-      {/* Dots Indicator */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+      {/* Dots Indicator with Animated Active Pill */}
+      <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
         {slides.map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
-            className={`h-1.5 transition-all duration-300 rounded-full cursor-pointer border-none ${
-              idx === currentSlide ? 'w-8 bg-[#C59D5F]' : 'w-2 bg-white/50 hover:bg-white/80'
+            className={`h-2 transition-all duration-500 rounded-full cursor-pointer border-none p-0 ${
+              idx === currentSlide
+                ? 'w-10 bg-gradient-to-r from-[#C62828] to-[#E5A823] shadow-md shadow-red-900/40'
+                : 'w-2.5 bg-white/40 hover:bg-white/80'
             }`}
             aria-label={`Go to slide ${idx + 1}`}
           />

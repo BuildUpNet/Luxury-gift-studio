@@ -129,7 +129,7 @@ export default function DiwaliHampersPage({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white text-gray-900 font-sans">
+    <div className="min-h-screen flex flex-col text-gray-900 font-sans" style={{ backgroundColor: '#FAF7F2' }}>
       {/* 1. Shared Header */}
       <Header
         searchQuery={searchQuery}

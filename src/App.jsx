@@ -7,13 +7,11 @@ import HomeDecorPage from './pages/collections/tgs-home';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminProtectedRoute from './components/AdminProtectedRoute';
-import ProductModal from './components/ProductModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ProductProvider } from './context/ProductContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
 
 export default function App() {
-  const [quickViewProduct, setQuickViewProduct] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
 
   const showToast = (msg) => {
@@ -28,7 +26,7 @@ export default function App() {
       <ProductProvider>
         <ErrorBoundary>
           <Router>
-          <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#ffffff' }}>
+          <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
             {/* Global Toast */}
             {toastMessage && (
               <div
@@ -54,34 +52,13 @@ export default function App() {
             {/* Application Routes */}
             <Routes>
               {/* 1. Dedicated Home Page Route */}
-              <Route
-                path="/"
-                element={
-                  <HomePage
-                    onQuickView={(product) => setQuickViewProduct(product)}
-                  />
-                }
-              />
+              <Route path="/" element={<HomePage />} />
 
               {/* 2. Dedicated Diwali Gift Hampers Collection Page */}
-              <Route
-                path="/collections/diwali-hampers"
-                element={
-                  <DiwaliHampersPage
-                    onQuickView={(product) => setQuickViewProduct(product)}
-                  />
-                }
-              />
+              <Route path="/collections/diwali-hampers" element={<DiwaliHampersPage />} />
 
               {/* 3. Dedicated Home Decor Collection Page */}
-              <Route
-                path="/collections/tgs-home"
-                element={
-                  <HomeDecorPage
-                    onQuickView={(product) => setQuickViewProduct(product)}
-                  />
-                }
-              />
+              <Route path="/collections/tgs-home" element={<HomeDecorPage />} />
 
               {/* 4. Contact Us Page Route */}
               <Route path="/contact" element={<ContactPage />} />
@@ -106,23 +83,8 @@ export default function App() {
               />
 
               {/* Fallback Route */}
-              <Route
-                path="*"
-                element={
-                  <HomePage
-                    onQuickView={(product) => setQuickViewProduct(product)}
-                  />
-                }
-              />
+              <Route path="*" element={<HomePage />} />
             </Routes>
-
-            {/* Shared Modals */}
-            {quickViewProduct && (
-              <ProductModal
-                product={quickViewProduct}
-                onClose={() => setQuickViewProduct(null)}
-              />
-            )}
           </div>
         </Router>
       </ErrorBoundary>

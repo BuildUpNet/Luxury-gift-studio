@@ -170,7 +170,7 @@ export default function HomeDecorPage({
   }, [appliedCustomRange, selectedPriceTier]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf9] flex flex-col text-gray-900 font-sans selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen flex flex-col text-gray-900 font-sans selection:bg-red-100 selection:text-red-900" style={{ backgroundColor: '#FAF7F2' }}>
       {/* 1. Header & Navigation with active Category 'home-decor' */}
       <Header
         searchQuery={searchQuery}

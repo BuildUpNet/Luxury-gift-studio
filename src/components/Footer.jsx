@@ -18,7 +18,14 @@ export default function Footer({ onSelectCategory }) {
   return (
     <footer className="w-full bg-[#07111E] text-white">
       {/* 1. Newsletter / Subscribe Section */}
-      <div className="bg-[#F9F8F6] border-t border-b border-[#E5E5E5] text-gray-900 py-10 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div
+        className="text-gray-900 py-10 sm:py-12 px-4 sm:px-6 lg:px-8"
+        style={{
+          backgroundColor: '#FDFBF7',
+          borderTop: '1px solid #E8DFD3',
+          borderBottom: '1px solid #E8DFD3'
+        }}
+      >
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left max-w-xl">
             <h3 className="font-serif text-2xl sm:text-3xl font-bold text-gray-950 mb-2">
@@ -43,11 +50,14 @@ export default function Footer({ onSelectCategory }) {
                   placeholder="Enter your email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-white border border-[#CCCCCC] rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-gray-800 transition"
+                  className="flex-1 px-4 py-3 bg-white border border-[#E8DFD3] rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C62828] transition"
                 />
                 <button
                   type="submit"
-                  className="bg-[#0B1320] hover:bg-[#1a2638] text-white text-sm font-semibold px-6 py-3 rounded-lg transition duration-200 shadow-sm whitespace-nowrap cursor-pointer active:scale-98"
+                  className="text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer active:scale-98"
+                  style={{ backgroundColor: '#C62828' }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1B7A43'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#C62828'}
                 >
                   Subscribe
                 </button>
@@ -63,13 +73,16 @@ export default function Footer({ onSelectCategory }) {
           
           {/* Brand Logo & Contacts */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-2xl sm:text-3xl font-bold tracking-wider text-white">
-                THE GIFT STUDIO
-              </span>
-              <span className="text-gray-600 font-light">|</span>
-              <span className="text-xs font-semibold text-emerald-400 tracking-wider uppercase">
-                Nature's Basket
+            <div className="flex items-center gap-3">
+              <img
+                src="/images/gift_logo.jpeg"
+                alt="The Gift Studio"
+                className="h-10 sm:h-11 w-auto object-contain rounded-xs bg-white p-1"
+                style={{ height: '42px', width: 'auto', objectFit: 'contain' }}
+              />
+              <span className="h-6 w-px" style={{ background: 'rgba(255, 255, 255, 0.25)' }} />
+              <span className="font-serif text-xs sm:text-sm font-bold tracking-wide italic" style={{ color: '#F3ECE1', letterSpacing: '0.04em' }}>
+                Premium Gifting Solutions
               </span>
             </div>
 

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Search,
   MapPin,
@@ -7,6 +7,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import { apiService } from '../services/api';
 
 const Header = ({
   searchQuery = '',
@@ -14,192 +15,80 @@ const Header = ({
   onSelectCategory,
   activeCategory = 'all'
 }) => {
+  const navigate = useNavigate();
+  const [categories, setCategories] = useState([]);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [selectedCity, setSelectedCity] = useState('Mumbai');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Dropdown items data
-  const standardDropdowns = {
-    diwali: {
-      title: 'Diwali',
-      items: ['Diwali Hampers', 'Home Decor', 'View All'],
-    },
-    birthdays: {
-      title: 'Birthdays',
-      items: [
-        'Curated Hampers',
-        'Plants & Flowers',
-        'Balloons',
-        'For Her',
-        'For Him',
-        'View All',
-      ],
-    },
-    anniversary: {
-      title: 'Anniversary',
-      items: [
-        'Curated Hampers',
-        'Plants & Flowers',
-        'Jewellery',
-        'Personalised',
-        'View All',
-      ],
-    },
-    corporateGifts: {
-      title: 'Corporate Gifts',
-      items: [
-        'Writing & Stationery',
-        'Bags & Travel',
-        'Apparel',
-        'Tech Accessories',
-        'Branded Merchandise',
-        'Explore All',
-      ],
-    },
-    moreGifts: {
-      title: 'More Gifts',
-      items: [
-        'Home Decor',
-        'Baby & Kids',
-        'Personalised Games',
-        'Fashion & Personal Care',
-        'For Him',
-        'For Her',
-        'Personal Care & Grooming',
-        'Balloons',
-        'Corporate Gifting',
-        'Wedding Gifts',
-        'Jewellery',
-      ],
-    },
-  };
+  // Fetch categories dynamically
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCategories = async () => {
+      try {
+        const data = await apiService.getCategories();
+        if (data.success && isMounted) {
+          setCategories(data.categories || []);
+        }
+      } catch (err) {
+        console.error('Header: failed to fetch categories', err);
+      }
+    };
+    fetchCategories();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  // Best Sellers 6-Column Mega Menu Data
-  const bestSellersMegaMenu = [
-    {
-      title: 'View All Hampers',
-      items: [
-        'All Gift Hampers',
-        'Festive Bestsellers',
-        'Luxury Keepsake Hampers',
-        'Signature Wooden Boxes',
-        'Gourmet Delicacies',
-        'View All Hampers',
-      ],
-    },
-    {
-      title: 'Hampers By Features',
-      items: ['Bestsellers', 'Featured', 'View All'],
-    },
-    {
-      title: 'Hampers By Type',
-      items: [
-        'Build Your Own Hamper',
-        'Chocolates & Candy',
-        'Snacks & Munchies',
-        'Tea & Coffee',
-        'Dry Fruits',
-        'View All Hampers',
-      ],
-    },
-    {
-      title: 'Hampers By Occasion',
-      items: [
-        'Sorry Hamper',
-        'Love & Romance',
-        'Birthday',
-        'Housewarming',
-        'Wedding',
-        'Farewell',
-        'Congratulations',
-        'Anniversary',
-        'Date Night',
-        'Movie Night',
-      ],
-    },
-    {
-      title: 'Hampers For Recipient',
-      items: [
-        'For Him',
-        'For Her',
-        'Parents',
-        'Corporate Hampers',
-        'Employee Onboarding',
-        'Rewards & Appreciation',
-        'Promotion & Appraisal',
-        'View All',
-      ],
-    },
-    {
-      title: 'Hampers By Price',
-      items: [
-        'Under 1500',
-        'Rs. 1500 - Rs. 3000',
-        'Rs. 3000 - Rs. 5000',
-        'Rs. 5000 - Rs. 7000',
-        'View All',
-      ],
-    },
-  ];
+  // Filter top-level categories that have show_in_navbar = 1 (max 10)
+  const navbarCategories = categories
+    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar))
+    .slice(0, 10);
+
+  // Map subcategories by parent_id
+  const subcategoriesByParent = {};
+  categories.forEach(c => {
+    if (c.parent_id !== null && c.parent_id !== undefined) {
+      if (!subcategoriesByParent[c.parent_id]) {
+        subcategoriesByParent[c.parent_id] = [];
+      }
+      subcategoriesByParent[c.parent_id].push(c);
+    }
+  });
 
   const cities = ['Mumbai', 'Delhi NCR', 'Bengaluru', 'Kolkata', 'Hyderabad', 'Pune', 'Chennai'];
 
-  const handleItemClick = (categoryKey, term) => {
+  const handleCategoryClick = (categorySlugOrId) => {
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
 
-    if (categoryKey === 'create-own' || term === 'Build Your Own Hamper') {
-      const el = document.getElementById('build-hamper-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-      return;
-    }
-
-    if (categoryKey === 'celebrity' || term === 'Celebrity Hampers') {
-      const el = document.getElementById('celebrity-hampers');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-        return;
-      }
-    }
-
-    if (term) {
-      if (setSearchQuery) {
-        setSearchQuery(term);
-        const el = document.getElementById('shop-now') || document.querySelector('.product-grid-section');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else if (categoryKey && onSelectCategory) {
-      onSelectCategory(categoryKey);
+    if (onSelectCategory) {
+      onSelectCategory(categorySlugOrId);
       const el = document.getElementById('shop-now') || document.querySelector('.product-grid-section');
       if (el) el.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      navigate('/');
     }
   };
 
-  return (
-    <header className="w-full bg-white relative z-40 shadow-sm">
-      {/* 1. Top Announcement Bar */}
-      <div className="bg-black text-white text-xs md:text-sm py-2 px-4 text-center font-medium tracking-wide flex items-center justify-center gap-2">
-        <span>FOR QUERIES PLEASE CALL OR WHATSAPP: 7506210892</span>
-        <a
-          href="https://wa.me/917506210892"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline text-amber-300 hover:text-white transition ml-1"
-        >
-          Chat on WhatsApp
-        </a>
-      </div>
+  // Row splitting: first 6 in primary row, 7-10 in expandable row
+  const primaryRow = navbarCategories.slice(0, 6);
+  const overflowRow = navbarCategories.slice(6);
+  const hasOverflow = navbarCategories.length > 6;
 
-      {/* 2. Main Navbar */}
-      <div className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4">
+  return (
+    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#FDFBF7', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}>
+      {/* Main Brand / Search / City Bar */}
+      <div style={{ borderBottom: '1px solid rgba(198, 40, 40, 0.10)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           
-          {/* Left: Brand Logo */}
-          <div className="flex items-center gap-2">
+          {/* Left: Brand Logo & Mobile Toggle */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-1.5 text-gray-700 hover:text-black hover:bg-gray-100 rounded-md"
+              className="lg:hidden p-1.5 text-gray-700 hover:text-black hover:bg-stone-100 rounded-md cursor-pointer border-none bg-transparent"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -212,14 +101,20 @@ const Header = ({
                 if (setSearchQuery) setSearchQuery('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center gap-2 text-left bg-transparent border-none cursor-pointer p-0 no-underline text-inherit"
+              className="flex items-center gap-3 text-left bg-transparent border-none cursor-pointer p-0 no-underline text-inherit group"
             >
-              <span className="font-serif text-lg sm:text-xl md:text-2xl font-bold tracking-wider text-gray-950">
-                THE GIFT STUDIO
-              </span>
-              <span className="hidden sm:inline text-gray-300 font-light">|</span>
-              <span className="hidden sm:inline text-xs sm:text-sm font-medium text-emerald-800 tracking-wide">
-                Nature's Basket
+              <img
+                src="/images/gift_logo.jpeg"
+                alt="The Gift Studio Logo"
+                className="transition-transform duration-300 group-hover:scale-[1.02]"
+                style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
+              />
+              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(198, 40, 40, 0.25)' }} />
+              <span
+                className="hidden sm:inline-block font-serif text-xs sm:text-sm font-bold tracking-wide italic"
+                style={{ color: '#C62828', letterSpacing: '0.04em' }}
+              >
+                Premium Gifting Solutions
               </span>
             </Link>
           </div>
@@ -246,7 +141,7 @@ const Header = ({
             </div>
           </div>
 
-          {/* Right: Actions */}
+          {/* Right: City Selector & Contact Buttons */}
           <div className="flex items-center gap-2 sm:gap-3">
             
             {/* Location Pill */}
@@ -260,7 +155,6 @@ const Header = ({
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
               </button>
 
-              {/* City Selection Dropdown */}
               {isCityDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
                   <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
@@ -284,24 +178,35 @@ const Header = ({
               )}
             </div>
 
-            {/* Black Pill Button: Bulk/Corporate Enquiry */}
+            {/* Bulk / Corporate Enquiry Button */}
             <a
               href="https://wa.me/917506210892?text=Hi,%20I%20am%20interested%20in%20Bulk%20Corporate%20Gifting"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center justify-center bg-black hover:bg-gray-800 text-white text-xs sm:text-sm font-medium px-4 py-2 rounded-full transition shadow-sm whitespace-nowrap text-decoration-none"
+              className="hidden sm:inline-flex items-center justify-center text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap no-underline cursor-pointer"
+              style={{
+                backgroundColor: '#C62828',
+                color: '#FFFFFF'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#1B7A43';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#C62828';
+                e.currentTarget.style.transform = 'translateY(0)';
+              }}
             >
               Bulk/Corporate Enquiry
             </a>
 
-            {/* Social FA Icons: Facebook & WhatsApp */}
+            {/* Social Icons */}
             <a
               href="https://facebook.com/thegiftstudio"
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#1877F2] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
               aria-label="Facebook"
-              title="Follow us on Facebook"
             >
               <i className="fa-brands fa-facebook-f text-base"></i>
             </a>
@@ -312,14 +217,13 @@ const Header = ({
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#25D366] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
               aria-label="WhatsApp"
-              title="Chat with us on WhatsApp"
             >
               <i className="fa-brands fa-whatsapp text-lg"></i>
             </a>
           </div>
         </div>
 
-        {/* Mobile Search Bar (visible on small screens) */}
+        {/* Mobile Search Bar */}
         <div className="md:hidden px-4 pb-3">
           <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
             <Search className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
@@ -342,511 +246,262 @@ const Header = ({
         </div>
       </div>
 
-      {/* 3. Navigation Links & Dropdowns (Desktop) */}
-      <nav className="hidden lg:block border-b border-gray-200">
+      {/* 3. Semantic Top Navbar (Desktop) */}
+      <nav
+        aria-label="Main Navigation"
+        className="hidden lg:block relative"
+        style={{ backgroundColor: '#FDFBF7', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ul className="flex items-center justify-between text-xs xl:text-sm font-medium text-gray-700 list-none m-0 p-0">
-            
-            {/* 1. Diwali Dropdown (Links to Home Decor Collection) */}
-            <li
-              className="relative py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('diwali')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <Link
-                to="/collections/tgs-home"
-                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline ${
-                  activeCategory === 'diwali' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Diwali <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </Link>
-              {activeDropdown === 'diwali' && (
-                <div className="absolute top-full left-0 w-56 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                  <Link
-                    to="/collections/tgs-home"
-                    onClick={() => setActiveDropdown(null)}
-                    className="block w-full text-left px-4 py-2.5 text-sm font-semibold text-amber-950 bg-amber-50/70 hover:bg-amber-100/70 transition no-underline flex items-center justify-between"
+          
+          {/* Primary Row: First 6 categories + optional "View All" */}
+          <ul className="flex items-center justify-center gap-2 xl:gap-3 text-xs xl:text-sm font-medium text-gray-700 list-none m-0 py-1.5 flex-wrap">
+            {primaryRow.map((cat) => {
+              const subcats = subcategoriesByParent[cat.id] || [];
+              const hasSubcats = subcats.length > 0;
+              const isActive = activeCategory === cat.slug || String(activeCategory) === String(cat.id);
+              const isOpen = activeDropdown === cat.id;
+
+              return (
+                <li
+                  key={cat.id}
+                  className="relative group"
+                  onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
+                  onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                    className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium capitalize transition-all duration-200 cursor-pointer border border-transparent ${
+                      isActive
+                        ? 'active text-[#C62828] font-semibold bg-red-50/70 border-red-200/50 shadow-xs'
+                        : 'text-stone-700 hover:text-[#C62828] hover:bg-red-50/40 hover:border-red-100'
+                    }`}
                   >
-                    <span>Home Decor</span>
-                    <span className="text-[10px] bg-amber-200 text-amber-900 font-bold px-1.5 py-0.5 rounded">Featured</span>
-                  </Link>
-                  <Link
-                    to="/collections/diwali-hampers"
-                    onClick={() => setActiveDropdown(null)}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
-                  >
-                    Diwali Hampers
-                  </Link>
-                  <Link
-                    to="/collections/tgs-home"
-                    onClick={() => setActiveDropdown(null)}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
-                  >
-                    View All
-                  </Link>
-                </div>
-              )}
-            </li>
+                    <span className="relative">
+                      {cat.name}
+                      <span className="category-underline" />
+                    </span>
+                    {hasSubcats && (
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                        }`}
+                      />
+                    )}
+                  </button>
 
-            {/* 2. Celebrity Hampers */}
-            <li className="py-3.5">
-              <button
-                onClick={() => handleItemClick('celebrity')}
-                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'celebrity' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Celebrity Hampers
-              </button>
-            </li>
-
-            {/* 3. Birthdays Dropdown */}
-            <li
-              className="relative py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('birthdays')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <button
-                onClick={() => handleItemClick('birthdays')}
-                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'birthdays' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Birthdays <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-              {activeDropdown === 'birthdays' && (
-                <div className="absolute top-full left-0 w-52 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.birthdays.items.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick('birthdays', item === 'View All' ? '' : item)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </li>
-
-            {/* 4. Anniversary Dropdown */}
-            <li
-              className="relative py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('anniversary')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <button
-                onClick={() => handleItemClick('anniversary')}
-                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'anniversary' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Anniversary <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-              {activeDropdown === 'anniversary' && (
-                <div className="absolute top-full left-0 w-52 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.anniversary.items.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick('anniversary', item === 'View All' ? '' : item)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </li>
-
-            {/* 5. Last Minute Gifting */}
-            <li className="py-3.5">
-              <button
-                onClick={() => handleItemClick('last-minute')}
-                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'last-minute' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Last Minute Gifting
-              </button>
-            </li>
-
-            {/* 6. Best Sellers - 6 COLUMN MEGA MENU */}
-            <li
-              className="py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('bestSellers')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <button
-                onClick={() => handleItemClick('best-sellers')}
-                className={`flex items-center gap-1 font-semibold text-black hover:text-gray-600 transition bg-transparent border-none cursor-pointer p-0 text-inherit font-inherit ${
-                  activeCategory === 'best-sellers' ? 'border-b-2 border-black' : ''
-                }`}
-              >
-                Best Sellers <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-
-              {/* Mega Menu Container */}
-              {activeDropdown === 'bestSellers' && (
-                <div className="absolute left-0 right-0 top-full bg-white border-t border-b border-gray-200 shadow-2xl py-8 px-6 lg:px-12 z-50">
-                  <div className="max-w-7xl mx-auto grid grid-cols-6 gap-6 text-left">
-                    {bestSellersMegaMenu.map((column, colIdx) => (
-                      <div key={colIdx} className="space-y-3">
-                        <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider pb-1 border-b border-gray-100">
-                          {column.title}
-                        </h4>
-                        <ul className="space-y-2 list-none p-0 m-0">
-                          {column.items.map((item, itemIdx) => (
-                            <li key={itemIdx}>
-                              <button
-                                onClick={() => handleItemClick('best-sellers', item)}
-                                className="text-xs text-gray-600 hover:text-black hover:translate-x-0.5 inline-block transition bg-transparent border-none p-0 cursor-pointer text-left"
-                              >
-                                {item}
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </li>
-
-            {/* 7. Create Your Own Hamper */}
-            <li className="py-3.5">
-              <button
-                onClick={() => handleItemClick('create-own')}
-                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'create-own' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Create Your Own Hamper
-              </button>
-            </li>
-
-            {/* 8. Corporate Gifts Dropdown */}
-            <li
-              className="relative py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('corporateGifts')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <button
-                onClick={() => handleItemClick('corporate')}
-                className={`flex items-center gap-1 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition ${
-                  activeCategory === 'corporate' ? 'font-bold text-black border-b-2 border-black' : ''
-                }`}
-              >
-                Corporate Gifts <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
-              {activeDropdown === 'corporateGifts' && (
-                <div className="absolute top-full left-0 w-56 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.corporateGifts.items.map((item, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick('corporate', item === 'Explore All' ? '' : item)}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </li>
-
-            {/* 9. Home Decor */}
-            <li className="py-3.5">
-              <Link
-                to="/collections/tgs-home"
-                className={`bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline inline-block ${
-                  activeCategory === 'home-decor' ? 'font-bold text-black border-b-2 border-black pb-0.5' : ''
-                }`}
-              >
-                Home Decor
-              </Link>
-            </li>
-
-            {/* 10. More Gifts Dropdown */}
-            <li
-              className="relative py-3.5 group cursor-pointer"
-              onMouseEnter={() => setActiveDropdown('moreGifts')}
-              onMouseLeave={() => setActiveDropdown(null)}
-            >
-              <span className="flex items-center gap-1 hover:text-black transition">
-                More Gifts <ChevronDown className="w-3.5 h-3.5 text-gray-400 group-hover:rotate-180 transition-transform duration-200" />
-              </span>
-              {activeDropdown === 'moreGifts' && (
-                <div className="absolute top-full right-0 w-64 bg-white border border-gray-100 shadow-xl rounded-b-lg py-2 z-50">
-                  {standardDropdowns.moreGifts.items.map((item, idx) => {
-                    if (item === 'Home Decor') {
-                      return (
-                        <Link
-                          key={idx}
-                          to="/collections/tgs-home"
-                          onClick={() => setActiveDropdown(null)}
-                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition no-underline"
-                        >
-                          Home Decor
-                        </Link>
-                      );
-                    }
-                    return (
+                  {/* Dropdown Menu for Subcategories */}
+                  {hasSubcats && isOpen && (
+                    <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                      {/* Parent category 'View All' link */}
                       <button
-                        key={idx}
-                        onClick={() => handleItemClick(null, item)}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-black transition border-none bg-transparent cursor-pointer"
+                        type="button"
+                        onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                        className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60 capitalize"
                       >
-                        {item}
+                        All in {cat.name}
                       </button>
-                    );
-                  })}
-                </div>
-              )}
-            </li>
 
-            {/* 11. Contact Us */}
-            <li className="py-3.5">
-              <Link
-                to="/contact"
-                className="bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 hover:text-black transition no-underline inline-block"
-              >
-                Contact Us
-              </Link>
-            </li>
+                      {/* Subcategory items */}
+                      {subcats.map((subcat) => (
+                        <button
+                          key={subcat.id}
+                          type="button"
+                          onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
+                          className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer capitalize"
+                        >
+                          {subcat.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
 
+            {/* "View All" / "Close" toggle button when more than 6 categories are active */}
+            {hasOverflow && (
+              <li>
+                <button
+                  type="button"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                  className={`inline-flex items-center gap-1.5 text-xs tracking-wider font-semibold uppercase px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer border ${
+                    isExpanded
+                      ? 'bg-[#C62828] text-white border-[#C62828] shadow-xs'
+                      : 'bg-[#FAF7F2] text-stone-800 hover:text-[#C62828] hover:bg-white border-[#E8DFD3] hover:border-[#C62828]'
+                  }`}
+                >
+                  <span>{isExpanded ? 'Close' : 'View All'}</span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                      isExpanded ? 'rotate-180 text-white' : 'text-stone-500'
+                    }`}
+                  />
+                </button>
+              </li>
+            )}
           </ul>
         </div>
+
+        {/* Expandable Category Drawer for categories 7+ (Absolute Overlay) */}
+        {hasOverflow && (
+          <div
+            className={`absolute top-full left-0 w-full z-40 border-b border-[#E8DFD3] shadow-xl transition-all duration-300 ease-in-out ${
+              isExpanded
+                ? 'opacity-100 translate-y-0 pointer-events-auto visible'
+                : 'opacity-0 -translate-y-2 pointer-events-none invisible'
+            }`}
+            style={{ backgroundColor: '#FDFBF7' }}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
+              <div className="flex items-center justify-between mb-2.5">
+                <span className="text-[11px] font-bold tracking-wider text-[#C62828] uppercase">
+                  More Categories
+                </span>
+                <span className="text-[11px] text-stone-500">
+                  {overflowRow.length} additional curated collections
+                </span>
+              </div>
+              <div className="flex items-center justify-center gap-2.5 flex-wrap">
+                {overflowRow.map((cat) => {
+                  const subcats = subcategoriesByParent[cat.id] || [];
+                  const hasSubcats = subcats.length > 0;
+                  const isActive = activeCategory === cat.slug || String(activeCategory) === String(cat.id);
+                  const isOpen = activeDropdown === cat.id;
+
+                  return (
+                    <div
+                      key={cat.id}
+                      className="relative group"
+                      onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
+                      onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                        className={`nav-category-link inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide capitalize transition-all duration-200 cursor-pointer border ${
+                          isActive
+                            ? 'bg-[#C62828] text-white border-[#C62828] shadow-sm font-semibold'
+                            : 'bg-white text-stone-800 border-[#E8DFD3] hover:border-[#C62828] hover:text-[#C62828] hover:shadow-xs'
+                        }`}
+                      >
+                        <span className="font-medium relative">
+                          {cat.name}
+                          {!isActive && <span className="category-underline" />}
+                        </span>
+                        {hasSubcats && (
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                              isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                            }`}
+                          />
+                        )}
+                      </button>
+
+                      {/* Dropdown for Subcategories in overflow row */}
+                      {hasSubcats && isOpen && (
+                        <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                          <button
+                            type="button"
+                            onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                            className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60 capitalize"
+                          >
+                            All in {cat.name}
+                          </button>
+                          {subcats.map((subcat) => (
+                            <button
+                              key={subcat.id}
+                              type="button"
+                              onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
+                              className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer capitalize"
+                            >
+                              {subcat.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
-      {/* Mobile Drawer Navigation */}
+      {/* 4. Mobile Drawer Navigation */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-b border-gray-200 bg-white px-4 py-4 space-y-4 max-h-[75vh] overflow-y-auto">
-          <div className="pb-2 border-b border-gray-100">
+        <div className="lg:hidden border-b border-[#E8DFD3] px-4 py-4 space-y-3 max-h-[75vh] overflow-y-auto" style={{ backgroundColor: '#FDFBF7' }}>
+          <div className="pb-2 border-b border-[#E8DFD3]">
             <a
               href="https://wa.me/917506210892?text=Hi,%20I%20am%20interested%20in%20Bulk%20Corporate%20Gifting"
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full text-center bg-black text-white text-sm font-medium py-2.5 rounded-full text-decoration-none"
+              className="block w-full text-center text-white text-sm font-semibold py-2.5 rounded-full no-underline transition-colors shadow-sm"
+              style={{ backgroundColor: '#C62828' }}
             >
               Bulk / Corporate Enquiry
             </a>
           </div>
 
-          <div className="space-y-2 text-sm font-medium text-gray-800">
-            {/* Mobile Diwali */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none">
-                <span>Diwali</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.diwali.items.map((item, idx) => {
-                  if (item === 'Diwali Hampers') {
-                    return (
-                      <Link
-                        key={idx}
-                        to="/collections/diwali-hampers"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          setActiveDropdown(null);
-                        }}
-                        className="block w-full text-left py-1.5 font-medium text-gray-700 hover:text-amber-800 no-underline"
-                      >
-                        Diwali Hampers
-                      </Link>
-                    );
-                  }
-                  if (item === 'Home Decor' || item === 'View All') {
-                    return (
-                      <Link
-                        key={idx}
-                        to="/collections/tgs-home"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          setActiveDropdown(null);
-                        }}
-                        className="block w-full text-left py-1.5 font-medium text-amber-950 hover:text-amber-800 no-underline"
-                      >
-                        {item}
-                      </Link>
-                    );
-                  }
-                  return (
+          <div className="space-y-1 text-sm font-medium text-gray-800">
+            {navbarCategories.map((cat) => {
+              const subcats = subcategoriesByParent[cat.id] || [];
+              const hasSubcats = subcats.length > 0;
+
+              if (!hasSubcats) {
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                    className="block w-full text-left py-2 hover:text-black bg-transparent border-none cursor-pointer font-medium text-gray-800 capitalize"
+                  >
+                    {cat.name}
+                  </button>
+                );
+              }
+
+              return (
+                <details key={cat.id} className="group">
+                  <summary className="flex items-center justify-between py-2 cursor-pointer list-none font-medium text-gray-800 capitalize">
+                    <span>{cat.name}</span>
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
+                  </summary>
+                  <div className="pl-4 pb-2 space-y-1.5 text-xs text-gray-600">
                     <button
-                      key={idx}
                       type="button"
-                      onClick={() => handleItemClick('diwali', item === 'View All' ? '' : item)}
-                      className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
+                      onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                      className="block w-full text-left py-1 font-semibold text-gray-900 bg-transparent border-none cursor-pointer capitalize"
                     >
-                      {item}
+                      All in {cat.name}
                     </button>
-                  );
-                })}
-              </div>
-            </details>
-
-            <button
-              onClick={() => handleItemClick('celebrity')}
-              className="block w-full text-left py-2 hover:text-black bg-transparent border-none cursor-pointer font-medium"
-            >
-              Celebrity Hampers
-            </button>
-
-            {/* Mobile Birthdays */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none">
-                <span>Birthdays</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.birthdays.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleItemClick('birthdays', item === 'View All' ? '' : item)}
-                    className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </details>
-
-            {/* Mobile Anniversary */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none">
-                <span>Anniversary</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.anniversary.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleItemClick('anniversary', item === 'View All' ? '' : item)}
-                    className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </details>
-
-            <button
-              onClick={() => handleItemClick('last-minute')}
-              className="block w-full text-left py-2 hover:text-black bg-transparent border-none cursor-pointer font-medium"
-            >
-              Last Minute Gifting
-            </button>
-
-            {/* Mobile Best Sellers Mega */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none font-semibold text-black">
-                <span>Best Sellers (All Categories)</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-3 space-y-3 text-xs text-gray-600">
-                {bestSellersMegaMenu.map((col, idx) => (
-                  <div key={idx}>
-                    <p className="font-semibold text-gray-900 mb-1">{col.title}</p>
-                    <div className="space-y-1 pl-2">
-                      {col.items.map((subItem, sIdx) => (
-                        <button
-                          key={sIdx}
-                          onClick={() => handleItemClick('best-sellers', subItem)}
-                          className="block w-full text-left py-0.5 hover:text-black bg-transparent border-none cursor-pointer"
-                        >
-                          {subItem}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </details>
-
-            <button
-              onClick={() => handleItemClick('create-own')}
-              className="block w-full text-left py-2 hover:text-black bg-transparent border-none cursor-pointer font-medium"
-            >
-              Create Your Own Hamper
-            </button>
-
-            {/* Mobile Corporate Gifts */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none">
-                <span>Corporate Gifts</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.corporateGifts.items.map((item, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => handleItemClick('corporate', item === 'Explore All' ? '' : item)}
-                    className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                  >
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </details>
-
-            <Link
-              to="/collections/tgs-home"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setActiveDropdown(null);
-              }}
-              className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
-            >
-              Home Decor
-            </Link>
-
-            {/* Mobile More Gifts */}
-            <details className="group">
-              <summary className="flex items-center justify-between py-2 cursor-pointer list-none">
-                <span>More Gifts</span>
-                <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
-              </summary>
-              <div className="pl-4 pb-2 space-y-1.5 text-sm text-gray-600">
-                {standardDropdowns.moreGifts.items.map((item, idx) => {
-                  if (item === 'Home Decor') {
-                    return (
-                      <Link
-                        key={idx}
-                        to="/collections/tgs-home"
-                        onClick={() => {
-                          setIsMobileMenuOpen(false);
-                          setActiveDropdown(null);
-                        }}
-                        className="block w-full text-left py-1 hover:text-black no-underline text-gray-700"
+                    {subcats.map((subcat) => (
+                      <button
+                        key={subcat.id}
+                        type="button"
+                        onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
+                        className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer capitalize"
                       >
-                        Home Decor
-                      </Link>
-                    );
-                  }
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => handleItemClick(null, item)}
-                      className="block w-full text-left py-1 hover:text-black bg-transparent border-none cursor-pointer"
-                    >
-                      {item}
-                    </button>
-                  );
-                })}
-              </div>
-            </details>
+                        {subcat.name}
+                      </button>
+                    ))}
+                  </div>
+                </details>
+              );
+            })}
+
             {/* Mobile Contact Us */}
-            <Link
-              to="/contact"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setActiveDropdown(null);
-              }}
-              className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
-            >
-              Contact Us
-            </Link>
+            <div className="pt-2 border-t border-gray-100">
+              <Link
+                to="/contact"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
+              >
+                Contact Us
+              </Link>
+            </div>
           </div>
         </div>
       )}

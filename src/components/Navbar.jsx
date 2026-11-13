@@ -1,254 +1,235 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, ChevronDown } from 'lucide-react';
-import { STORE_INFO } from '../data/giftStudioData';
+import { ChevronDown } from 'lucide-react';
 import { apiService } from '../services/api';
 
 export default function Navbar({
-  searchQuery,
-  setSearchQuery,
   onSelectCategory,
-  activeCategory
+  activeCategory = 'all'
 }) {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
-  // Fetch categories dynamically on component mount
   useEffect(() => {
+    let isMounted = true;
     const fetchCategories = async () => {
       try {
         setIsLoading(true);
         const data = await apiService.getCategories();
-        if (data.success) {
+        if (data.success && isMounted) {
           setCategories(data.categories || []);
         }
-      } catch (error) {
-        console.error('Error fetching categories:', error);
+      } catch (err) {
+        console.error('Navbar: failed to fetch categories', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) setIsLoading(false);
       }
     };
-
     fetchCategories();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Navigation links - main categories from database + some special ones
-  const navLinks = [
-    { id: 'all', label: 'All Hampers' },
-    ...categories.map(cat => ({ id: `cat-${cat.id}`, label: cat.name })),
-    { id: 'best-sellers', label: 'Best Sellers' },
-    { id: 'create-own', label: 'Create Your Own Hamper', isBuilder: true },
-    { id: 'corporate', label: 'Corporate Gifts' }
-  ];
+  // Top-level categories shown in navbar (max 10)
+  const navbarCategories = categories
+    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar))
+    .slice(0, 10);
+
+  // Group subcategories by parent_id
+  const subcategoriesByParent = {};
+  categories.forEach(c => {
+    if (c.parent_id !== null && c.parent_id !== undefined) {
+      if (!subcategoriesByParent[c.parent_id]) {
+        subcategoriesByParent[c.parent_id] = [];
+      }
+      subcategoriesByParent[c.parent_id].push(c);
+    }
+  });
+
+  const handleCategoryClick = (catSlugOrId) => {
+    setActiveDropdown(null);
+    if (onSelectCategory) {
+      onSelectCategory(catSlugOrId);
+      const el = document.getElementById('shop-now') || document.querySelector('.product-grid-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const primaryRow = navbarCategories.slice(0, 6);
+  const overflowRow = navbarCategories.slice(6);
+  const hasOverflow = navbarCategories.length > 6;
 
   return (
-    <header style={{ position: 'sticky', top: 0, zIndex: 50, background: '#ffffff', borderBottom: '1px solid var(--color-border)' }}>
-      {/* 1. Top Announcement Bar (Matching Original) */}
-      <div style={{
-        background: '#020919',
-        color: '#ffffff',
-        padding: '8px 16px',
-        fontSize: '0.78rem',
-        fontWeight: 600,
-        letterSpacing: '0.04em',
-        textAlign: 'center',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px'
-      }}>
-        <span>{STORE_INFO.announcement}</span>
-        <a
-          href={`https://wa.me/91${STORE_INFO.phone}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: '#ffffff', textDecoration: 'underline', marginLeft: '6px' }}
-        >
-          Chat on WhatsApp
-        </a>
-      </div>
-
-      {/* 2. Main Header Bar (Logo, Search & Actions) */}
-      <div style={{
-        maxWidth: '1360px',
-        margin: '0 auto',
-        padding: '16px 24px 12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '20px'
-      }}>
-        {/* Search Bar */}
-        <div style={{ width: '280px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: '#f8f8f8',
-            border: '1px solid #e2e2e2',
-            borderRadius: '4px',
-            padding: '6px 12px'
-          }}>
-            <Search size={16} color="#777" style={{ marginRight: '8px' }} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search gifts, hampers..."
-              style={{
-                background: 'transparent',
-                border: 'none',
-                outline: 'none',
-                color: '#1a1a1a',
-                fontSize: '0.82rem',
-                width: '100%',
-                fontFamily: 'inherit'
-              }}
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-              >
-                <X size={14} color="#777" />
-              </button>
-            )}
+    <nav
+      aria-label="Main Store Navigation"
+      className="relative z-40"
+      style={{ backgroundColor: '#FDFBF7', borderTop: '1px solid rgba(198, 40, 40, 0.14)', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-6 py-3.5">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="w-20 h-4 bg-stone-200/60 rounded animate-pulse" />
+            ))}
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Primary Row: First 6 categories */}
+            <ul className="flex items-center justify-center gap-6 xl:gap-8 text-xs xl:text-sm font-medium text-stone-700 list-none m-0 p-0 flex-wrap">
+              {primaryRow.map((cat) => {
+                const subcats = subcategoriesByParent[cat.id] || [];
+                const hasSubcats = subcats.length > 0;
+                const isActive = activeCategory === cat.slug || String(activeCategory) === String(cat.id);
+                const isOpen = activeDropdown === cat.id;
 
-        {/* Center Logo: Authentic SVG */}
-        <div
-          onClick={() => { onSelectCategory('all'); setSearchQuery(''); }}
-          style={{ cursor: 'pointer', textAlign: 'center', flex: 1, display: 'flex', justifyContent: 'center' }}
-        >
-          <img
-            src="/the-gift-studio-logo.svg"
-            alt="The Gift Studio"
-            style={{ height: '38px', maxWidth: '320px', objectFit: 'contain' }}
-            onError={(e) => {
-              // Fallback text if SVG fails
-              e.currentTarget.style.display = 'none';
-            }}
-          />
-        </div>
+                return (
+                  <li
+                    key={cat.id}
+                    className="relative py-3 group"
+                    onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
+                    onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                      className={`nav-category-link inline-flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 tracking-wide ${
+                        isActive ? 'active' : ''
+                      }`}
+                    >
+                      <span className="relative">
+                        {cat.name}
+                        <span className="category-underline" />
+                      </span>
+                      {hasSubcats && (
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform duration-250 ${
+                            isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                          }`}
+                        />
+                      )}
+                    </button>
 
-        {/* Right Actions: Facebook & WhatsApp FA Icons */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', width: '280px', justifyContent: 'flex-end' }}>
-          <a
-            href="https://facebook.com/thegiftstudio"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Follow us on Facebook"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: '#f8f8f8',
-              border: '1px solid #e2e2e2',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#1877F2',
-              textDecoration: 'none',
-              fontSize: '1rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            <i className="fa-brands fa-facebook-f"></i>
-          </a>
+                    {/* Subcategory Dropdown */}
+                    {hasSubcats && isOpen && (
+                      <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                        <button
+                          type="button"
+                          onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                          className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60"
+                        >
+                          All in {cat.name}
+                        </button>
+                        {subcats.map((subcat) => (
+                          <button
+                            key={subcat.id}
+                            type="button"
+                            onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
+                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer"
+                          >
+                            {subcat.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
 
-          <a
-            href={`https://wa.me/91${STORE_INFO.phone}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Chat on WhatsApp"
-            style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: '#f8f8f8',
-              border: '1px solid #e2e2e2',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#25D366',
-              textDecoration: 'none',
-              fontSize: '1.2rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            <i className="fa-brands fa-whatsapp"></i>
-          </a>
-        </div>
+              {/* View All / Show Less Button */}
+              {hasOverflow && (
+                <li className="py-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-full transition cursor-pointer border ${
+                      isExpanded
+                        ? 'bg-[#C62828] text-white border-[#C62828]'
+                        : 'bg-[#FAF7F2] text-stone-800 hover:text-[#C62828] border-[#E8DFD3] hover:border-[#C62828]'
+                    }`}
+                  >
+                    <span>{isExpanded ? 'Show Less' : 'View All'}</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                        isExpanded ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+                </li>
+              )}
+            </ul>
+
+            {/* Expandable Row for categories 7 to 10 */}
+            {hasOverflow && isExpanded && (
+              <div
+                className="border-t border-[#E8DFD3] py-3 animate-in fade-in slide-in-from-top-1 duration-150"
+                style={{ backgroundColor: '#FDFBF7' }}
+              >
+                <ul className="flex items-center justify-center gap-8 text-xs xl:text-sm font-medium text-stone-700 list-none m-0 p-0 flex-wrap">
+                  {overflowRow.map((cat) => {
+                    const subcats = subcategoriesByParent[cat.id] || [];
+                    const hasSubcats = subcats.length > 0;
+                    const isActive = activeCategory === cat.slug || String(activeCategory) === String(cat.id);
+                    const isOpen = activeDropdown === cat.id;
+
+                    return (
+                      <li
+                        key={cat.id}
+                        className="relative py-1 group"
+                        onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
+                        onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                          className={`nav-category-link inline-flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 tracking-wide ${
+                            isActive ? 'active' : ''
+                          }`}
+                        >
+                          <span className="relative">
+                            {cat.name}
+                            <span className="category-underline" />
+                          </span>
+                          {hasSubcats && (
+                            <ChevronDown
+                              className={`w-3.5 h-3.5 transition-transform duration-250 ${
+                                isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                              }`}
+                            />
+                          )}
+                        </button>
+
+                        {hasSubcats && isOpen && (
+                          <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                            <button
+                              type="button"
+                              onClick={() => handleCategoryClick(cat.slug || cat.id)}
+                              className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60"
+                            >
+                              All in {cat.name}
+                            </button>
+                            {subcats.map((subcat) => (
+                              <button
+                                key={subcat.id}
+                                type="button"
+                                onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
+                                className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer"
+                              >
+                                {subcat.name}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+          </>
+        )}
       </div>
-
-      {/* 3. Bottom Navigation Links (Dynamic from Database) */}
-      <nav style={{
-        borderTop: '1px solid #f0f0f0',
-        background: '#ffffff',
-        overflowX: 'auto',
-        scrollbarWidth: 'none'
-      }}>
-        <div style={{
-          maxWidth: '1360px',
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '24px',
-          padding: '0 24px'
-        }}>
-          {isLoading ? (
-            <div style={{ display: 'flex', gap: '24px', padding: '12px 0' }}>
-              {[...Array(5)].map((_, i) => (
-                <div key={i} style={{
-                  width: '80px',
-                  height: '16px',
-                  background: '#f0f0f0',
-                  borderRadius: '2px',
-                  animation: 'pulse 1.5s infinite'
-                }}></div>
-              ))}
-            </div>
-          ) : (
-            navLinks.map((link) => {
-              const isActive = activeCategory === link.id;
-              return (
-                <button
-                  key={link.id}
-                  onClick={() => {
-                    if (link.id.startsWith('cat-')) {
-                      const categoryId = link.id.replace('cat-', '');
-                      onSelectCategory(categoryId);
-                    } else {
-                      onSelectCategory(link.id);
-                    }
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: '12px 2px',
-                    fontSize: '0.86rem',
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? '#020919' : '#444444',
-                    borderBottom: isActive ? '2px solid #020919' : '2px solid transparent',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    transition: 'all var(--transition)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.color = '#020919';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.color = '#444444';
-                  }}
-                >
-                  {link.label}
-                </button>
-              );
-            })
-          )}
-        </div>
-      </nav>
-    </header>
+    </nav>
   );
 }

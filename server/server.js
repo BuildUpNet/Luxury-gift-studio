@@ -5,9 +5,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.js';
-import productsRoutes from './routes/products.js';
 import categoriesRoutes from './routes/categories.js';
 import contactRoutes from './routes/contact.js';
+import giftingBannerRoutes from './routes/giftingBanner.js';
 
 import { uploadMiddleware } from './middlewares/upload.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -55,9 +55,9 @@ app.use(express.static(uploadsDir));
 
 // API routes
 app.use('/api/admin', authRoutes);
-app.use('/api/products', productsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api', giftingBannerRoutes);
 
 // Image upload endpoint
 app.post('/api/upload', uploadMiddleware.single('image'), (req, res) => {

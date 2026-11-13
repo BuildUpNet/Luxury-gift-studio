@@ -5,21 +5,21 @@ import { CELEBRITIES } from '../data/giftStudioData';
 export default function CelebritySection({ onSelectDesigner }) {
   return (
     <section id="celebrity-hampers" style={{
-      background: '#faf9f6',
-      borderTop: '1px solid #ebebeb',
-      borderBottom: '1px solid #ebebeb',
+      background: '#FAF7F2',
+      borderTop: '1px solid #E8DFD3',
+      borderBottom: '1px solid #E8DFD3',
       padding: '50px 24px 60px'
     }}>
       <div style={{ maxWidth: '1360px', margin: '0 auto' }}>
         {/* Title */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <span style={{ fontSize: '0.78rem', color: '#a11414', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+          <span style={{ fontSize: '0.78rem', color: '#C62828', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
             Exclusive Collaborations
           </span>
-          <h2 className="font-heading" style={{ fontSize: '2rem', color: '#020919', fontWeight: 600, marginTop: '6px' }}>
+          <h2 className="font-heading" style={{ fontSize: '2rem', color: '#1E1E1E', fontWeight: 600, marginTop: '6px' }}>
             The Celebrity & Artist Collection
           </h2>
-          <p style={{ color: '#666', maxWidth: '600px', margin: '8px auto 0', fontSize: '0.9rem' }}>
+          <p style={{ color: '#555555', maxWidth: '600px', margin: '8px auto 0', fontSize: '0.9rem' }}>
             Exclusive designer curations by Masaba Gupta, Anamika Khanna & master artist Paresh Maity.
           </p>
         </div>
@@ -70,7 +70,7 @@ export default function CelebritySection({ onSelectDesigner }) {
 
               <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                 <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                  <Quote size={18} color="#a11414" style={{ flexShrink: 0, opacity: 0.8 }} />
+                  <Quote size={18} color="#C62828" style={{ flexShrink: 0, opacity: 0.8 }} />
                   <p style={{ fontSize: '0.86rem', color: '#444', fontStyle: 'italic', lineHeight: 1.55 }}>
                     "{celeb.quote}"
                   </p>
@@ -79,14 +79,14 @@ export default function CelebritySection({ onSelectDesigner }) {
                 <div style={{
                   marginTop: 'auto',
                   paddingTop: '14px',
-                  borderTop: '1px solid #f0f0f0',
+                  borderTop: '1px solid #E8DFD3',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between'
                 }}>
                   <div>
-                    <span style={{ fontSize: '0.7rem', color: '#888', textTransform: 'uppercase' }}>Signature Hamper</span>
-                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#020919' }}>
+                    <span style={{ fontSize: '0.7rem', color: '#777', textTransform: 'uppercase' }}>Signature Hamper</span>
+                    <div style={{ fontSize: '0.86rem', fontWeight: 700, color: '#1E1E1E' }}>
                       {celeb.highlightHamper}
                     </div>
                   </div>
