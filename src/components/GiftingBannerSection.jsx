@@ -2,16 +2,21 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, CheckCircle2, AlertCircle, MessageCircle, Gift, Loader2 } from 'lucide-react';
 import { apiService } from '../services/api';
 import { resolveImageUrl } from '../utils/image';
+import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
+
+const DEFAULT_BANNER = {
+  eyebrow: 'BESPOKE GIFTING & BULK ORDERS',
+  heading: 'Curate Your Custom Gift Hamper',
+  subheading: 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.',
+  button_text: 'Request Custom Quote →',
+  bg_image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop',
+  overlay_opacity: 0.65,
+  is_active: 1
+};
 
 export default function GiftingBannerSection() {
-  const [bannerConfig, setBannerConfig] = useState({
-    eyebrow: 'BESPOKE GIFTING & BULK ORDERS',
-    heading: 'Curate Your Custom Gift Hamper',
-    subheading: 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.',
-    button_text: 'Request Custom Quote →',
-    bg_image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop',
-    overlay_opacity: 0.65,
-    is_active: 1
+  const [bannerConfig, setBannerConfig] = useState(() => {
+    return getCachedData(CACHE_KEYS.GIFTING_BANNER, DEFAULT_BANNER);
   });
 
   const [formData, setFormData] = useState({
@@ -39,6 +44,7 @@ export default function GiftingBannerSection() {
             ...prev,
             ...data.banner
           }));
+          setCachedData(CACHE_KEYS.GIFTING_BANNER, data.banner);
         }
       } catch (err) {
         console.warn('Using default gifting banner config:', err.message);

@@ -4,16 +4,22 @@ import Header from '../components/Header';
 import HeroSlider from '../components/HeroSlider';
 import HomeCarousels from '../components/HomeCarousels';
 import GiftingBannerSection from '../components/GiftingBannerSection';
-import CelebritySection from '../components/CelebritySection';
 import HamperBuilder from '../components/HamperBuilder';
 import Testimonials from '../components/Testimonials';
 import Footer from '../components/Footer';
+import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
 export default function HomePage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [categories, setCategories] = useState([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
+  const [categories, setCategories] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    return Array.isArray(cached) ? cached : [];
+  });
+  const [isLoadingCategories, setIsLoadingCategories] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    return !Array.isArray(cached) || cached.length === 0;
+  });
 
   const scrollToHamperBuilder = () => {
     const el = document.getElementById('build-hamper-section');
@@ -36,27 +42,34 @@ export default function HomePage() {
     window.scrollTo({ top: 600, behavior: 'smooth' });
   };
 
-  // Fetch categories dynamically from API
+  // Fetch categories dynamically from API (Stale-While-Revalidate)
   useEffect(() => {
+    let isMounted = true;
     const fetchCategories = async () => {
       try {
-        setIsLoadingCategories(true);
         const response = await fetch(API_URLS.getCategories());
         
         if (response.ok) {
           const data = await response.json();
-          if (data.success) {
-            setCategories(data.categories || []);
+          if (data.success && isMounted) {
+            const fetchedCats = data.categories || [];
+            setCategories(fetchedCats);
+            setIsLoadingCategories(false);
+            setCachedData(CACHE_KEYS.CATEGORIES, fetchedCats);
           }
         }
       } catch (error) {
         console.error('Error fetching categories:', error);
       } finally {
-        setIsLoadingCategories(false);
+        if (isMounted) setIsLoadingCategories(false);
       }
     };
 
     fetchCategories();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -80,7 +93,29 @@ export default function HomePage() {
       />
 
       {/* Dynamic Luxury Carousels: Shop by Category & Shop by Occasion */}
-      {!isLoadingCategories && (
+      {isLoadingCategories && categories.length === 0 ? (
+        /* Fixed-height skeleton container preventing layout jump */
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full min-h-[460px]">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <div className="w-28 h-4 bg-stone-200/80 rounded animate-pulse mb-2" />
+              <div className="w-64 h-7 bg-stone-200/80 rounded animate-pulse" />
+            </div>
+            <div className="flex gap-2">
+              <div className="w-9 h-9 rounded-full bg-stone-200/80 animate-pulse" />
+              <div className="w-9 h-9 rounded-full bg-stone-200/80 animate-pulse" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {[...Array(5)].map((_, idx) => (
+              <div key={idx} className="flex flex-col gap-2">
+                <div className="w-full aspect-[3/4] bg-stone-200/70 rounded-xl animate-pulse" />
+                <div className="w-3/4 h-4 bg-stone-200/80 rounded animate-pulse mx-auto" />
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : (
         <HomeCarousels
           categories={categories}
           activeCategory={activeCategory}
@@ -90,9 +125,6 @@ export default function HomePage() {
 
       {/* Dynamic Festive Promotional Banner & Custom Gifting Inquiry Section */}
       <GiftingBannerSection />
-
-      {/* Celebrity Designers Collection */}
-      <CelebritySection onSelectDesigner={handleDesignerSelect} />
 
       {/* Create Your Own Hamper Studio */}
       <HamperBuilder />

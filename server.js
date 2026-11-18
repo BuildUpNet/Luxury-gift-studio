@@ -5,8 +5,15 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const serverEnvFile = path.join(__dirname, 'server', '.env');
+if (fs.existsSync(serverEnvFile)) {
+  dotenv.config({ path: serverEnvFile });
+}
+dotenv.config();
+
 const LOG_FILE = path.join(__dirname, 'startup.log');
 const MAX_LOGS = 300;
 

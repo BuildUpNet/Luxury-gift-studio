@@ -28,25 +28,23 @@ const getTransporter = () => {
     return transporter;
   }
 
-  const {
-    SMTP_HOST,
-    SMTP_PORT,
-    SMTP_USER,
-    SMTP_PASS,
-    SMTP_SECURE,
-  } = process.env;
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const user = process.env.SMTP_USER || process.env.SMTP_EMAIL;
+  const pass = process.env.SMTP_PASS || process.env.SMTP_APP_PASSWORD;
+  const secure = process.env.SMTP_SECURE === "true";
 
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
-    throw new Error("SMTP configuration is incomplete.");
+  if (!user || !pass) {
+    throw new Error("SMTP configuration is incomplete. Missing SMTP user or password.");
   }
 
   transporter = nodemailer.createTransport({
-    host: SMTP_HOST,
-    port: Number(SMTP_PORT) || 587,
-    secure: SMTP_SECURE === "true",
+    host,
+    port,
+    secure,
     auth: {
-      user: SMTP_USER,
-      pass: SMTP_PASS,
+      user,
+      pass,
     },
   });
 
@@ -414,6 +412,103 @@ The Gift Studio Concierge Team
     return { success: true };
   } catch (error) {
     console.error("Inquiry customer confirmation email failed:", error.message);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Newsletter Subscription Welcome / Confirmation Email.
+ */
+export const sendSubscriptionWelcomeEmail = async (subscriberEmail) => {
+  try {
+    const mailer = getTransporter();
+    const fromAddress = process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.SMTP_EMAIL;
+    const cleanEmail = escapeHtml(subscriberEmail);
+
+    await mailer.sendMail({
+      from: fromAddress,
+      to: subscriberEmail,
+      subject: "Welcome to The Gift Studio ✨ | Exclusive Curations & Offers",
+      text: `
+Welcome to The Gift Studio!
+
+Thank you for subscribing to our newsletter. You're now on the list to receive:
+- Early access to seasonal & festive hampers
+- Exclusive celebrity & master artist designer collaborations
+- Bespoke corporate & celebration gifting inspirations
+- Members-only promotional offers & new arrivals
+
+Explore our latest luxury collections online anytime:
+https://thegiftstudio.com
+
+Warm regards,
+The Gift Studio Team
+Mumbai • Delhi • Bengaluru • Pan-India Delivery
+      `.trim(),
+      html: `
+        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #2d3748; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06);">
+          <!-- Header Banner -->
+          <div style="background: #0d0d12; padding: 36px 30px; border-bottom: 3px solid #E5A823; text-align: center;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 3px; color: #E5A823; text-transform: uppercase; margin-bottom: 8px;">
+              The Art of Luxury Gifting
+            </div>
+            <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 700; letter-spacing: 1.5px; font-family: 'Georgia', serif;">
+              THE GIFT STUDIO
+            </h1>
+            <p style="color: #cbd5e1; margin: 8px 0 0; font-size: 13px; font-style: italic;">
+              Premium Hampers • Artisanal Confectionery • Memorable Keepsakes
+            </p>
+          </div>
+
+          <!-- Body Content -->
+          <div style="padding: 34px 30px;">
+            <div style="text-align: center; margin-bottom: 24px;">
+              <span style="display: inline-block; background: #FDFBF7; border: 1px solid #E5A823; color: #C62828; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                ✨ Subscription Confirmed
+              </span>
+            </div>
+
+            <h2 style="color: #0f172a; font-size: 20px; margin-top: 0; font-weight: 700; text-align: center;">
+              Welcome to Our Exclusive Circle!
+            </h2>
+            <p style="color: #475569; font-size: 14px; text-align: center; margin-bottom: 26px;">
+              Thank you for subscribing with <strong style="color: #0f172a;">${cleanEmail}</strong>. You will now be the first to discover our handcrafted festive collections, signature celebrity curations, and private offers.
+            </p>
+
+            <!-- Highlights Box -->
+            <div style="background: #FAF7F2; border: 1px solid #E8DFD3; border-radius: 10px; padding: 22px 20px; margin: 26px 0;">
+              <div style="font-size: 11px; font-weight: 700; color: #C62828; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">
+                What To Look Forward To
+              </div>
+              <ul style="margin: 0; padding-left: 20px; color: #334155; font-size: 13px; line-height: 1.8;">
+                <li><strong>Artisanal Delights:</strong> Handpicked gourmet snacks, imported chocolates, and luxury teas.</li>
+                <li><strong>Celebrity Editions:</strong> Exclusive hampers curated with top designers & artists.</li>
+                <li><strong>Custom Gifting Concierge:</strong> Bespoke corporate boxes and wedding favors.</li>
+                <li><strong>Pan-India Express:</strong> Guaranteed fresh delivery in temperature-safe packaging.</li>
+              </ul>
+            </div>
+
+            <!-- CTA Button -->
+            <div style="text-align: center; margin: 32px 0 24px;">
+              <a href="http://localhost:5173" style="display: inline-block; background: #C62828; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 13px 32px; border-radius: 30px; box-shadow: 0 4px 14px rgba(198, 40, 40, 0.35);">
+                Explore Luxury Hampers
+              </a>
+            </div>
+
+            <!-- Footer Signoff -->
+            <div style="padding-top: 24px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #64748b; text-align: center; line-height: 1.6;">
+              <strong style="color: #0f172a; font-size: 13px;">The Gift Studio</strong><br>
+              Curated Hampers For Every Celebration<br>
+              <span style="color: #94a3b8;">Mumbai • Delhi • Bengaluru • Hyderabad • Pan-India Delivery</span>
+            </div>
+          </div>
+        </div>
+      `,
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error("Subscription welcome email failed:", error.message);
     return { success: false, error: error.message };
   }
 };

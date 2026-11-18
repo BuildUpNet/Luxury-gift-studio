@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -6,6 +6,11 @@ import { API_URLS } from '../config/api';
 import { STORE_INFO } from '../data/giftStudioData';
 
 export default function ContactPage() {
+  useEffect(() => {
+    document.title = 'Contact Us | The Gift Studio';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',

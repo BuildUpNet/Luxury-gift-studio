@@ -2,7 +2,7 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
-import dbPool from '../config/db.js';
+import dbPool, { executeWithRetry } from '../config/db.js';
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'the_gift_studio_secure_jwt_key_env';
@@ -10,10 +10,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'the_gift_studio_secure_jwt_key_env
 // Dummy hash used when admin not found — prevents timing attacks
 const DUMMY_HASH = '$2a$12$dummyhashfortimingattackmitigationxxxxxxxxxxxxxxxxxx';
 
-// Rate limiter: max 5 login attempts per 15 minutes per IP
+// Rate limiter: max 15 login attempts per 15 minutes per IP
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 15,
   message: { success: false, message: 'Too many login attempts. Try again in 15 minutes.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -50,11 +50,14 @@ router.post('/login', loginLimiter, async (req, res) => {
   }
 
   try {
-    const identifier = username.trim().toLowerCase();
+    const identifier = (username || '').trim().toLowerCase();
+    const cleanPassword = (password || '').trim();
 
-    console.log('Login attempt with username:', identifier);
+    if (!identifier || !cleanPassword) {
+      return res.status(400).json({ success: false, message: 'Username/email and password are required.' });
+    }
 
-    const [rows] = await dbPool.execute(
+    const [rows] = await executeWithRetry(
       `SELECT id, username, email, password_hash
        FROM admin
        WHERE LOWER(username) = ? OR LOWER(email) = ?
@@ -64,21 +67,10 @@ router.post('/login', loginLimiter, async (req, res) => {
 
     const admin = rows[0];
 
-    console.log('Admin found in DB:', !!admin);
-    if (admin) {
-      console.log('DB Admin username:', admin.username);
-      console.log('DB Password hash exists:', !!admin.password_hash);
-    }
-
     const hashToCompare = admin ? admin.password_hash : DUMMY_HASH;
-    const isMatch = await bcrypt.compare(password, hashToCompare);
-
-    console.log('Password comparison result:', isMatch);
-    console.log('Admin exists:', !!admin);
-    console.log('Match result:', isMatch);
+    const isMatch = await bcrypt.compare(cleanPassword, hashToCompare);
 
     if (!admin || !isMatch) {
-      console.log('Login failed: Invalid credentials');
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
 

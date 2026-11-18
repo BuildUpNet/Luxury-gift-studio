@@ -32,6 +32,13 @@ export default class ErrorBoundary extends Component {
             <p className="text-sm text-gray-600 mb-6">
               We encountered an unexpected issue while rendering this section.
             </p>
+            {this.state.error && (
+              <pre className="text-left bg-rose-50 border border-rose-200 text-rose-800 text-[11px] p-3 rounded-lg overflow-x-auto mb-4 font-mono">
+                {this.state.error.toString()}
+                {'\n'}
+                {this.state.error.stack}
+              </pre>
+            )}
             <button
               onClick={this.handleReset}
               className="inline-flex items-center gap-2 bg-[#020919] hover:bg-[#1a2233] text-white text-xs font-semibold uppercase tracking-wider px-6 py-2.5 rounded-lg transition"

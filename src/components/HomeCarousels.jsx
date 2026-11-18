@@ -1,5 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import resolveImageUrl from '../utils/image';
+import { apiService } from '../services/api';
+import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
 export default function HomeCarousels({
   categories = [],
@@ -9,9 +13,37 @@ export default function HomeCarousels({
   const categoryScrollRef = useRef(null);
   const occasionScrollRef = useRef(null);
 
+  const [occasions, setOccasions] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.OCCASIONS, null);
+    return Array.isArray(cached) ? cached : [];
+  });
+
   const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
   const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(true);
   const [categoryScrollRatio, setCategoryScrollRatio] = useState(0);
+
+  const [canScrollOccasionLeft, setCanScrollOccasionLeft] = useState(false);
+  const [canScrollOccasionRight, setCanScrollOccasionRight] = useState(true);
+
+  // Fetch dynamic occasions from backend
+  useEffect(() => {
+    let isMounted = true;
+    const fetchOccasions = async () => {
+      try {
+        const res = await apiService.getOccasions();
+        if (res?.success && Array.isArray(res.occasions) && isMounted) {
+          setOccasions(res.occasions);
+          setCachedData(CACHE_KEYS.OCCASIONS, res.occasions);
+        }
+      } catch (err) {
+        console.error('Failed to load occasions for home carousel:', err);
+      }
+    };
+    fetchOccasions();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Smooth scroll helper
   const scroll = (ref, direction) => {
@@ -33,11 +65,24 @@ export default function HomeCarousels({
     }
   };
 
+  const handleOccasionScroll = () => {
+    if (occasionScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = occasionScrollRef.current;
+      setCanScrollOccasionLeft(scrollLeft > 15);
+      setCanScrollOccasionRight(scrollLeft < scrollWidth - clientWidth - 15);
+    }
+  };
+
   useEffect(() => {
     handleCategoryScroll();
+    handleOccasionScroll();
     window.addEventListener('resize', handleCategoryScroll);
-    return () => window.removeEventListener('resize', handleCategoryScroll);
-  }, [categories]);
+    window.addEventListener('resize', handleOccasionScroll);
+    return () => {
+      window.removeEventListener('resize', handleCategoryScroll);
+      window.removeEventListener('resize', handleOccasionScroll);
+    };
+  }, [categories, occasions]);
 
   // Top-level categories filtered by section_type
   const shopByCategories = (categories || []).filter(
@@ -57,7 +102,7 @@ export default function HomeCarousels({
   };
 
   // Indicators count for Shop by Category
-  const indicatorCount = Math.min(5, Math.max(2, Math.ceil(shopByCategories.length / 2)));
+  const indicatorCount = Math.min(5, Math.max(2, Math.ceil((shopByCategories?.length || 0) / 2)));
   const activeCategoryDot = Math.min(
     indicatorCount - 1,
     Math.round(categoryScrollRatio * (indicatorCount - 1))
@@ -72,21 +117,127 @@ export default function HomeCarousels({
     }
   };
 
+  // Occasion Card Component matching exact editorial category card styling
+  const EditorialOccasionCard = ({ occasion }) => {
+    const [imgFailed, setImgFailed] = useState(false);
+    const occasionTarget = `/occasion/${occasion.slug || occasion.id}`;
+    const coverUrl = resolveImageUrl(occasion.image_url);
+
+    return (
+      <Link
+        to={occasionTarget}
+        className="editorial-category-card group no-underline text-inherit"
+      >
+        {/* Tall Image Frame with 3:4 Aspect Ratio */}
+        <div className="editorial-card-image-wrap">
+          {occasion.image_url && !imgFailed ? (
+            <img
+              src={coverUrl}
+              alt={occasion.name}
+              loading="lazy"
+              className="editorial-card-image"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            /* Luxury Occasion Champagne Fallback Placeholder */
+            <div
+              className="w-full h-full flex flex-col items-center justify-between p-6 relative select-none"
+              style={{
+                background: 'linear-gradient(145deg, #FDF8F2 0%, #F3E6D8 100%)'
+              }}
+            >
+              <div
+                className="absolute inset-3 rounded-lg border pointer-events-none"
+                style={{ borderColor: 'rgba(198, 40, 40, 0.15)' }}
+              />
+              <div
+                className="absolute inset-4 rounded-md border pointer-events-none"
+                style={{ borderColor: 'rgba(229, 168, 35, 0.25)' }}
+              />
+
+              <span
+                className="text-[10px] uppercase font-bold tracking-widest pt-2 z-10"
+                style={{ color: '#1B7A43' }}
+              >
+                Celebration Collection
+              </span>
+
+              <div className="my-auto flex flex-col items-center z-10">
+                <div
+                  className="w-16 h-16 rounded-full flex items-center justify-center font-serif text-xl font-bold tracking-widest shadow-xs transition-transform duration-500 group-hover:scale-110"
+                  style={{
+                    background: '#FFFFFF',
+                    color: '#C62828',
+                    border: '1.5px solid rgba(198, 40, 40, 0.3)'
+                  }}
+                >
+                  {occasion.name ? occasion.name.substring(0, 2).toUpperCase() : 'OC'}
+                </div>
+                <span className="font-serif italic text-xs text-stone-600 mt-2.5 tracking-wider">
+                  The Gift Studio
+                </span>
+              </div>
+
+              <span
+                className="text-[11px] font-semibold tracking-wider uppercase pb-1 z-10 transition-colors group-hover:underline"
+                style={{ color: '#C62828' }}
+              >
+                Explore Occasion
+              </span>
+            </div>
+          )}
+
+          {/* Product count tag */}
+          {occasion.products_count !== undefined && occasion.products_count > 0 && (
+            <span
+              className="absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-md"
+              style={{ background: 'rgba(30, 30, 30, 0.78)' }}
+            >
+              {occasion.products_count} Gifts
+            </span>
+          )}
+        </div>
+
+        {/* Clean White Card Footer with Occasion Title and VIEW COLLECTION Link */}
+        <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
+          <h3
+            className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1"
+            style={{ color: '#1E1E1E' }}
+          >
+            {occasion.name}
+          </h3>
+          <span className="text-[11px] text-stone-400 font-medium tracking-wider uppercase mt-0.5">
+            VIEW COLLECTION
+          </span>
+        </div>
+
+        {/* Bottom Crimson Accent Bar on Hover */}
+        <span className="editorial-card-accent-bar" />
+      </Link>
+    );
+  };
+
   // Taller, Editorial Category Card Component (Reference: Gargian Layout)
   const EditorialCategoryCard = ({ category }) => {
     const isSelected = activeCategory === category.slug || String(activeCategory) === String(category.id);
     const [imgFailed, setImgFailed] = useState(false);
+    const categoryTarget = `/category/${category.slug || category.id}`;
 
     return (
-      <div
-        onClick={() => handleCategoryClick(category)}
-        className={`editorial-category-card group ${isSelected ? 'selected ring-2 ring-[#C62828]/60' : ''}`}
+      <Link
+        to={categoryTarget}
+        onClick={() => {
+          if (onSelectCategory) {
+            onSelectCategory(category.slug || category.id);
+          }
+        }}
+        className={`editorial-category-card group no-underline text-inherit ${isSelected ? 'selected ring-2 ring-[#C62828]/60' : ''}`}
       >
         {/* Tall Image Frame with 3:4 Aspect Ratio */}
         <div className="editorial-card-image-wrap">
           {category.image_url && !imgFailed ? (
             <img
-              src={category.image_url}
+              src={resolveImageUrl(category.image_url)}
               alt={category.name}
               loading="lazy"
               className="editorial-card-image"
@@ -171,30 +322,35 @@ export default function HomeCarousels({
 
         {/* Bottom Crimson Accent Bar on Hover */}
         <span className="editorial-card-accent-bar" />
-      </div>
+      </Link>
     );
   };
 
   // Luxury Card Component for Occasions
   const CategoryCard = ({ category, isOccasion = false }) => {
     const isSelected = activeCategory === category.slug || String(activeCategory) === String(category.id);
+    const categoryTarget = `/category/${category.slug || category.id}`;
 
     return (
-      <div
-        onClick={() => handleCategoryClick(category)}
-        className="group flex flex-col items-center shrink-0 w-36 sm:w-44 md:w-48 cursor-pointer select-none transition-transform duration-300 hover:-translate-y-1"
+      <Link
+        to={categoryTarget}
+        onClick={() => {
+          if (onSelectCategory) {
+            onSelectCategory(category.slug || category.id);
+          }
+        }}
+        className="group flex flex-col items-center shrink-0 w-36 sm:w-44 md:w-48 cursor-pointer select-none transition-transform duration-300 hover:-translate-y-1 no-underline text-inherit"
       >
         {/* Card Image Container */}
         <div
-          className={`relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f7f6f4] border transition-all duration-300 ${
-            isSelected
-              ? 'border-gray-900 shadow-lg ring-2 ring-gray-900'
-              : 'border-gray-200/80 shadow-xs group-hover:border-gray-400 group-hover:shadow-md'
-          }`}
+          className={`relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f7f6f4] border transition-all duration-300 ${isSelected
+            ? 'border-gray-900 shadow-lg ring-2 ring-gray-900'
+            : 'border-gray-200/80 shadow-xs group-hover:border-gray-400 group-hover:shadow-md'
+            }`}
         >
           {category.image_url ? (
             <img
-              src={category.image_url}
+              src={resolveImageUrl(category.image_url)}
               alt={category.name}
               loading="lazy"
               className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-108"
@@ -224,9 +380,8 @@ export default function HomeCarousels({
         {/* Centered Title */}
         <div className="mt-3 text-center px-1">
           <h4
-            className={`font-serif text-xs sm:text-sm tracking-wide transition-colors line-clamp-1 ${
-              isSelected ? 'font-bold text-black' : 'font-semibold text-gray-800 group-hover:text-black'
-            }`}
+            className={`font-serif text-xs sm:text-sm tracking-wide transition-colors line-clamp-1 ${isSelected ? 'font-bold text-black' : 'font-semibold text-gray-800 group-hover:text-black'
+              }`}
           >
             {category.name}
           </h4>
@@ -234,7 +389,7 @@ export default function HomeCarousels({
             Explore
           </span>
         </div>
-      </div>
+      </Link>
     );
   };
 
@@ -326,46 +481,88 @@ export default function HomeCarousels({
         </section>
       )}
 
-      {/* ── 2. SHOP BY OCCASION ─────────────────────────────────────────── */}
-      {shopByOccasions.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-          <div className="flex items-end justify-between mb-5">
-            <div>
-              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#1B7A43' }}>
-                Festivals & Milestones
-              </span>
-              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-gray-950 tracking-tight">
-                Shop by Occasion
-              </h2>
+      {/* ── 2. SHOP BY OCCASION (MATCHING EXACT EDITORIAL CARD STYLING) ────────────────── */}
+      {occasions.length > 0 && (
+        <section
+          id="shop-by-occasion-section"
+          className="w-full py-12"
+          style={{
+            backgroundColor: '#FAF7F2',
+            borderTop: '1px solid #E8DFD3',
+            borderBottom: '1px solid #E8DFD3'
+          }}
+        >
+          <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between mb-5">
+              <div>
+                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#1B7A43' }}>
+                  Festivals & Milestones
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-950 tracking-tight">
+                  Shop by Occasion
+                </h2>
+              </div>
+
+              {/* Floating Edge Navigation Buttons */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scroll(occasionScrollRef, 'left')}
+                  className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  disabled={!canScrollOccasionLeft}
+                  aria-label="Scroll occasions left"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scroll(occasionScrollRef, 'right')}
+                  className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  disabled={!canScrollOccasionRight}
+                  aria-label="Scroll occasions right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => scroll(occasionScrollRef, 'left')}
-                className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95"
-                aria-label="Scroll left"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => scroll(occasionScrollRef, 'right')}
-                className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95"
-                aria-label="Scroll right"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+            {/* Carousel Viewport with Floating Edge Arrows */}
+            <div className="relative group/occasion-carousel">
+              {/* Left Floating Edge Arrow */}
+              {canScrollOccasionLeft && (
+                <button
+                  type="button"
+                  onClick={() => scroll(occasionScrollRef, 'left')}
+                  className="category-floating-arrow -left-3 sm:-left-4 lg:-left-5"
+                  aria-label="Previous occasions"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+              )}
 
-          <div
-            ref={occasionScrollRef}
-            className="flex items-start gap-4 sm:gap-6 overflow-x-auto scrollbar-none scroll-smooth pb-3 pt-1 -mx-4 px-4 sm:mx-0 sm:px-0"
-          >
-            {shopByOccasions.map((category) => (
-              <CategoryCard key={category.id} category={category} isOccasion={true} />
-            ))}
+              {/* Scroll Track matching category-scroll-track */}
+              <div
+                ref={occasionScrollRef}
+                onScroll={handleOccasionScroll}
+                className="category-scroll-track"
+              >
+                {occasions.map((occasion) => (
+                  <EditorialOccasionCard key={occasion.id} occasion={occasion} />
+                ))}
+              </div>
+
+              {/* Right Floating Edge Arrow */}
+              {canScrollOccasionRight && (
+                <button
+                  type="button"
+                  onClick={() => scroll(occasionScrollRef, 'right')}
+                  className="category-floating-arrow -right-3 sm:-right-4 lg:-right-5"
+                  aria-label="Next occasions"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+            </div>
           </div>
         </section>
       )}

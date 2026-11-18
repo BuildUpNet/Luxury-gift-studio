@@ -45,6 +45,9 @@ export function AdminAuthProvider({ children }) {
     }
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+
       // Connect to real backend login endpoint
       const response = await fetch('/api/admin/login', {
         method: 'POST',
@@ -54,8 +57,11 @@ export function AdminAuthProvider({ children }) {
         body: JSON.stringify({
           username: trimmedId,
           password: cleanPassword
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       const data = await response.json().catch(() => ({}));
 
@@ -64,14 +70,34 @@ export function AdminAuthProvider({ children }) {
         return { success: true };
       }
 
+      if (response.status === 401) {
+        return {
+          success: false,
+          error: data.message || 'Invalid username or password. Please verify credentials.'
+        };
+      }
+
+      if (response.status === 429) {
+        return {
+          success: false,
+          error: data.message || 'Too many attempts. Please try again shortly.'
+        };
+      }
+
       return {
         success: false,
-        error: data.message || 'Invalid username or password. Please verify credentials.'
+        error: data.message || `Login request failed (Status ${response.status}). Please try again.`
       };
-    } catch {
+    } catch (err) {
+      if (err.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Connection timed out. The server is waking up, please try again.'
+        };
+      }
       return {
         success: false,
-        error: 'Unable to connect to authentication server. Please verify backend is running on port 5000.'
+        error: 'Unable to connect to authentication server. Please verify your internet or try again in a moment.'
       };
     }
   };

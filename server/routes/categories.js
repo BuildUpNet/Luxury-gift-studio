@@ -1,6 +1,7 @@
 import express from 'express';
 import dbPool from '../config/db.js';
 import { authenticateToken } from './auth.js';
+import { parseProductImages } from './products.js';
 import slugify from 'slugify';
 import multer from 'multer';
 import path from 'path';
@@ -126,6 +127,12 @@ router.get('/', async (req, res) => {
 router.get('/:slug', async (req, res) => {
   const { slug } = req.params;
 
+  if (!slug || typeof slug !== 'string' || !slug.trim()) {
+    return res.status(400).json({ success: false, message: 'Category slug is required.' });
+  }
+
+  const cleanSlug = slug.trim().toLowerCase();
+
   try {
     if (!dbPool) {
       return res.status(500).json({ success: false, message: 'Database not connected.' });
@@ -133,7 +140,7 @@ router.get('/:slug', async (req, res) => {
 
     const [categories] = await dbPool.execute(
       'SELECT * FROM categories WHERE slug = ? LIMIT 1',
-      [slug]
+      [cleanSlug]
     );
 
     if (categories.length === 0) {
@@ -455,23 +462,62 @@ router.delete('/:id', authenticateToken, async (req, res) => {
 });
 
 // ── GET /api/categories/:id/products ────────────────────────────────────────
-// Get products for a specific category
+// Get products for a specific category (supports numeric ID or slug)
 router.get('/:id/products', async (req, res) => {
   const { id } = req.params;
+
+  if (!id || typeof id !== 'string' || !id.trim()) {
+    return res.status(400).json({ success: false, message: 'Invalid category identifier.' });
+  }
+
+  const cleanParam = id.trim();
 
   try {
     if (!dbPool) {
       return res.status(500).json({ success: false, message: 'Database not connected.' });
     }
 
+    let categoryId = null;
+
+    // Check if parameter is a numeric ID
+    if (/^\d+$/.test(cleanParam)) {
+      categoryId = parseInt(cleanParam, 10);
+    } else {
+      // Look up category by slug
+      const [cats] = await dbPool.execute(
+        'SELECT id FROM categories WHERE slug = ? LIMIT 1',
+        [cleanParam.toLowerCase()]
+      );
+
+      if (cats.length === 0) {
+        return res.status(404).json({ success: false, message: 'Category not found.' });
+      }
+
+      categoryId = cats[0].id;
+    }
+
+    // Fetch products belonging directly to this category or its child subcategories
     const [products] = await dbPool.execute(
-      'SELECT * FROM products WHERE category_id = ? ORDER BY created_at DESC',
-      [id]
+      `SELECT * FROM products 
+       WHERE category_id = ? OR category_id IN (SELECT id FROM categories WHERE parent_id = ?) 
+       ORDER BY created_at DESC`,
+      [categoryId, categoryId]
     );
+
+    const transformedProducts = products.map((product) => {
+      const parsedImages = parseProductImages(product);
+      return {
+        ...product,
+        images: parsedImages,
+        image: parsedImages[0] || product.image || '',
+        slug: product.slug || `product-${product.id}`
+      };
+    });
 
     res.json({
       success: true,
-      products
+      categoryId,
+      products: transformedProducts
     });
   } catch (error) {
     console.error('Get category products error:', error);

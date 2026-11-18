@@ -1,13 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { apiService } from '../services/api';
+import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
 export default function Navbar({
   onSelectCategory,
-  activeCategory = 'all'
+  activeCategory: propActiveCategory
 }) {
-  const [categories, setCategories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const location = useLocation();
+  const isContactActive = location.pathname === '/contact';
+
+  const categoryMatch = location.pathname.match(/^\/category\/?([^/]*)/);
+  const urlCategorySlug = categoryMatch ? (categoryMatch[1] || 'all') : null;
+  const activeCategory = propActiveCategory !== undefined ? propActiveCategory : (urlCategorySlug || 'all');
+
+  const [categories, setCategories] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    return Array.isArray(cached) ? cached : [];
+  });
+  const [isLoading, setIsLoading] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    return !Array.isArray(cached) || cached.length === 0;
+  });
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -15,10 +30,12 @@ export default function Navbar({
     let isMounted = true;
     const fetchCategories = async () => {
       try {
-        setIsLoading(true);
         const data = await apiService.getCategories();
         if (data.success && isMounted) {
-          setCategories(data.categories || []);
+          const fetchedCats = data.categories || [];
+          setCategories(fetchedCats);
+          setIsLoading(false);
+          setCachedData(CACHE_KEYS.CATEGORIES, fetchedCats);
         }
       } catch (err) {
         console.error('Navbar: failed to fetch categories', err);
@@ -91,10 +108,10 @@ export default function Navbar({
                     onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
                     onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
                   >
-                    <button
-                      type="button"
-                      onClick={() => handleCategoryClick(cat.slug || cat.id)}
-                      className={`nav-category-link inline-flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 tracking-wide ${
+                    <Link
+                      to={`/category/${cat.slug || cat.id}`}
+                      onClick={() => setActiveDropdown(null)}
+                      className={`nav-category-link inline-flex items-center gap-1.5 text-inherit font-inherit p-0 tracking-wide no-underline ${
                         isActive ? 'active' : ''
                       }`}
                     >
@@ -109,27 +126,27 @@ export default function Navbar({
                           }`}
                         />
                       )}
-                    </button>
+                    </Link>
 
                     {/* Subcategory Dropdown */}
                     {hasSubcats && isOpen && (
                       <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                        <button
-                          type="button"
-                          onClick={() => handleCategoryClick(cat.slug || cat.id)}
-                          className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60"
+                        <Link
+                          to={`/category/${cat.slug || cat.id}`}
+                          onClick={() => setActiveDropdown(null)}
+                          className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-b border-[#E8DFD3]/60 no-underline"
                         >
                           All in {cat.name}
-                        </button>
+                        </Link>
                         {subcats.map((subcat) => (
-                          <button
+                          <Link
                             key={subcat.id}
-                            type="button"
-                            onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
-                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer"
+                            to={`/category/${subcat.slug || subcat.id}`}
+                            onClick={() => setActiveDropdown(null)}
+                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline"
                           >
                             {subcat.name}
-                          </button>
+                          </Link>
                         ))}
                       </div>
                     )}
@@ -158,6 +175,21 @@ export default function Navbar({
                   </button>
                 </li>
               )}
+
+              {/* Contact Us Link */}
+              <li className="relative py-3">
+                <Link
+                  to="/contact"
+                  className={`nav-category-link inline-flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 tracking-wide no-underline ${
+                    isContactActive ? 'active' : ''
+                  }`}
+                >
+                  <span className="relative">
+                    Contact Us
+                    <span className="category-underline" />
+                  </span>
+                </Link>
+              </li>
             </ul>
 
             {/* Expandable Row for categories 7 to 10 */}
@@ -180,10 +212,10 @@ export default function Navbar({
                         onMouseEnter={() => hasSubcats && setActiveDropdown(cat.id)}
                         onMouseLeave={() => hasSubcats && setActiveDropdown(null)}
                       >
-                        <button
-                          type="button"
-                          onClick={() => handleCategoryClick(cat.slug || cat.id)}
-                          className={`nav-category-link inline-flex items-center gap-1.5 bg-transparent border-none cursor-pointer text-inherit font-inherit p-0 tracking-wide ${
+                        <Link
+                          to={`/category/${cat.slug || cat.id}`}
+                          onClick={() => setActiveDropdown(null)}
+                          className={`nav-category-link inline-flex items-center gap-1.5 text-inherit font-inherit p-0 tracking-wide no-underline ${
                             isActive ? 'active' : ''
                           }`}
                         >
@@ -198,26 +230,26 @@ export default function Navbar({
                               }`}
                             />
                           )}
-                        </button>
+                        </Link>
 
                         {hasSubcats && isOpen && (
                           <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                            <button
-                              type="button"
-                              onClick={() => handleCategoryClick(cat.slug || cat.id)}
-                              className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer border-b border-[#E8DFD3]/60"
+                            <Link
+                              to={`/category/${cat.slug || cat.id}`}
+                              onClick={() => setActiveDropdown(null)}
+                              className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-b border-[#E8DFD3]/60 no-underline"
                             >
                               All in {cat.name}
-                            </button>
+                            </Link>
                             {subcats.map((subcat) => (
-                              <button
+                              <Link
                                 key={subcat.id}
-                                type="button"
-                                onClick={() => handleCategoryClick(subcat.slug || subcat.id)}
-                                className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-none bg-transparent cursor-pointer"
+                                to={`/category/${subcat.slug || subcat.id}`}
+                                onClick={() => setActiveDropdown(null)}
+                                className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline"
                               >
                                 {subcat.name}
-                              </button>
+                              </Link>
                             ))}
                           </div>
                         )}

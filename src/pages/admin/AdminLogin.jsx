@@ -25,14 +25,17 @@ export default function AdminLogin() {
     e.preventDefault();
     setError('');
 
-    if (!identifier.trim() || !password) {
+    const cleanIdentifier = identifier.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanIdentifier || !cleanPassword) {
       setError('Please provide your username or email and password.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await login(identifier, password);
+      const result = await login(cleanIdentifier, cleanPassword);
       if (result.success) {
         const destination = location.state?.from?.pathname || '/admin';
         navigate(destination, { replace: true });
@@ -157,7 +160,7 @@ export default function AdminLogin() {
                 {isSubmitting ? (
                   <>
                     <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                    <span>Signing In...</span>
+                    <span>Logging in...</span>
                   </>
                 ) : (
                   <>

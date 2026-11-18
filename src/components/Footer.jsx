@@ -1,17 +1,38 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail } from 'lucide-react';
+import { Phone, Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { STORE_INFO } from '../data/giftStudioData';
+import { apiService } from '../services/api';
 
 export default function Footer({ onSelectCategory }) {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    if (email.trim()) {
-      setSubscribed(true);
-      setEmail('');
+    const cleanEmail = email.trim();
+    if (!cleanEmail) return;
+
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      const res = await apiService.subscribeNewsletter(cleanEmail);
+      if (res?.success) {
+        setSubscribed(true);
+        setSuccessMessage(res.message || 'Thank you for subscribing to our newsletter! A welcome email is on its way.');
+        setEmail('');
+      } else {
+        setErrorMessage(res?.message || 'Failed to subscribe. Please try again.');
+      }
+    } catch (err) {
+      console.error('Subscription error:', err);
+      setErrorMessage(err?.data?.message || err?.message || 'Unable to subscribe right now. Please check your connection.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -38,29 +59,54 @@ export default function Footer({ onSelectCategory }) {
 
           <div className="w-full md:w-auto md:min-w-[420px]">
             {subscribed ? (
-              <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-5 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2">
-                <i className="fa-solid fa-check text-emerald-700"></i>
-                <span>Thank you for subscribing to our newsletter!</span>
+              <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-5 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 animate-in fade-in">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>{successMessage}</span>
               </div>
             ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col sm:flex-row gap-2.5">
-                <input
-                  type="email"
-                  required
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 bg-white border border-[#E8DFD3] rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C62828] transition"
-                />
-                <button
-                  type="submit"
-                  className="text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer active:scale-98"
-                  style={{ backgroundColor: '#C62828' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1B7A43'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#C62828'}
-                >
-                  Subscribe
-                </button>
+              <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
+                <div className="flex flex-col sm:flex-row gap-2.5">
+                  <input
+                    type="email"
+                    required
+                    disabled={isSubmitting}
+                    placeholder="Enter your email address"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errorMessage) setErrorMessage('');
+                    }}
+                    className="flex-1 px-4 py-3 bg-white border border-[#E8DFD3] rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C62828] transition disabled:opacity-60"
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer active:scale-98 disabled:opacity-60 flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#C62828' }}
+                    onMouseEnter={(e) => {
+                      if (!isSubmitting) e.currentTarget.style.backgroundColor = '#1B7A43';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSubmitting) e.currentTarget.style.backgroundColor = '#C62828';
+                    }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
+                        <span>Subscribing...</span>
+                      </>
+                    ) : (
+                      'Subscribe'
+                    )}
+                  </button>
+                </div>
+
+                {errorMessage && (
+                  <div className="flex items-center gap-1.5 text-xs text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-md mt-1 animate-in fade-in">
+                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
               </form>
             )}
           </div>

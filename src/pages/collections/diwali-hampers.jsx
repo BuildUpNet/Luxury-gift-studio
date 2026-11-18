@@ -18,6 +18,7 @@ import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useProducts } from '../../context/ProductContext';
 import { DIWALI_GIFTING_IDEAS } from '../../data/giftStudioData';
+import { parseGalleryImages } from '../../utils/image';
 
 // Price tier definitions matching requirements
 const PRICE_TIERS = [
@@ -362,7 +363,7 @@ export default function DiwaliHampersPage({
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-7">
             {filteredProducts.map((product) => {
-              const images = product.images && product.images.length > 0 ? product.images : [product.image];
+              const images = parseGalleryImages(product);
               const currentIndex = activeImageIndices[product.id] || 0;
 
               return (

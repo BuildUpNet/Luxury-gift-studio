@@ -5,9 +5,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 import authRoutes from './routes/auth.js';
+import productsRoutes from './routes/products.js';
 import categoriesRoutes from './routes/categories.js';
 import contactRoutes from './routes/contact.js';
 import giftingBannerRoutes from './routes/giftingBanner.js';
+import testimonialsRoutes from './routes/testimonials.js';
+import settingsRoutes from './routes/settings.js';
+import heroSlidesRoutes from './routes/heroSlides.js';
+import subscribeRoutes from './routes/subscribe.js';
+import occasionsRoutes from './routes/occasions.js';
 
 import { uploadMiddleware } from './middlewares/upload.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -55,8 +61,14 @@ app.use(express.static(uploadsDir));
 
 // API routes
 app.use('/api/admin', authRoutes);
+app.use('/api/products', productsRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/testimonials', testimonialsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/hero-slides', heroSlidesRoutes);
+app.use('/api/subscribe', subscribeRoutes);
+app.use('/api/occasions', occasionsRoutes);
 app.use('/api', giftingBannerRoutes);
 
 // Image upload endpoint
@@ -77,6 +89,30 @@ app.post('/api/upload', uploadMiddleware.single('image'), (req, res) => {
     filename: req.file.filename,
     originalName: req.file.originalname,
     size: req.file.size
+  });
+});
+
+// Multi-image upload endpoint (max 7 images)
+app.post('/api/upload-multiple', uploadMiddleware.array('images', 7), (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'No files uploaded'
+    });
+  }
+
+  const urls = req.files.map((file) => `/images/${file.filename}`);
+
+  return res.status(200).json({
+    success: true,
+    message: `${req.files.length} image(s) uploaded successfully`,
+    urls,
+    files: req.files.map((file) => ({
+      url: `/images/${file.filename}`,
+      filename: file.filename,
+      originalName: file.originalname,
+      size: file.size
+    }))
   });
 });
 

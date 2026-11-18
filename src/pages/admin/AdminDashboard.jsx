@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Package,
   FolderTree,
   Settings,
   LogOut,
@@ -9,12 +10,19 @@ import {
   ExternalLink,
   Menu,
   X,
-  Sparkles
+  Sparkles,
+  Quote,
+  CalendarHeart
 } from 'lucide-react';
 
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import ProductsPage from './ProductsPage';
 import CategoriesPage from './CategoriesPage';
 import FestiveBannerAndLeads from './FestiveBannerAndLeads';
+import TestimonialsAdminPage from './TestimonialsAdminPage';
+import SettingsAdminPage from './SettingsAdminPage';
+import HeroBannersAdminPage from './HeroBannersAdminPage';
+import OccasionsAdminPage from './OccasionsAdminPage';
 
 export default function AdminDashboard() {
   const { logout, adminUser } = useAdminAuth();
@@ -73,7 +81,11 @@ export default function AdminDashboard() {
           <nav className="p-4 space-y-1.5">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+              { id: 'hero-banners', label: 'Hero Banners', icon: Sparkles },
+              { id: 'products', label: 'Products', icon: Package },
               { id: 'categories', label: 'Categories', icon: FolderTree },
+              { id: 'occasions', label: 'Occasions', icon: CalendarHeart },
+              { id: 'testimonials', label: 'Testimonials', icon: Quote },
               { id: 'festive-banner', label: 'Festive Banner & Leads', icon: Sparkles },
               { id: 'settings', label: 'Settings', icon: Settings }
             ].map((item) => {
@@ -155,12 +167,20 @@ export default function AdminDashboard() {
               <h1 className="text-base sm:text-lg font-bold text-gray-900 capitalize">
                 {currentTab === 'dashboard'
                   ? 'Overview Dashboard'
+                  : currentTab === 'hero-banners'
+                  ? 'Homepage Hero Banners'
+                  : currentTab === 'products'
+                  ? 'Products Management'
+                  : currentTab === 'categories'
+                  ? 'Categories Management'
+                  : currentTab === 'testimonials'
+                  ? 'Customer Testimonials & Reviews'
                   : currentTab === 'festive-banner'
                   ? 'Festive Banner & Leads'
                   : `${currentTab} Management`}
               </h1>
               <p className="text-xs text-gray-500 hidden sm:block">
-                Manage your luxury gifting categories, festive banner, and leads
+                Manage your luxury gifting banners, products, categories, reviews, and store settings
               </p>
             </div>
           </div>
@@ -206,10 +226,105 @@ export default function AdminDashboard() {
                   Welcome to Admin Dashboard
                 </h2>
                 <p className="text-xs text-gray-500 mb-6">
-                  Manage your luxury gifting categories, festive campaign banners, and customer hamper inquiries.
+                  Manage your luxury gifting catalogue, products, categories, festive campaign banners, and customer hamper inquiries.
                 </p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('hero-banners')}
+                    className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Sparkles className="w-5 h-5 text-amber-600" />
+                      <span className="text-[10px] font-bold uppercase text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-full">
+                        Hero Slider
+                      </span>
+                    </div>
+                    <div className="font-bold text-sm text-gray-900 group-hover:text-amber-900">
+                      Hero Banners
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Manage dynamic carousel wallpapers, titles, subtext, and call-to-action buttons.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('products')}
+                    className="p-4 rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-left transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Package className="w-5 h-5 text-blue-600" />
+                      <span className="text-[10px] font-bold uppercase text-blue-700 bg-blue-200/60 px-2 py-0.5 rounded-full">
+                        Catalogue
+                      </span>
+                    </div>
+                    <div className="font-bold text-sm text-gray-900 group-hover:text-blue-900">
+                      Products
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Upload and manage product details, prices, stock, and images inside each category.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('categories')}
+                    className="p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 text-left transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <FolderTree className="w-5 h-5 text-gray-700" />
+                      <span className="text-[10px] font-bold uppercase text-gray-700 bg-gray-200 px-2 py-0.5 rounded-full">
+                        Structure
+                      </span>
+                    </div>
+                    <div className="font-bold text-sm text-gray-900 group-hover:text-black">
+                      Categories
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Organize collections, occasions, subcategories, and navbar presentation.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('occasions')}
+                    className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <CalendarHeart className="w-5 h-5 text-amber-600" />
+                      <span className="text-[10px] font-bold uppercase text-amber-700 bg-amber-200/60 px-2 py-0.5 rounded-full">
+                        Celebrations
+                      </span>
+                    </div>
+                    <div className="font-bold text-sm text-gray-900 group-hover:text-amber-900">
+                      Occasions
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Manage gifting occasions (Diwali, Corporate, Birthdays) and assign products.
+                    </p>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setCurrentTab('testimonials')}
+                    className="p-4 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-50 text-left transition cursor-pointer group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <Quote className="w-5 h-5 text-rose-600" />
+                      <span className="text-[10px] font-bold uppercase text-rose-700 bg-rose-200/60 px-2 py-0.5 rounded-full">
+                        Social Proof
+                      </span>
+                    </div>
+                    <div className="font-bold text-sm text-gray-900 group-hover:text-rose-900">
+                      Testimonials
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Manage client quotes, ratings, city locations, and photo reviews.
+                    </p>
+                  </button>
+
                   <button
                     type="button"
                     onClick={() => setCurrentTab('festive-banner')}
@@ -228,28 +343,19 @@ export default function AdminDashboard() {
                       Customize festive hero wallpapers, texts, and view customer custom hamper inquiries.
                     </p>
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setCurrentTab('categories')}
-                    className="p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 text-left transition cursor-pointer group"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <FolderTree className="w-5 h-5 text-gray-700" />
-                      <span className="text-[10px] font-bold uppercase text-gray-700 bg-gray-200 px-2 py-0.5 rounded-full">
-                        Structure
-                      </span>
-                    </div>
-                    <div className="font-bold text-sm text-gray-900 group-hover:text-black">
-                      Categories & Occasions
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Organize collections, occasions, subcategories, and navbar presentation.
-                    </p>
-                  </button>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Hero Banners Tab */}
+          {currentTab === 'hero-banners' && (
+            <HeroBannersAdminPage onShowToast={showToast} />
+          )}
+
+          {/* Products Tab */}
+          {currentTab === 'products' && (
+            <ProductsPage onShowToast={showToast} />
           )}
 
           {/* Categories Tab */}
@@ -257,9 +363,24 @@ export default function AdminDashboard() {
             <CategoriesPage />
           )}
 
+          {/* Occasions Tab */}
+          {currentTab === 'occasions' && (
+            <OccasionsAdminPage onShowToast={showToast} />
+          )}
+
+          {/* Testimonials Tab */}
+          {currentTab === 'testimonials' && (
+            <TestimonialsAdminPage onShowToast={showToast} />
+          )}
+
           {/* Festive Banner & Custom Inquiries Leads Tab */}
           {currentTab === 'festive-banner' && (
             <FestiveBannerAndLeads onShowToast={showToast} />
+          )}
+
+          {/* Settings Tab */}
+          {currentTab === 'settings' && (
+            <SettingsAdminPage onShowToast={showToast} />
           )}
         </main>
       </div>
