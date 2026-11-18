@@ -424,6 +424,7 @@ export const sendSubscriptionWelcomeEmail = async (subscriberEmail) => {
     const mailer = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.SMTP_EMAIL;
     const cleanEmail = escapeHtml(subscriberEmail);
+    const clientUrl = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
 
     await mailer.sendMail({
       from: fromAddress,
@@ -490,7 +491,7 @@ Mumbai • Delhi • Bengaluru • Pan-India Delivery
 
             <!-- CTA Button -->
             <div style="text-align: center; margin: 32px 0 24px;">
-              <a href="http://localhost:5173" style="display: inline-block; background: #C62828; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 13px 32px; border-radius: 30px; box-shadow: 0 4px 14px rgba(198, 40, 40, 0.35);">
+              <a href="${clientUrl}" style="display: inline-block; background: #C62828; color: #ffffff; text-decoration: none; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 13px 32px; border-radius: 30px; box-shadow: 0 4px 14px rgba(198, 40, 40, 0.35);">
                 Explore Luxury Hampers
               </a>
             </div>
