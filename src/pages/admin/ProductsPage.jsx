@@ -22,6 +22,7 @@ import resolveImageUrl, { parseGalleryImages } from '../../utils/image';
 export default function ProductsPage({ onShowToast }) {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [occasions, setOccasions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [localToast, setLocalToast] = useState('');
@@ -44,6 +45,8 @@ export default function ProductsPage({ onShowToast }) {
     title: '',
     category_id: '',
     category: '',
+    occasion_id: '',
+    occasion_ids: [],
     priceNum: '',
     originalPrice: '',
     stock: 10,
@@ -78,6 +81,18 @@ export default function ProductsPage({ onShowToast }) {
     }
   };
 
+  // Fetch all occasions
+  const fetchOccasions = async () => {
+    try {
+      const data = await apiService.getOccasions();
+      if (data.success && Array.isArray(data.occasions)) {
+        setOccasions(data.occasions);
+      }
+    } catch (err) {
+      console.error('Error fetching occasions:', err);
+    }
+  };
+
   // Fetch all products
   const fetchProducts = async () => {
     try {
@@ -99,6 +114,7 @@ export default function ProductsPage({ onShowToast }) {
 
   useEffect(() => {
     fetchCategories();
+    fetchOccasions();
     fetchProducts();
   }, []);
 
@@ -136,9 +152,9 @@ export default function ProductsPage({ onShowToast }) {
     setModalError('');
     setCustomUrlInput('');
 
-    // Pre-select current category if filtered, else default to first available
+    // In new product mode, keep category selection completely optional
     let defaultCatId = '';
-    let defaultCatName = 'Home Decor';
+    let defaultCatName = '';
 
     if (selectedCategory !== 'All') {
       const found = categories.find(
@@ -148,15 +164,14 @@ export default function ProductsPage({ onShowToast }) {
         defaultCatId = found.id;
         defaultCatName = found.name;
       }
-    } else if (categories.length > 0) {
-      defaultCatId = categories[0].id;
-      defaultCatName = categories[0].name;
     }
 
     setFormData({
       ...initialFormState,
       category_id: defaultCatId,
       category: defaultCatName,
+      occasion_id: '',
+      occasion_ids: [],
       images: []
     });
     setIsModalOpen(true);
@@ -172,10 +187,20 @@ export default function ProductsPage({ onShowToast }) {
     // Parse existing images safely (handles JSON strings, arrays, or single image fallback)
     const existingImages = parseGalleryImages(product);
 
+    // Resolve occasion IDs
+    let currentOccasionIds = [];
+    if (Array.isArray(product.occasion_ids)) {
+      currentOccasionIds = product.occasion_ids;
+    } else if (product.occasion_id) {
+      currentOccasionIds = [Number(product.occasion_id)];
+    }
+
     setFormData({
       title: product.title || '',
       category_id: product.category_id || '',
       category: product.category || product.category_name || 'Home Decor',
+      occasion_id: product.occasion_id || (currentOccasionIds[0] || ''),
+      occasion_ids: currentOccasionIds,
       priceNum: product.priceNum !== undefined && product.priceNum !== null ? String(product.priceNum) : '',
       originalPrice: product.originalPrice ? String(product.originalPrice) : '',
       stock: product.stock !== undefined ? product.stock : 10,
@@ -320,23 +345,33 @@ export default function ProductsPage({ onShowToast }) {
       return;
     }
 
-    // Resolve category name and id
+    // Resolve category name and id (optional)
     let resolvedCatId = formData.category_id ? Number(formData.category_id) : null;
-    let resolvedCatName = formData.category;
+    let resolvedCatName = null;
 
     if (resolvedCatId && categories.length > 0) {
       const found = categories.find((c) => c.id === resolvedCatId);
       if (found) resolvedCatName = found.name;
-    } else if (resolvedCatName && categories.length > 0) {
-      const found = categories.find((c) => c.name.toLowerCase() === resolvedCatName.toLowerCase());
-      if (found) resolvedCatId = found.id;
+    } else if (formData.category && categories.length > 0) {
+      const found = categories.find((c) => c.name.toLowerCase() === formData.category.toLowerCase());
+      if (found) {
+        resolvedCatId = found.id;
+        resolvedCatName = found.name;
+      }
     }
+
+    // Resolve occasion IDs (optional)
+    const normalizedOccasionIds = Array.isArray(formData.occasion_ids)
+      ? formData.occasion_ids.map((id) => Number(id)).filter((id) => !isNaN(id) && id > 0)
+      : (formData.occasion_id ? [Number(formData.occasion_id)] : []);
 
     const primaryCoverImage = formData.images[0];
     const payload = {
       title: formData.title.trim(),
       category_id: resolvedCatId,
-      category: resolvedCatName || 'Home Decor',
+      category: resolvedCatName,
+      occasion_id: normalizedOccasionIds[0] || null,
+      occasion_ids: normalizedOccasionIds,
       priceNum: Number(formData.priceNum),
       originalPrice: formData.originalPrice ? Number(formData.originalPrice) : null,
       stock: Math.max(0, parseInt(formData.stock, 10) || 0),
@@ -607,11 +642,18 @@ export default function ProductsPage({ onShowToast }) {
                         </div>
                       </td>
 
-                      {/* Category */}
-                      <td className="py-3 px-4 whitespace-nowrap">
-                        <span className="inline-block bg-gray-100 text-gray-800 text-[11px] font-medium px-2.5 py-0.5 rounded-md">
-                          {p.category || p.category_name || 'Home Decor'}
-                        </span>
+                      {/* Category & Occasions */}
+                      <td className="py-3 px-4">
+                        <div className="space-y-1">
+                          <span className="inline-block bg-blue-50 text-blue-800 border border-blue-200 text-[11px] font-medium px-2 py-0.5 rounded-md">
+                            {p.category || p.category_name || 'Home Decor'}
+                          </span>
+                          {p.occasion_names ? (
+                            <div className="text-[10px] text-amber-800 font-medium">
+                              🎉 {p.occasion_names}
+                            </div>
+                          ) : null}
+                        </div>
                       </td>
 
                       {/* Price */}
@@ -726,13 +768,23 @@ export default function ProductsPage({ onShowToast }) {
                 </div>
               )}
 
-              {/* Category Dropdown */}
+              {/* Category Dropdown (Optional) */}
               <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">
-                  Assign Category *
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-gray-700">
+                    Assign Category <span className="text-gray-400 font-normal">(Optional Product Category)</span>
+                  </label>
+                  {formData.category_id && (
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, category_id: '', category: '' })}
+                      className="text-[11px] text-rose-600 hover:underline cursor-pointer bg-transparent border-none p-0"
+                    >
+                      Clear Category
+                    </button>
+                  )}
+                </div>
                 <select
-                  required
                   value={formData.category_id}
                   onChange={(e) => {
                     const selectedId = e.target.value;
@@ -746,17 +798,77 @@ export default function ProductsPage({ onShowToast }) {
                   disabled={isSubmitting}
                   className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black bg-white"
                 >
-                  <option value="" disabled>
-                    -- Select Category --
+                  <option value="">
+                    -- None (Do not assign to a Navbar Product Category) --
                   </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.name} {c.section_type ? `(${c.section_type})` : ''}
+                      {c.name}
                     </option>
                   ))}
                 </select>
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Select the category collection where this product will be displayed.
+                  Optional: Select a product category if this item should appear under a navbar category.
+                </p>
+              </div>
+
+              {/* Assign Occasion(s) */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-semibold text-gray-700">
+                    Assign Occasion(s) <span className="text-gray-400 font-normal">(Optional, Select multiple)</span>
+                  </label>
+                  {formData.occasion_ids && formData.occasion_ids.length > 0 && (
+                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      {formData.occasion_ids.length} selected
+                    </span>
+                  )}
+                </div>
+
+                {occasions.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">No occasions created yet.</p>
+                ) : (
+                  <div className="border border-gray-300 rounded-lg p-2.5 bg-gray-50/50 max-h-36 overflow-y-auto space-y-1.5">
+                    {occasions.map((occ) => {
+                      const isChecked = Array.isArray(formData.occasion_ids) && formData.occasion_ids.includes(occ.id);
+                      return (
+                        <label
+                          key={occ.id}
+                          className={`flex items-center justify-between px-2.5 py-1.5 rounded-md cursor-pointer transition text-xs select-none ${
+                            isChecked ? 'bg-amber-100/70 text-amber-950 font-medium' : 'hover:bg-gray-100 text-gray-700'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setFormData((prev) => {
+                                  const current = Array.isArray(prev.occasion_ids) ? prev.occasion_ids : [];
+                                  const next = checked
+                                    ? [...current, occ.id]
+                                    : current.filter((id) => id !== occ.id);
+                                  return {
+                                    ...prev,
+                                    occasion_ids: next,
+                                    occasion_id: next[0] || ''
+                                  };
+                                });
+                              }}
+                              disabled={isSubmitting}
+                              className="rounded border-gray-300 text-amber-600 focus:ring-amber-500 w-3.5 h-3.5 cursor-pointer"
+                            />
+                            <span>{occ.name}</span>
+                          </div>
+                          <span className="text-[10px] text-gray-400">/occasion/{occ.slug}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                <p className="text-[11px] text-gray-400 mt-1">
+                  Tag this product to festive or milestone occasions (e.g. Diwali, Corporate, New Year).
                 </p>
               </div>
 

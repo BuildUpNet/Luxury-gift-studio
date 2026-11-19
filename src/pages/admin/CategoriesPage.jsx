@@ -311,7 +311,7 @@ export default function CategoriesPage() {
           <div>
             <h2 className="text-base font-bold text-gray-900">Category Management</h2>
             <p className="text-xs text-gray-500">
-              Organize your products into categories, occasions, and subcategories
+              Organize product categories (Navbar items) and subcategories
             </p>
           </div>
 
@@ -605,16 +605,14 @@ export default function CategoriesPage() {
                   Section Type
                 </label>
                 <select
-                  value={modalData.section_type || 'category'}
-                  onChange={(e) => setModalData({ ...modalData, section_type: e.target.value })}
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-black disabled:opacity-50 bg-white"
+                  value="category"
+                  disabled
+                  className="w-full px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none bg-gray-50 text-gray-700 cursor-not-allowed"
                 >
-                  <option value="category">Shop by Category</option>
-                  <option value="occasion">Shop by Occasion</option>
+                  <option value="category">Shop by Category (Product Category)</option>
                 </select>
                 <p className="text-[11px] text-gray-400 mt-1">
-                  Controls whether this item belongs to category browsing or occasion browsing.
+                  Categories strictly manages product categories. To manage occasions, visit the Occasions tab.
                 </p>
               </div>
 

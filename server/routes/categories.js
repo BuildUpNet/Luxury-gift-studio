@@ -172,8 +172,8 @@ router.post('/', authenticateToken, async (req, res) => {
     return res.status(400).json({ success: false, message: 'Category name is required.' });
   }
 
-  // Validate section_type
-  const resolvedSectionType = section_type === 'occasion' ? 'occasion' : 'category';
+  // Categories table is strictly for product categories (section_type = 'category')
+  const resolvedSectionType = 'category';
 
   // Normalise parent_id: treat 0, '', null as NULL
   const resolvedParentId = parent_id ? Number(parent_id) : null;
@@ -349,10 +349,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
       deleteCategoryImageFile(existing.image_url);
     }
 
-    // Section type
-    const resolvedSectionType = section_type !== undefined
-      ? (section_type === 'occasion' ? 'occasion' : 'category')
-      : (existing.section_type || 'category');
+    // Section type strictly 'category'
+    const resolvedSectionType = 'category';
 
     // Generate new slug from name
     const newSlug = slugify(name.trim(), {

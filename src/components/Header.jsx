@@ -82,9 +82,9 @@ const Header = ({
     };
   }, []);
 
-  // Filter top-level categories that have show_in_navbar = 1 (max 10)
+  // Filter top-level categories that have show_in_navbar = 1 (strictly product categories, max 10)
   const navbarCategories = categories
-    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar))
+    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar) && (c.section_type === 'category' || !c.section_type))
     .slice(0, 10);
 
   // Map subcategories by parent_id

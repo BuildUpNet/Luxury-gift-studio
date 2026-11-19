@@ -15,14 +15,14 @@ CREATE TABLE IF NOT EXISTS `admin` (
   CONSTRAINT `only_one_admin` CHECK ((`id` = 1))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Categories Table (supports parent-child subcategories, navbar limit, images & section types)
+-- Categories Table (strictly for product categories, parent-child subcategories, navbar limit & thumbnails)
 CREATE TABLE IF NOT EXISTS `categories` (
   `id` int unsigned NOT NULL AUTO_INCREMENT,
   `parent_id` int unsigned DEFAULT NULL,
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `slug` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `image_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `section_type` ENUM('category', 'occasion') NOT NULL DEFAULT 'category',
+  `section_type` ENUM('category') NOT NULL DEFAULT 'category',
   `show_in_navbar` tinyint(1) NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `slug` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT 'Home Decor',
   `category_id` int unsigned DEFAULT NULL,
+  `occasion_id` int unsigned DEFAULT NULL,
   `priceNum` decimal(10,2) NOT NULL,
   `originalPrice` decimal(10,2) DEFAULT NULL,
   `stock` int unsigned DEFAULT '10',
@@ -74,7 +75,9 @@ CREATE TABLE IF NOT EXISTS `products` (
   KEY `idx_inStock` (`inStock`),
   KEY `idx_is_best_collection` (`is_best_collection`),
   KEY `fk_products_category_id` (`category_id`),
-  CONSTRAINT `fk_products_category_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL
+  KEY `fk_products_occasion_id` (`occasion_id`),
+  CONSTRAINT `fk_products_category_id` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `fk_products_occasion_id` FOREIGN KEY (`occasion_id`) REFERENCES `occasions` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Gifting Banner Config Table

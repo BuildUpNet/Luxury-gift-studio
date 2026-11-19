@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
   try {
     const [occasions] = await executeWithRetry(`
       SELECT o.*,
-             COUNT(po.product_id) AS products_count
+             COUNT(DISTINCT po.product_id) AS products_count
       FROM occasions o
       LEFT JOIN product_occasions po ON o.id = po.occasion_id
       GROUP BY o.id
@@ -252,18 +252,67 @@ router.post('/:id/assign-products', authenticateToken, async (req, res) => {
   }
 
   try {
-    await executeWithRetry('DELETE FROM product_occasions WHERE occasion_id = ?', [id]);
+    const occasionId = Number(id);
 
-    for (const prodId of product_ids) {
+    // Verify occasion exists
+    const [occRows] = await executeWithRetry('SELECT id FROM occasions WHERE id = ? LIMIT 1', [occasionId]);
+    if (occRows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Occasion not found'
+      });
+    }
+
+    // 1. Delete previous associations for this occasion
+    await executeWithRetry('DELETE FROM product_occasions WHERE occasion_id = ?', [occasionId]);
+
+    // 2. Insert new associations
+    const cleanProductIds = product_ids
+      .map((pid) => Number(pid))
+      .filter((pid) => !isNaN(pid) && pid > 0);
+
+    for (const prodId of cleanProductIds) {
       await executeWithRetry(
         'INSERT IGNORE INTO product_occasions (product_id, occasion_id) VALUES (?, ?)',
-        [prodId, id]
+        [prodId, occasionId]
       );
+
+      // Keep products.occasion_id in sync if not already set or updating
+      try {
+        await executeWithRetry(
+          'UPDATE products SET occasion_id = ? WHERE id = ? AND (occasion_id IS NULL OR occasion_id = ?)',
+          [occasionId, prodId, occasionId]
+        );
+      } catch (err) {}
     }
+
+    // 3. Clear products.occasion_id for products that were unassigned from this occasion and had occasion_id = this occasion
+    try {
+      if (cleanProductIds.length > 0) {
+        const placeholders = cleanProductIds.map(() => '?').join(',');
+        await executeWithRetry(
+          `UPDATE products SET occasion_id = NULL WHERE occasion_id = ? AND id NOT IN (${placeholders})`,
+          [occasionId, ...cleanProductIds]
+        );
+      } else {
+        await executeWithRetry(
+          'UPDATE products SET occasion_id = NULL WHERE occasion_id = ?',
+          [occasionId]
+        );
+      }
+    } catch (err) {}
+
+    // Return the updated count
+    const [countRows] = await executeWithRetry(
+      'SELECT COUNT(DISTINCT product_id) as count FROM product_occasions WHERE occasion_id = ?',
+      [occasionId]
+    );
+    const updatedCount = Number(countRows[0]?.count) || 0;
 
     return res.json({
       success: true,
-      message: `Assigned ${product_ids.length} product(s) to occasion successfully`
+      message: `Assigned ${cleanProductIds.length} product(s) to occasion successfully`,
+      count: updatedCount
     });
   } catch (error) {
     console.error('Error assigning products to occasion:', error);

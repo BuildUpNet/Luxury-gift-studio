@@ -31,8 +31,27 @@ async function ensureProductColumns() {
       }
       console.log('Added missing "slug" column to products table.');
     }
+    if (!fieldNames.includes('occasion_id')) {
+      await dbPool.execute('ALTER TABLE products ADD COLUMN occasion_id INT UNSIGNED DEFAULT NULL AFTER category_id');
+      try {
+        await dbPool.execute('ALTER TABLE products ADD CONSTRAINT fk_products_occasion_id FOREIGN KEY (occasion_id) REFERENCES occasions(id) ON DELETE SET NULL');
+      } catch (e) {}
+      console.log('Added missing "occasion_id" column to products table.');
+    }
+
+    // Ensure product_occasions table exists
+    await dbPool.execute(`
+      CREATE TABLE IF NOT EXISTS product_occasions (
+        product_id INT UNSIGNED NOT NULL,
+        occasion_id INT UNSIGNED NOT NULL,
+        PRIMARY KEY (product_id, occasion_id),
+        KEY fk_po_occasion (occasion_id),
+        CONSTRAINT fk_po_product FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+        CONSTRAINT fk_po_occasion FOREIGN KEY (occasion_id) REFERENCES occasions (id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+    `);
   } catch (err) {
-    console.error('Failed to ensure product columns:', err.message);
+    console.error('Failed to ensure product columns/tables:', err.message);
   }
 }
 ensureProductColumns();
@@ -201,54 +220,77 @@ async function safelyDeleteImageFile(filename, excludeProductId = null) {
 }
 
 // ── GET /api/products ─────────────────────────────────────────────────────
-// Get all products with category details (optional ?category=ID_OR_SLUG filter)
+// Get all products with category and occasion details (optional ?category=ID_OR_SLUG filter)
 router.get('/', async (req, res) => {
   try {
-    const { category: categoryParam } = req.query;
+    const { category: categoryParam, occasion: occasionParam } = req.query;
 
     if (!dbPool) {
       return res.status(500).json({ success: false, message: 'Database not connected.' });
     }
 
     let query = `
-      SELECT p.*, c.name as category_name, c.slug as category_slug
+      SELECT p.*,
+             c.name as category_name,
+             c.slug as category_slug,
+             o.name as occasion_name,
+             o.slug as occasion_slug,
+             GROUP_CONCAT(DISTINCT po.occasion_id) as occasion_ids,
+             GROUP_CONCAT(DISTINCT occ.name SEPARATOR ', ') as occasion_names
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
-      ORDER BY p.created_at DESC
+      LEFT JOIN occasions o ON p.occasion_id = o.id
+      LEFT JOIN product_occasions po ON p.id = po.product_id
+      LEFT JOIN occasions occ ON po.occasion_id = occ.id
     `;
     let queryParams = [];
+    let whereClauses = [];
 
     // Filter by category if provided
     if (categoryParam) {
       if (!isNaN(categoryParam)) {
-        query = `
-          SELECT p.*, c.name as category_name, c.slug as category_slug
-          FROM products p
-          LEFT JOIN categories c ON p.category_id = c.id
-          WHERE p.category_id = ?
-          ORDER BY p.created_at DESC
-        `;
-        queryParams = [categoryParam];
+        whereClauses.push('p.category_id = ?');
+        queryParams.push(categoryParam);
       } else {
-        query = `
-          SELECT p.*, c.name as category_name, c.slug as category_slug
-          FROM products p
-          LEFT JOIN categories c ON p.category_id = c.id
-          WHERE c.slug = ? OR c.name = ?
-          ORDER BY p.created_at DESC
-        `;
-        queryParams = [categoryParam, categoryParam];
+        whereClauses.push('(c.slug = ? OR c.name = ?)');
+        queryParams.push(categoryParam, categoryParam);
       }
     }
+
+    // Filter by occasion if provided
+    if (occasionParam) {
+      if (!isNaN(occasionParam)) {
+        whereClauses.push('(p.occasion_id = ? OR po.occasion_id = ?)');
+        queryParams.push(occasionParam, occasionParam);
+      } else {
+        whereClauses.push('(o.slug = ? OR o.name = ? OR occ.slug = ? OR occ.name = ?)');
+        queryParams.push(occasionParam, occasionParam, occasionParam, occasionParam);
+      }
+    }
+
+    if (whereClauses.length > 0) {
+      query += ` WHERE ${whereClauses.join(' AND ')}`;
+    }
+
+    query += ` GROUP BY p.id ORDER BY p.created_at DESC`;
 
     const [rows] = await dbPool.execute(query, queryParams);
 
     // Transform data to ensure backward compatibility and clean formatting
     const transformedProducts = rows.map((product) => {
       const parsedImages = parseProductImages(product);
+      const parsedOccasionIds = product.occasion_ids
+        ? String(product.occasion_ids)
+            .split(',')
+            .map((id) => Number(id.trim()))
+            .filter((id) => !isNaN(id) && id > 0)
+        : (product.occasion_id ? [Number(product.occasion_id)] : []);
+
       return {
         ...product,
         category: product.category_name || product.category || 'Home Decor',
+        occasion_id: product.occasion_id ? Number(product.occasion_id) : (parsedOccasionIds[0] || null),
+        occasion_ids: parsedOccasionIds,
         images: parsedImages,
         image: parsedImages[0] || product.image || '',
         slug: product.slug || `product-${product.id}`
@@ -277,10 +319,20 @@ router.get('/:idOrSlug', async (req, res) => {
 
     const isNumericId = /^\d+$/.test(idOrSlug);
     const query = `
-      SELECT p.*, c.name as category_name, c.slug as category_slug
+      SELECT p.*,
+             c.name as category_name,
+             c.slug as category_slug,
+             o.name as occasion_name,
+             o.slug as occasion_slug,
+             GROUP_CONCAT(DISTINCT po.occasion_id) as occasion_ids,
+             GROUP_CONCAT(DISTINCT occ.name SEPARATOR ', ') as occasion_names
       FROM products p
       LEFT JOIN categories c ON p.category_id = c.id
+      LEFT JOIN occasions o ON p.occasion_id = o.id
+      LEFT JOIN product_occasions po ON p.id = po.product_id
+      LEFT JOIN occasions occ ON po.occasion_id = occ.id
       WHERE ${isNumericId ? '(p.id = ? OR p.slug = ?)' : 'p.slug = ?'}
+      GROUP BY p.id
       LIMIT 1
     `;
     const queryParams = isNumericId ? [Number(idOrSlug), idOrSlug] : [idOrSlug];
@@ -292,9 +344,18 @@ router.get('/:idOrSlug', async (req, res) => {
     }
 
     const parsedImages = parseProductImages(rows[0]);
+    const parsedOccasionIds = rows[0].occasion_ids
+      ? String(rows[0].occasion_ids)
+          .split(',')
+          .map((id) => Number(id.trim()))
+          .filter((id) => !isNaN(id) && id > 0)
+      : (rows[0].occasion_id ? [Number(rows[0].occasion_id)] : []);
+
     const product = {
       ...rows[0],
       category: rows[0].category_name || rows[0].category || 'Home Decor',
+      occasion_id: rows[0].occasion_id ? Number(rows[0].occasion_id) : (parsedOccasionIds[0] || null),
+      occasion_ids: parsedOccasionIds,
       images: parsedImages,
       image: parsedImages[0] || rows[0].image || '',
       slug: rows[0].slug || `product-${rows[0].id}`
@@ -317,6 +378,8 @@ router.post('/', authenticateToken, async (req, res) => {
     title,
     category_id,
     category,
+    occasion_id,
+    occasion_ids,
     priceNum,
     originalPrice,
     stock,
@@ -349,36 +412,46 @@ router.post('/', authenticateToken, async (req, res) => {
       return res.status(500).json({ success: false, message: 'Database not connected.' });
     }
 
-    // Determine category_id: prioritize category_id, fallback to category name
+    // Determine category_id: prioritize category_id, fallback to category name; if neither is provided, allow NULL
     let finalCategoryId = null;
-    let finalCategoryName = category || 'Home Decor';
+    let finalCategoryName = null;
 
-    if (category_id) {
-      finalCategoryId = category_id;
+    if (category_id !== undefined && category_id !== null && category_id !== '') {
+      finalCategoryId = Number(category_id);
       const [catRow] = await dbPool.execute(
         'SELECT name FROM categories WHERE id = ? LIMIT 1',
-        [category_id]
+        [finalCategoryId]
       );
       if (catRow.length > 0) {
         finalCategoryName = catRow[0].name;
       }
-    } else if (category) {
+    } else if (category && typeof category === 'string' && category.trim()) {
       const [categoryResult] = await dbPool.execute(
         'SELECT id, name FROM categories WHERE name = ? LIMIT 1',
-        [category]
+        [category.trim()]
       );
 
       if (categoryResult.length > 0) {
         finalCategoryId = categoryResult[0].id;
         finalCategoryName = categoryResult[0].name;
       } else {
-        const [defaultCategory] = await dbPool.execute(
-          'SELECT id, name FROM categories LIMIT 1'
-        );
-        finalCategoryId = defaultCategory[0]?.id || null;
-        finalCategoryName = defaultCategory[0]?.name || 'Home Decor';
+        finalCategoryName = category.trim();
       }
     }
+
+    // Normalize occasion assignments (supports single occasion_id or multiple occasion_ids array)
+    let assignedOccasionIds = [];
+    if (Array.isArray(occasion_ids)) {
+      assignedOccasionIds = occasion_ids
+        .map((id) => Number(id))
+        .filter((id) => !isNaN(id) && id > 0);
+    } else if (occasion_id !== undefined && occasion_id !== null && occasion_id !== '') {
+      const numOcc = Number(occasion_id);
+      if (!isNaN(numOcc) && numOcc > 0) {
+        assignedOccasionIds = [numOcc];
+      }
+    }
+    const primaryOccasionId = assignedOccasionIds.length > 0 ? assignedOccasionIds[0] : null;
 
     // Multiple products in the same category can share titles, prices, or MRP without artificial duplicate blocking
     let uniqueSlug = await generateUniqueSlug(req.body.slug || title.trim());
@@ -399,6 +472,7 @@ router.post('/', authenticateToken, async (req, res) => {
             slug,
             category_id,
             category,
+            occasion_id,
             priceNum,
             originalPrice,
             stock,
@@ -411,12 +485,13 @@ router.post('/', authenticateToken, async (req, res) => {
             reviews,
             brand,
             discountBadge
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             title.trim(),
             uniqueSlug,
             finalCategoryId,
             finalCategoryName,
+            primaryOccasionId,
             Number(priceNum),
             originalPrice ? Number(originalPrice) : null,
             resolvedStock,
@@ -442,12 +517,26 @@ router.post('/', authenticateToken, async (req, res) => {
       }
     }
 
+    const newProductId = result.insertId;
+
+    // Sync product_occasions junction table
+    if (assignedOccasionIds.length > 0) {
+      for (const occId of assignedOccasionIds) {
+        await dbPool.execute(
+          'INSERT IGNORE INTO product_occasions (product_id, occasion_id) VALUES (?, ?)',
+          [newProductId, occId]
+        );
+      }
+    }
+
     const newProduct = {
-      id: result.insertId,
+      id: newProductId,
       title: title.trim(),
       slug: uniqueSlug,
       category_id: finalCategoryId,
       category: finalCategoryName,
+      occasion_id: primaryOccasionId,
+      occasion_ids: assignedOccasionIds,
       priceNum: Number(priceNum),
       originalPrice: originalPrice ? Number(originalPrice) : null,
       stock: resolvedStock,
@@ -465,7 +554,7 @@ router.post('/', authenticateToken, async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
-      productId: result.insertId,
+      productId: newProductId,
       product: newProduct
     });
   } catch (error) {
@@ -496,22 +585,55 @@ router.put('/:id', authenticateToken, async (req, res) => {
     let finalCategoryName = current.category;
 
     if (req.body.category_id !== undefined) {
-      finalCategoryId = req.body.category_id;
-      if (finalCategoryId) {
+      if (req.body.category_id === null || req.body.category_id === '' || req.body.category_id === 0) {
+        finalCategoryId = null;
+        finalCategoryName = null;
+      } else {
+        finalCategoryId = Number(req.body.category_id);
         const [catRow] = await dbPool.execute('SELECT name FROM categories WHERE id = ? LIMIT 1', [finalCategoryId]);
-        if (catRow.length > 0) finalCategoryName = catRow[0].name;
+        finalCategoryName = catRow.length > 0 ? catRow[0].name : null;
       }
     } else if (req.body.category !== undefined) {
-      finalCategoryName = req.body.category;
-      const [categoryResult] = await dbPool.execute(
-        'SELECT id, name FROM categories WHERE name = ? LIMIT 1',
-        [req.body.category]
-      );
-      if (categoryResult.length > 0) {
-        finalCategoryId = categoryResult[0].id;
-        finalCategoryName = categoryResult[0].name;
+      if (!req.body.category || !String(req.body.category).trim()) {
+        finalCategoryId = null;
+        finalCategoryName = null;
+      } else {
+        finalCategoryName = String(req.body.category).trim();
+        const [categoryResult] = await dbPool.execute(
+          'SELECT id, name FROM categories WHERE name = ? LIMIT 1',
+          [finalCategoryName]
+        );
+        if (categoryResult.length > 0) {
+          finalCategoryId = categoryResult[0].id;
+          finalCategoryName = categoryResult[0].name;
+        }
       }
     }
+
+    // Determine occasion assignments
+    let hasOccasionUpdate = false;
+    let updatedOccasionIds = [];
+
+    if (req.body.occasion_ids !== undefined) {
+      hasOccasionUpdate = true;
+      if (Array.isArray(req.body.occasion_ids)) {
+        updatedOccasionIds = req.body.occasion_ids
+          .map((oid) => Number(oid))
+          .filter((oid) => !isNaN(oid) && oid > 0);
+      }
+    } else if (req.body.occasion_id !== undefined) {
+      hasOccasionUpdate = true;
+      if (req.body.occasion_id !== null && req.body.occasion_id !== '') {
+        const numOcc = Number(req.body.occasion_id);
+        if (!isNaN(numOcc) && numOcc > 0) {
+          updatedOccasionIds = [numOcc];
+        }
+      }
+    }
+
+    const finalPrimaryOccasionId = hasOccasionUpdate
+      ? (updatedOccasionIds.length > 0 ? updatedOccasionIds[0] : null)
+      : current.occasion_id;
 
     const title = req.body.title !== undefined ? String(req.body.title).trim() : current.title;
     const priceNum = req.body.priceNum !== undefined ? Number(req.body.priceNum) : current.priceNum;
@@ -568,6 +690,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
             slug = ?,
             category_id = ?,
             category = ?,
+            occasion_id = ?,
             priceNum = ?,
             originalPrice = ?,
             stock = ?,
@@ -587,6 +710,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
             finalSlug,
             finalCategoryId,
             finalCategoryName,
+            finalPrimaryOccasionId,
             priceNum,
             originalPrice,
             stock,
@@ -612,6 +736,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
       }
     }
 
+    // Update product_occasions if occasion assignments were provided
+    if (hasOccasionUpdate) {
+      await dbPool.execute('DELETE FROM product_occasions WHERE product_id = ?', [id]);
+      for (const occId of updatedOccasionIds) {
+        await dbPool.execute(
+          'INSERT IGNORE INTO product_occasions (product_id, occasion_id) VALUES (?, ?)',
+          [id, occId]
+        );
+      }
+    }
+
     // Safely cleanup removed image files
     if (imagesArray) {
       const removedImages = oldImages.filter((oldImg) => !imagesArray.includes(oldImg));
@@ -623,12 +758,21 @@ router.put('/:id', authenticateToken, async (req, res) => {
       }
     }
 
+    // Fetch refreshed occasion_ids for response
+    const [poRows] = await dbPool.execute(
+      'SELECT occasion_id FROM product_occasions WHERE product_id = ?',
+      [id]
+    );
+    const finalOccasionIds = poRows.map((r) => r.occasion_id);
+
     const updatedProduct = {
       id: Number(id),
       title,
       slug: finalSlug,
       category_id: finalCategoryId,
       category: finalCategoryName,
+      occasion_id: finalPrimaryOccasionId,
+      occasion_ids: finalOccasionIds,
       priceNum,
       originalPrice,
       stock,

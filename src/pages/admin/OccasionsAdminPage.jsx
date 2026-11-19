@@ -157,9 +157,20 @@ export default function OccasionsAdminPage({ onShowToast }) {
     try {
       const res = await apiService.assignProductsToOccasion(selectedOccasion.id, assignedProductIds);
       if (res?.success) {
-        notify(`Updated products for "${selectedOccasion.name}" (${assignedProductIds.length} assigned)`);
+        const assignedCount = assignedProductIds.length;
+        notify(`Updated products for "${selectedOccasion.name}" (${assignedCount} assigned)`);
+        
+        // Optimistically update the occasion's products_count in local state immediately
+        setOccasions((prev) =>
+          prev.map((o) =>
+            o.id === selectedOccasion.id
+              ? { ...o, products_count: assignedCount }
+              : o
+          )
+        );
+
         setIsAssignModalOpen(false);
-        loadData();
+        await loadData();
       } else {
         throw new Error(res?.message || 'Failed to update assignments');
       }

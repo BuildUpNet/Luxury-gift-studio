@@ -84,13 +84,9 @@ export default function HomeCarousels({
     };
   }, [categories, occasions]);
 
-  // Top-level categories filtered by section_type
+  // Top-level product categories for Shop by Category
   const shopByCategories = (categories || []).filter(
     (c) => (c.parent_id === null || c.parent_id === undefined) && (c.section_type === 'category' || !c.section_type)
-  );
-
-  const shopByOccasions = (categories || []).filter(
-    (c) => (c.parent_id === null || c.parent_id === undefined) && c.section_type === 'occasion'
   );
 
   const handleCategoryClick = (category) => {

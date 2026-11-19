@@ -49,9 +49,9 @@ export default function Navbar({
     };
   }, []);
 
-  // Top-level categories shown in navbar (max 10)
+  // Top-level categories shown in navbar (strictly product categories, show_in_navbar = 1, max 10)
   const navbarCategories = categories
-    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar))
+    .filter(c => (c.parent_id === null || c.parent_id === undefined) && Boolean(c.show_in_navbar) && (c.section_type === 'category' || !c.section_type))
     .slice(0, 10);
 
   // Group subcategories by parent_id
