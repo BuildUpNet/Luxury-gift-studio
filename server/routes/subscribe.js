@@ -47,7 +47,7 @@ router.post('/', async (req, res) => {
     );
 
     // Send confirmation welcome email asynchronously
-    sendSubscriptionWelcomeEmail(cleanEmail)
+    sendSubscriptionWelcomeEmail(cleanEmail, req)
       .then((mailRes) => {
         if (!mailRes?.success) {
           console.warn(`[Subscribe] Email delivery failed for ${cleanEmail}:`, mailRes?.error);

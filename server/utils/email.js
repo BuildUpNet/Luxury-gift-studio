@@ -238,8 +238,28 @@ export const testEmailConfiguration = async () => {
   }
 };
 
+/**
+ * Resolves the primary client origin dynamically.
+ * Prioritizes the first origin from CLIENT_ORIGIN (even if comma-separated),
+ * falling back to request-derived origin or standard localhost in local development.
+ */
+export const getClientOrigin = (req = null) => {
+  if (process.env.CLIENT_ORIGIN) {
+    const firstOrigin = process.env.CLIENT_ORIGIN.split(',')[0].trim();
+    if (firstOrigin) return firstOrigin;
+  }
+  if (req && typeof req.get === 'function') {
+    const host = req.get('host');
+    if (host) {
+      const protocol = req.protocol || (req.secure ? 'https' : 'http');
+      return `${protocol}://${host}`;
+    }
+  }
+  return 'http://localhost:5173';
+};
+
 // Admin notification for custom gifting inquiry
-export const sendGiftingInquiryAdminNotification = async (inquiryData) => {
+export const sendGiftingInquiryAdminNotification = async (inquiryData, req = null) => {
   try {
     const adminEmail = process.env.ADMIN_EMAIL;
     if (!adminEmail) {
@@ -256,7 +276,7 @@ export const sendGiftingInquiryAdminNotification = async (inquiryData) => {
       dateStyle: 'medium',
       timeStyle: 'short'
     });
-    const dashboardUrl = `${process.env.CLIENT_ORIGIN || 'http://localhost:5173'}/admin/dashboard`;
+    const dashboardUrl = `${getClientOrigin(req)}/admin/dashboard`;
 
     await mailer.sendMail({
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,
@@ -419,12 +439,12 @@ The Gift Studio Concierge Team
 /**
  * Newsletter Subscription Welcome / Confirmation Email.
  */
-export const sendSubscriptionWelcomeEmail = async (subscriberEmail) => {
+export const sendSubscriptionWelcomeEmail = async (subscriberEmail, req = null) => {
   try {
     const mailer = getTransporter();
     const fromAddress = process.env.EMAIL_FROM || process.env.SMTP_USER || process.env.SMTP_EMAIL;
     const cleanEmail = escapeHtml(subscriberEmail);
-    const clientUrl = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    const clientUrl = getClientOrigin(req);
 
     await mailer.sendMail({
       from: fromAddress,

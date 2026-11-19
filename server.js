@@ -1,6 +1,3 @@
-// Hostinger entry point.
-// Boots the Express app from server/server.js and records every startup log/error,
-// so failures can be inspected at /api/debug?key=<DEBUG_KEY> and in startup.log.
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
@@ -70,7 +67,8 @@ try {
 function startFallbackServer() {
   const port = Number(process.env.PORT) || 5002;
   const server = http.createServer((req, res) => {
-    const url = new URL(req.url, 'http://localhost');
+    const hostHeader = req.headers.host || '127.0.0.1';
+    const url = new URL(req.url, `http://${hostHeader}`);
     const authorized = process.env.DEBUG_KEY && url.searchParams.get('key') === process.env.DEBUG_KEY;
     res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
     if (!authorized) {

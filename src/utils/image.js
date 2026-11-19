@@ -16,9 +16,9 @@ export function resolveImageUrl(imagePath, fallback = '/images/gift_logo.jpeg') 
     return fallback;
   }
 
-  // Normalize legacy localhost:5002 or 127.0.0.1:5002 URLs stored in database
-  if (trimmed.includes('localhost:5002/') || trimmed.includes('127.0.0.1:5002/')) {
-    trimmed = trimmed.replace(/^https?:\/\/(localhost|127\.0\.0\.1):5002/, '');
+  // Normalize legacy localhost / 127.0.0.1 URLs (with any port) stored in database
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//i.test(trimmed)) {
+    trimmed = trimmed.replace(/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, '');
   }
 
   // If path is an external CDN or data URI, return as-is

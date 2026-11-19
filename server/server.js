@@ -25,30 +25,71 @@ dotenv.config();
 const app = express();
 
 const PORT = Number(process.env.PORT) || 5002;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Dynamic CORS configuration from environment variables
-const allowedOrigins = [
+const parseOrigins = (val) => {
+  if (!val) return [];
+  return val
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const configuredOrigins = parseOrigins(process.env.CLIENT_ORIGIN);
+const defaultLocalOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
+  'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
-  CLIENT_ORIGIN
-].filter(Boolean);
+  'http://127.0.0.1:3000'
+];
+
+const allowedOriginsSet = new Set([
+  ...configuredOrigins,
+  ...(process.env.NODE_ENV !== 'production' ? defaultLocalOrigins : [])
+]);
+
+const allowAllCors =
+  process.env.CORS_ALLOW_ALL === 'true' ||
+  process.env.CORS_ALLOW_ALL === '1' ||
+  (!process.env.CLIENT_ORIGIN && process.env.NODE_ENV !== 'production');
 
 const corsOptions = {
   origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // 1. Allow requests with no origin (e.g. mobile apps, curl, Postman, server-to-server)
+    if (!origin) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+
+    // 2. Allow all when explicitly enabled or in open fallback mode
+    if (allowAllCors) {
+      return callback(null, true);
+    }
+
+    // 3. Allow if explicitly in configured/allowed origins
+    if (allowedOriginsSet.has(origin)) {
+      return callback(null, true);
+    }
+
+    // 4. In non-production or if localhost origin, allow localhost / 127.0.0.1 on any port
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    if (isLocalhost && process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+
+    // 5. Clean fallback: If CLIENT_ORIGIN is not set, reflect requesting origin safely
+    if (configuredOrigins.length === 0) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
 };
 
 app.use(cors(corsOptions));
@@ -131,11 +172,11 @@ app.get('/api/debug', async (req, res) => {
   }
 
   const envKeys = [
-    'PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD',
+    'PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'CORS_ALLOW_ALL', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD',
     'DB_NAME', 'JWT_SECRET', 'SMTP_HOST', 'SMTP_PORT', 'SMTP_USER', 'SMTP_PASS',
     'ADMIN_EMAIL', 'EMAIL_FROM'
   ];
-  const visible = new Set(['PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'DB_HOST', 'DB_PORT', 'SMTP_HOST', 'SMTP_PORT']);
+  const visible = new Set(['PORT', 'NODE_ENV', 'CLIENT_ORIGIN', 'CORS_ALLOW_ALL', 'DB_HOST', 'DB_PORT', 'SMTP_HOST', 'SMTP_PORT']);
   const env = Object.fromEntries(
     envKeys.map((k) => [
       k,

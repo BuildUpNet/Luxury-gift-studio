@@ -252,7 +252,7 @@ router.post('/gifting-inquiries', async (req, res) => {
 
     // Send notifications asynchronously (failures will not break inquiry response)
     Promise.allSettled([
-      sendGiftingInquiryAdminNotification(inquiryData),
+      sendGiftingInquiryAdminNotification(inquiryData, req),
       sendGiftingInquiryCustomerConfirmation(inquiryData)
     ]).catch((err) => {
       console.warn('Notification email error:', err);
