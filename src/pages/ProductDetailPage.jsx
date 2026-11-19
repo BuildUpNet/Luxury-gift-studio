@@ -16,7 +16,6 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import resolveImageUrl, { parseGalleryImages } from '../utils/image';
 import { apiService } from '../services/api';
-import { PRODUCTS as FALLBACK_PRODUCTS } from '../data/giftStudioData';
 
 export default function ProductDetailPage() {
   const { slug } = useParams();
@@ -64,22 +63,7 @@ export default function ProductDetailPage() {
         }
       } catch (err) {
         console.error('Failed to load product details from API:', err);
-        // Fallback to FALLBACK_PRODUCTS if product exists in local data
-        const fallback = FALLBACK_PRODUCTS.find(
-          (p) =>
-            String(p.id) === String(slug) ||
-            p.slug === slug ||
-            (p.title &&
-              p.title
-                .toLowerCase()
-                .trim()
-                .replace(/[^\w\s-]/g, '')
-                .replace(/[\s_-]+/g, '-') === slug.toLowerCase())
-        );
-
-        if (fallback && isMounted) {
-          setProduct(fallback);
-        } else if (isMounted) {
+        if (isMounted) {
           setErrorMessage(err.message || 'Product could not be loaded.');
         }
       } finally {

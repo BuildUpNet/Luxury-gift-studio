@@ -235,9 +235,7 @@ export default function OccasionPage() {
     return list;
   }, [products, selectedPriceBracket, priceBrackets, sortBy]);
 
-  const coverUrl = occasion?.image_url
-    ? resolveImageUrl(occasion.image_url)
-    : 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070&auto=format&fit=crop';
+  const coverUrl = occasion?.image_url ? resolveImageUrl(occasion.image_url) : null;
 
   return (
     <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
@@ -265,16 +263,17 @@ export default function OccasionPage() {
         </div>
 
         {/* 2. Hero Cover Banner */}
-        <div className="relative w-full h-[280px] sm:h-[340px] md:h-[400px] overflow-hidden bg-[#0A101D]">
-          <img
-            src={coverUrl}
-            alt={occasion?.name || 'Occasion'}
-            className="w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
-            onError={(e) => {
-              e.currentTarget.src =
-                'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2070&auto=format&fit=crop';
-            }}
-          />
+        <div className="relative w-full h-[280px] sm:h-[340px] md:h-[400px] overflow-hidden bg-gradient-to-r from-[#0B1320] via-[#1A2638] to-[#0B1320]">
+          {coverUrl && (
+            <img
+              src={coverUrl}
+              alt={occasion?.name || 'Occasion'}
+              className="w-full h-full object-cover object-center scale-105 transition-transform duration-1000"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/55 to-black/30" />
 
           {/* Banner Text Overlay */}

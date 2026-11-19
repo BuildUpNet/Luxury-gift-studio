@@ -9,27 +9,16 @@ import {
   ShieldCheck,
   CheckCircle2
 } from 'lucide-react';
-import { TESTIMONIALS as FALLBACK_TESTIMONIALS } from '../data/giftStudioData';
 import { apiService } from '../services/api';
 import resolveImageUrl from '../utils/image';
 import { formatTimeAgo } from '../utils/date';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
-const INITIAL_FALLBACK = FALLBACK_TESTIMONIALS.map((t, idx) => ({
-  id: `fallback-${idx}`,
-  customer_name: t.author,
-  city: t.location,
-  review_text: t.quote,
-  rating: t.stars || 5,
-  occasion: 'Celebration',
-  created_at: new Date(Date.now() - (idx + 1) * 86400000 * 3).toISOString()
-}));
-
 export default function Testimonials() {
   const [testimonials, setTestimonials] = useState(() => {
     const cached = getCachedData(CACHE_KEYS.TESTIMONIALS, null);
     if (Array.isArray(cached) && cached.length > 0) return cached;
-    return INITIAL_FALLBACK;
+    return [];
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -57,7 +46,8 @@ export default function Testimonials() {
     };
   }, []);
 
-  const displayList = testimonials.length > 0 ? testimonials.slice(0, 3) : FALLBACK_TESTIMONIALS;
+  const displayList = testimonials.slice(0, 3);
+  if (displayList.length === 0) return null;
 
   return (
     <section className="max-w-7xl mx-auto my-14 sm:my-20 px-4 sm:px-6 lg:px-8">

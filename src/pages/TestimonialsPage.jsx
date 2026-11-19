@@ -19,7 +19,6 @@ import Footer from '../components/Footer';
 import resolveImageUrl from '../utils/image';
 import { formatTimeAgo } from '../utils/date';
 import { apiService } from '../services/api';
-import { TESTIMONIALS as FALLBACK_TESTIMONIALS } from '../data/giftStudioData';
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState([]);
@@ -36,44 +35,14 @@ export default function TestimonialsPage() {
       setIsLoading(true);
       try {
         const res = await apiService.getTestimonials();
-        if (res?.success && Array.isArray(res.testimonials) && res.testimonials.length > 0) {
+        if (res?.success && Array.isArray(res.testimonials)) {
           if (isMounted) setTestimonials(res.testimonials);
         } else {
-          if (isMounted) {
-            setTestimonials(
-              FALLBACK_TESTIMONIALS.map((t, idx) => ({
-                id: `fallback-${idx}`,
-                customer_name: t.author,
-                city: t.location,
-                review_text: t.quote,
-                rating: t.stars || 5,
-                occasion: idx === 0 ? 'Diwali Gifting' : idx === 1 ? 'Corporate Celebrations' : 'Weddings',
-                created_at: new Date(Date.now() - (idx + 1) * 86400000 * 4).toISOString(),
-                product_image_url:
-                  idx === 0
-                    ? 'https://thegiftstudio.com/cdn/shop/files/The_Select_by_Anamika_Khanna.png?v=1768808499&width=600'
-                    : idx === 1
-                    ? 'https://thegiftstudio.com/cdn/shop/files/Artful_Indulgence_by_Paresh_Maity_1472899_01.jpg?v=1789036880&width=600'
-                    : 'https://thegiftstudio.com/cdn/shop/files/The_Select_by_Anamika_Khanna.png?v=1768808499&width=600'
-              }))
-            );
-          }
+          if (isMounted) setTestimonials([]);
         }
       } catch (err) {
         console.error('Failed to load testimonials:', err);
-        if (isMounted) {
-          setTestimonials(
-            FALLBACK_TESTIMONIALS.map((t, idx) => ({
-              id: `fallback-${idx}`,
-              customer_name: t.author,
-              city: t.location,
-              review_text: t.quote,
-              rating: t.stars || 5,
-              occasion: idx === 0 ? 'Diwali Gifting' : idx === 1 ? 'Corporate Celebrations' : 'Weddings',
-              created_at: new Date(Date.now() - (idx + 1) * 86400000 * 4).toISOString()
-            }))
-          );
-        }
+        if (isMounted) setTestimonials([]);
       } finally {
         if (isMounted) setIsLoading(false);
       }

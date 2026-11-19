@@ -366,16 +366,22 @@ export default function OccasionsAdminPage({ onShowToast }) {
               >
                 <div>
                   {/* Image Cover */}
-                  <div className="relative h-44 bg-gray-100 overflow-hidden">
-                    <img
-                      src={coverImg}
-                      alt={occ.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => {
-                        e.currentTarget.src =
-                          'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=800&auto=format&fit=crop';
-                      }}
-                    />
+                  <div className="relative h-44 bg-gradient-to-br from-stone-800 to-stone-900 overflow-hidden">
+                    {coverImg ? (
+                      <img
+                        src={coverImg}
+                        alt={occ.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-stone-400 select-none">
+                        <CalendarHeart className="w-8 h-8 text-amber-500/80 mb-1" />
+                        <span className="text-[11px] font-medium tracking-wider uppercase">The Gift Studio</span>
+                      </div>
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     
                     {/* Badge */}

@@ -1,15 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiService } from '../services/api';
-import { PRODUCTS as FALLBACK_PRODUCTS } from '../data/giftStudioData';
 
 const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
-  const [products, setProducts] = useState(FALLBACK_PRODUCTS);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch products from database via centralized apiService
+  // Fetch products dynamically from database via centralized apiService
   const loadProducts = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -18,6 +17,8 @@ export function ProductProvider({ children }) {
 
       if (data.success && Array.isArray(data.products)) {
         setProducts(data.products);
+      } else {
+        setProducts([]);
       }
     } catch (err) {
       console.error('ProductContext: Error loading products from API:', err.message);
