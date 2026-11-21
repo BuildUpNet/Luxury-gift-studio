@@ -461,17 +461,9 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
 
                 <div
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none transition-opacity duration-300"
                   style={{
-                    background:
-                      'linear-gradient(90deg, rgba(10, 10, 14, 0.88) 0%, rgba(10, 10, 14, 0.65) 55%, rgba(10, 10, 14, 0.45) 100%)'
-                  }}
-                />
-
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    backgroundColor: `rgba(10, 10, 14, ${Math.max(0.15, parseFloat(bannerConfig.overlay_opacity || 0.65) * 0.4)})`
+                    background: `linear-gradient(90deg, rgba(10, 10, 14, ${Math.min(0.85, (parseFloat(bannerConfig.overlay_opacity) || 0.65) * 1.15)}) 0%, rgba(10, 10, 14, ${(parseFloat(bannerConfig.overlay_opacity) || 0.65) * 0.55}) 50%, rgba(10, 10, 14, ${(parseFloat(bannerConfig.overlay_opacity) || 0.65) * 0.25}) 100%)`
                   }}
                 />
 
