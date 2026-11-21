@@ -187,7 +187,7 @@ export default function ProductDetailPage() {
     (product?.category ? product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#E4EDE5' }}>
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#15241B' }}>
       <Header />
 
       <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">

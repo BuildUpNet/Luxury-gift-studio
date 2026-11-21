@@ -25,7 +25,7 @@ const DEFAULT_BANNER = {
   heading: 'Curate Your Custom Gift Hamper',
   subheading: 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.',
   button_text: 'Request Custom Quote →',
-  bg_image: '/images/gift_logo.jpeg',
+  bg_image: '/images/WhatsApp_Image_2026-11-12_at_4_10_37_PM__1_-1794831265924-235183473.jpeg',
   overlay_opacity: 0.65,
   is_active: 1
 };

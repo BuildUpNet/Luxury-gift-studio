@@ -122,10 +122,10 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-[#E4EDE5]">
+    <div className="min-h-screen w-full flex flex-col bg-[#15241B]">
       <Header />
 
-      <main className="flex-1 py-12 md:py-16 bg-[#E4EDE5]">
+      <main className="flex-1 py-12 md:py-16 bg-[#15241B]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">

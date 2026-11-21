@@ -9,7 +9,7 @@ const DEFAULT_BANNER = {
   heading: 'Curate Your Custom Gift Hamper',
   subheading: 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.',
   button_text: 'Request Custom Quote →',
-  bg_image: '/images/gift_logo.jpeg',
+  bg_image: '/images/WhatsApp_Image_2026-11-12_at_4_10_37_PM__1_-1794831265924-235183473.jpeg',
   overlay_opacity: 0.65,
   is_active: 1
 };
@@ -217,14 +217,14 @@ export default function GiftingBannerSection() {
           className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
             background:
-              'linear-gradient(90deg, rgba(10, 10, 14, 0.88) 0%, rgba(10, 10, 14, 0.65) 55%, rgba(10, 10, 14, 0.45) 100%)'
+              'linear-gradient(90deg, rgba(10, 10, 14, 0.92) 0%, rgba(10, 10, 14, 0.78) 50%, rgba(10, 10, 14, 0.65) 100%)'
           }}
         />
 
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backgroundColor: `rgba(10, 10, 14, ${Math.max(0.15, overlayOpacity * 0.4)})`
+            backgroundColor: `rgba(10, 10, 14, ${overlayOpacity})`
           }}
         />
 

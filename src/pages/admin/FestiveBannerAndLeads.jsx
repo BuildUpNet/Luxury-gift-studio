@@ -28,20 +28,20 @@ import { resolveImageUrl } from '../../utils/image';
 
 const PRESET_FESTIVE_IMAGES = [
   {
-    name: 'Diwali & Festive Glow',
-    url: '/images/gift_logo.jpeg'
+    name: 'Luxury Hampers & Gourmet Glow',
+    url: '/images/WhatsApp_Image_2026-11-12_at_4_10_37_PM__1_-1794831265924-235183473.jpeg'
   },
   {
-    name: 'Christmas & Holiday Luxury',
-    url: '/images/gift_logo.jpeg'
+    name: 'Festive Gold Hamper Collection',
+    url: '/images/WhatsApp_Image_2026-11-12_at_4_10_25_PM-1794815870929-710997942.jpeg'
   },
   {
-    name: 'Royal Wedding & Celebration',
-    url: '/images/gift_logo.jpeg'
+    name: 'Artisanal Celebrations Hamper',
+    url: '/images/WhatsApp_Image_2026-11-12_at_4_10_36_PM-1794830325866-60791254.jpeg'
   },
   {
     name: 'Corporate & Gourmet Black Tie',
-    url: '/images/gift_logo.jpeg'
+    url: '/images/WhatsApp_Image_2026-11-12_at_4_10_47_PM-1794829693000-57259759.jpeg'
   }
 ];
 

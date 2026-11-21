@@ -315,16 +315,16 @@ export default function HomeCarousels({
           id="shop-by-category-section"
           className="w-full py-12"
           style={{
-            backgroundColor: '#E4EDE5',
-            borderBottom: '1px solid #BACBBD'
+            backgroundColor: '#15241B',
+            borderBottom: '1px solid #2D4737'
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-5">
-              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#8B2635' }}>
+              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#D4AF37' }}>
                 Curated Hampers
               </span>
-              <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-950 tracking-tight">
+              <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
                 Shop by Category
               </h2>
             </div>
@@ -410,7 +410,7 @@ export default function HomeCarousels({
                       style={{
                         height: '6px',
                         width: activeCategoryDot === idx ? '22px' : '6px',
-                        backgroundColor: activeCategoryDot === idx ? '#8B2635' : '#BACBBD'
+                        backgroundColor: activeCategoryDot === idx ? '#D4AF37' : '#2D4737'
                       }}
                     />
                   </button>
@@ -426,17 +426,17 @@ export default function HomeCarousels({
           id="shop-by-occasion-section"
           className="w-full py-12"
           style={{
-            backgroundColor: '#E4EDE5',
-            borderBottom: '1px solid #BACBBD'
+            backgroundColor: '#15241B',
+            borderBottom: '1px solid #2D4737'
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-5">
               <div>
-                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#C59D5F' }}>
+                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#D4AF37' }}>
                   Festivals & Milestones
                 </span>
-                <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-950 tracking-tight">
+                <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
                   Shop by Occasion
                 </h2>
               </div>
@@ -445,7 +445,7 @@ export default function HomeCarousels({
                 <button
                   type="button"
                   onClick={() => scroll(occasionScrollRef, 'left')}
-                  className="w-9 h-9 rounded-full border border-[#BACBBD] bg-white hover:bg-[#C4D9C8] hover:text-[#8B2635] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  className="w-9 h-9 rounded-full border border-[#2D4737] bg-white hover:bg-[#D4AF37] hover:text-white text-gray-800 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
                   disabled={!canScrollOccasionLeft}
                   aria-label="Scroll occasions left"
                 >
@@ -454,7 +454,7 @@ export default function HomeCarousels({
                 <button
                   type="button"
                   onClick={() => scroll(occasionScrollRef, 'right')}
-                  className="w-9 h-9 rounded-full border border-[#BACBBD] bg-white hover:bg-[#C4D9C8] hover:text-[#8B2635] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  className="w-9 h-9 rounded-full border border-[#2D4737] bg-white hover:bg-[#D4AF37] hover:text-white text-gray-800 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
                   disabled={!canScrollOccasionRight}
                   aria-label="Scroll occasions right"
                 >

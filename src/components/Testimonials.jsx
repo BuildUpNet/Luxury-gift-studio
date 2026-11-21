@@ -53,21 +53,21 @@ export default function Testimonials() {
     <section
       className="w-full py-16 sm:py-20"
       style={{
-        backgroundColor: '#E4EDE5',
-        borderTop: '1px solid #BACBBD',
-        borderBottom: '1px solid #BACBBD'
+        backgroundColor: '#15241B',
+        borderTop: '1px solid #2D4737',
+        borderBottom: '1px solid #2D4737'
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5E4D8] text-[#1B7A43] text-[11px] font-bold tracking-widest uppercase mb-2.5 shadow-2xs">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1C3024] border border-[#2D4737] text-[#D4AF37] text-[11px] font-bold tracking-widest uppercase mb-2.5 shadow-2xs">
             <Sparkles className="w-3 h-3" />
             <span>Words Of Acclaim</span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-stone-900 tracking-tight">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
             Celebrated Voices Echo Their Admiration
           </h2>
-          <p className="mt-2 text-stone-600 text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="mt-2 text-[#A2B5A7] text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
             Read verified experiences from delighted clients who celebrated birthdays, Diwali, and grand milestones with our bespoke luxury hampers.
           </p>
         </div>

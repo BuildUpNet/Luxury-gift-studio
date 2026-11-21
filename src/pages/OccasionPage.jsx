@@ -256,7 +256,7 @@ export default function OccasionPage() {
   const coverUrl = occasion?.image_url ? resolveImageUrl(occasion.image_url) : null;
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#E4EDE5' }}>
+    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#15241B' }}>
       <Header />
 
       <main className="flex-1 w-full">

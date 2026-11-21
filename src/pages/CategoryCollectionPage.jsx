@@ -504,7 +504,7 @@ export default function CategoryCollectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#E4EDE5' }}>
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#15241B' }}>
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}

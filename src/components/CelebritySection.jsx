@@ -5,9 +5,9 @@ import { CELEBRITIES } from '../data/giftStudioData';
 export default function CelebritySection({ onSelectDesigner }) {
   return (
     <section id="celebrity-hampers" style={{
-      background: '#E4EDE5',
-      borderTop: '1px solid #BACBBD',
-      borderBottom: '1px solid #BACBBD',
+      background: '#15241B',
+      borderTop: '1px solid #2D4737',
+      borderBottom: '1px solid #2D4737',
       padding: '50px 24px 60px'
     }}>
       <div style={{ maxWidth: '1360px', margin: '0 auto' }}>

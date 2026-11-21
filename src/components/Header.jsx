@@ -186,14 +186,14 @@ const Header = ({
   const hasOverflow = navbarCategories.length > 6;
 
   return (
-    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#DBE6DC', borderBottom: '1px solid #BACBBD' }}>
-      <div style={{ borderBottom: '1px solid rgba(27, 122, 67, 0.15)' }}>
+    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#182C20', borderBottom: '1px solid #2D4737' }}>
+      <div style={{ borderBottom: '1px solid rgba(212, 175, 55, 0.15)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-1.5 text-stone-700 hover:text-black hover:bg-[#CFE0D2] rounded-md cursor-pointer border-none bg-transparent"
+              className="lg:hidden p-1.5 text-stone-200 hover:text-white hover:bg-[#223B2D] rounded-md cursor-pointer border-none bg-transparent"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -214,10 +214,10 @@ const Header = ({
                 className="transition-transform duration-300 group-hover:scale-[1.02]"
                 style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
               />
-              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(27, 122, 67, 0.35)' }} />
+              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(212, 175, 55, 0.35)' }} />
               <span
                 className="hidden sm:inline-block font-serif text-xs sm:text-sm font-bold tracking-wide italic"
-                style={{ color: '#145E33', letterSpacing: '0.04em' }}
+                style={{ color: '#D4AF37', letterSpacing: '0.04em' }}
               >
                 Premium Gifting Solutions
               </span>
@@ -225,16 +225,17 @@ const Header = ({
           </div>
 
           <div ref={searchWrapRef} className="flex-1 max-w-md hidden md:block relative">
-            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-[#F0EBE1] hover:bg-white focus-within:bg-white border border-[#DFD6C9] focus-within:border-[#8B2635] shadow-sm rounded-full px-4 py-2 transition shadow-2xs">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-[#223B2D] hover:bg-[#284635] focus-within:bg-[#284635] border border-[#2D4737] focus-within:border-[#D4AF37] shadow-sm rounded-full px-4 py-2 transition shadow-2xs">
               <button
                 type="submit"
                 aria-label="Submit search"
-                className="bg-transparent border-none p-0 cursor-pointer text-stone-500 hover:text-[#145E33] mr-2 shrink-0 flex items-center"
+                className="bg-transparent border-none p-0 cursor-pointer text-[#D4AF37] mr-2 shrink-0 flex items-center"
               >
                 <Search className="w-4 h-4" />
               </button>
               <input
                 type="text"
+                className="w-full bg-transparent text-white text-xs sm:text-sm placeholder-[#8EA696] focus:outline-none"
                 value={internalSearch}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -348,8 +349,8 @@ const Header = ({
               to="/contact"
               className={`inline-flex items-center justify-center text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200 no-underline cursor-pointer border ${
                 isContactActive
-                  ? 'bg-[#1B7A43] text-white border-[#1B7A43] shadow-xs'
-                  : 'bg-[#EAF2EC] hover:bg-[#D6E6D8] text-[#145E33] border-[#BACBBD] hover:border-[#1B7A43] shadow-2xs'
+                  ? 'bg-[#D4AF37] text-stone-900 border-[#D4AF37] shadow-xs'
+                  : 'bg-[#223B2D] hover:bg-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 border-[#2D4737] hover:border-[#D4AF37] shadow-2xs'
               }`}
             >
               Contact Us
@@ -359,7 +360,7 @@ const Header = ({
               href={storeSettings.facebook_url || 'https://facebook.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#1877F2] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#1877F2] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="Facebook"
             >
               <i className="fa-brands fa-facebook-f text-base"></i>
@@ -369,7 +370,7 @@ const Header = ({
               href={storeSettings.instagram_url || 'https://instagram.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#E1306C] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#E1306C] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="Instagram"
             >
               <i className="fa-brands fa-instagram text-lg"></i>
@@ -379,7 +380,7 @@ const Header = ({
               href={storeSettings.whatsapp_url || 'https://wa.me/917506210892'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#25D366] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#25D366] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="WhatsApp"
             >
               <i className="fa-brands fa-whatsapp text-lg"></i>
@@ -388,7 +389,7 @@ const Header = ({
         </div>
 
         <div className="md:hidden px-4 pb-3">
-          <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#EAF2EC] border border-[#BACBBD] rounded-full px-4 py-2">
+          <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#223B2D] border border-[#2D4737] rounded-full px-4 py-2">
             <button
               type="submit"
               aria-label="Submit search"
@@ -465,8 +466,8 @@ const Header = ({
                       }}
                       className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium capitalize transition-all duration-200 cursor-pointer no-underline border ${
                         isActive
-                          ? 'active text-[#145E33] font-bold bg-[#C4D9C8] border-[#A2C2A8] shadow-xs'
-                          : 'text-stone-800 hover:text-[#145E33] hover:bg-[#CEE0D2]/70 hover:border-[#BACBBD] border-transparent'
+                          ? 'active text-stone-900 font-bold bg-[#D4AF37] border-[#D4AF37] shadow-xs'
+                          : 'text-[#E4EFE7] hover:text-[#D4AF37] hover:bg-[#223B2D] hover:border-[#2D4737] border-transparent'
                       }`}
                     >
                       <span className="relative">
@@ -476,21 +477,21 @@ const Header = ({
                       {hasSubcats && (
                         <ChevronDown
                           className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            isOpen ? 'rotate-180 text-[#145E33]' : 'text-stone-500 group-hover:rotate-180 group-hover:text-[#145E33]'
+                            isOpen ? 'rotate-180 text-[#D4AF37]' : 'text-[#8EA696] group-hover:rotate-180 group-hover:text-[#D4AF37]'
                           }`}
                         />
                       )}
                     </Link>
 
                     {hasSubcats && isOpen && (
-                      <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#BACBBD] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="absolute top-full left-0 mt-1 min-w-48 bg-[#182C20] border border-[#2D4737] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                         <Link
                           to={`/category/${cat.slug || cat.id}`}
                           onClick={() => {
                             setActiveDropdown(null);
                             setIsMobileMenuOpen(false);
                           }}
-                          className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline border-b border-[#BACBBD]/60 capitalize"
+                          className="block w-full text-left px-4 py-2 text-xs font-bold text-[#D4AF37] hover:bg-[#223B2D] hover:text-white transition no-underline border-b border-[#2D4737] capitalize"
                         >
                           All in {cat.name}
                         </Link>
@@ -503,7 +504,7 @@ const Header = ({
                               setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline capitalize"
+                            className="block w-full text-left px-4 py-2 text-xs text-[#E4EFE7] hover:bg-[#223B2D] hover:text-[#D4AF37] transition no-underline capitalize"
                           >
                             {subcat.name}
                           </Link>
@@ -522,13 +523,13 @@ const Header = ({
                     className={`inline-flex items-center gap-1.5 text-xs tracking-wider font-semibold uppercase px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer border ${
                       isExpanded
                         ? 'bg-[#C62828] text-white border-[#C62828] shadow-xs'
-                        : 'bg-[#E4EDE5] text-[#145E33] hover:text-[#145E33] hover:bg-white border-[#BACBBD] hover:border-[#145E33]'
+                        : 'bg-[#223B2D] text-[#E4EFE7] hover:text-stone-900 hover:bg-[#D4AF37] border-[#2D4737] hover:border-[#D4AF37]'
                     }`}
                   >
                     <span>{isExpanded ? 'Close' : 'View All'}</span>
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                        isExpanded ? 'rotate-180 text-white' : 'text-stone-500'
+                        isExpanded ? 'rotate-180 text-white' : 'text-[#8EA696]'
                       }`}
                     />
                   </button>
@@ -540,12 +541,12 @@ const Header = ({
 
         {hasOverflow && (
           <div
-            className={`absolute top-full left-0 w-full z-40 border-b border-[#BACBBD] shadow-xl transition-all duration-300 ease-in-out ${
+            className={`absolute top-full left-0 w-full z-40 border-b border-[#2D4737] shadow-xl transition-all duration-300 ease-in-out ${
               isExpanded
                 ? 'opacity-100 translate-y-0 pointer-events-auto visible'
                 : 'opacity-0 -translate-y-2 pointer-events-none invisible'
             }`}
-            style={{ backgroundColor: '#DBE6DC' }}
+            style={{ backgroundColor: '#182C20' }}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
               <div className="flex items-center justify-between mb-2.5">
@@ -632,8 +633,8 @@ const Header = ({
       </nav>
 
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-b border-[#BACBBD] px-4 py-4 space-y-3 max-h-[75vh] overflow-y-auto" style={{ backgroundColor: '#DBE6DC' }}>
-          <div className="space-y-1 text-sm font-medium text-gray-800">
+        <div className="lg:hidden border-b border-[#2D4737] px-4 py-4 space-y-3 max-h-[75vh] overflow-y-auto" style={{ backgroundColor: '#182C20' }}>
+          <div className="space-y-1 text-sm font-medium text-gray-200">
             {navbarCategories.map((cat) => {
               const subcats = subcategoriesByParent[cat.id] || [];
               const hasSubcats = subcats.length > 0;
