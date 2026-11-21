@@ -1,17 +1,16 @@
 import React from 'react';
-import { ArrowRight, Quote } from 'lucide-react';
+import { ArrowRight, Quote } from './FaIcons';
 import { CELEBRITIES } from '../data/giftStudioData';
 
 export default function CelebritySection({ onSelectDesigner }) {
   return (
     <section id="celebrity-hampers" style={{
-      background: '#FAF7F2',
-      borderTop: '1px solid #E8DFD3',
-      borderBottom: '1px solid #E8DFD3',
+      background: '#E4EDE5',
+      borderTop: '1px solid #BACBBD',
+      borderBottom: '1px solid #BACBBD',
       padding: '50px 24px 60px'
     }}>
       <div style={{ maxWidth: '1360px', margin: '0 auto' }}>
-        {/* Title */}
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <span style={{ fontSize: '0.78rem', color: '#C62828', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
             Exclusive Collaborations
@@ -24,7 +23,6 @@ export default function CelebritySection({ onSelectDesigner }) {
           </p>
         </div>
 
-        {/* Celebrity Cards */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -47,7 +45,7 @@ export default function CelebritySection({ onSelectDesigner }) {
                   style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80";
+                    e.currentTarget.src = "/images/gift_logo.jpeg";
                   }}
                   onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.06)'}
                   onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
@@ -79,7 +77,7 @@ export default function CelebritySection({ onSelectDesigner }) {
                 <div style={{
                   marginTop: 'auto',
                   paddingTop: '14px',
-                  borderTop: '1px solid #E8DFD3',
+                  borderTop: '1px solid #BACBBD',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between'

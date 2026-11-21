@@ -14,9 +14,10 @@ import {
   Link as LinkIcon,
   CheckCircle2,
   AlertCircle
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import { apiService } from '../../services/api';
 import resolveImageUrl from '../../utils/image';
+import { clearCache, CACHE_KEYS } from '../../utils/cache';
 
 const INITIAL_FORM = {
   image_url: '',
@@ -140,6 +141,7 @@ export default function HeroBannersAdminPage({ onShowToast }) {
       if (editingId) {
         const res = await apiService.updateHeroSlide(editingId, formData);
         if (res?.success) {
+          clearCache(CACHE_KEYS.HERO_SLIDES);
           if (onShowToast) onShowToast('Hero banner updated successfully');
           setIsModalOpen(false);
           fetchSlides();
@@ -149,6 +151,7 @@ export default function HeroBannersAdminPage({ onShowToast }) {
       } else {
         const res = await apiService.createHeroSlide(formData);
         if (res?.success) {
+          clearCache(CACHE_KEYS.HERO_SLIDES);
           if (onShowToast) onShowToast('Hero banner added successfully');
           setIsModalOpen(false);
           fetchSlides();
@@ -185,6 +188,7 @@ export default function HeroBannersAdminPage({ onShowToast }) {
     try {
       const res = await apiService.reorderHeroSlides(orderPayload);
       if (res?.success) {
+        clearCache(CACHE_KEYS.HERO_SLIDES);
         if (onShowToast) onShowToast('Banner order updated');
       }
     } catch (err) {
@@ -199,6 +203,7 @@ export default function HeroBannersAdminPage({ onShowToast }) {
     try {
       const res = await apiService.deleteHeroSlide(deleteModalItem.id);
       if (res?.success) {
+        clearCache(CACHE_KEYS.HERO_SLIDES);
         if (onShowToast) onShowToast('Hero banner deleted successfully');
         setDeleteModalItem(null);
         fetchSlides();
@@ -215,7 +220,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Bar */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -241,7 +245,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
         </div>
       </div>
 
-      {/* 2. Slides List */}
       {isLoading ? (
         <div className="py-24 text-center bg-white rounded-xl border border-[#E5E7EB]">
           <Loader2 className="w-8 h-8 animate-spin text-[#8B2635] mx-auto mb-2" />
@@ -273,7 +276,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 key={slide.id}
                 className="bg-white rounded-xl border border-[#E5E7EB] overflow-hidden shadow-2xs hover:shadow-xs transition flex flex-col md:flex-row items-stretch"
               >
-                {/* Slide Preview Box */}
                 <div className="md:w-72 h-44 md:h-auto relative overflow-hidden bg-stone-900 shrink-0">
                   <img
                     src={resolvedImg}
@@ -295,7 +297,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                   )}
                 </div>
 
-                {/* Content Details */}
                 <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                   <div>
                     {slide.tag_text && (
@@ -314,7 +315,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                   </div>
 
                   <div className="pt-3 mt-3 border-t border-gray-100 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    {/* Button Link Tag */}
                     <div className="flex items-center gap-2 text-stone-600">
                       <span className="font-bold text-gray-900 bg-stone-100 px-2.5 py-1 rounded text-[11px]">
                         CTA: {slide.button_text || 'GIFT NOW'}
@@ -325,9 +325,7 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                       </span>
                     </div>
 
-                    {/* Actions: Reorder + Edit + Delete */}
                     <div className="flex items-center gap-1.5">
-                      {/* Move Up */}
                       <button
                         type="button"
                         onClick={() => handleMoveSlide(index, 'up')}
@@ -338,7 +336,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                         <ArrowUp className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Move Down */}
                       <button
                         type="button"
                         onClick={() => handleMoveSlide(index, 'down')}
@@ -349,7 +346,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                         <ArrowDown className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Edit Button */}
                       <button
                         type="button"
                         onClick={() => handleOpenEdit(slide)}
@@ -359,7 +355,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                         <Edit2 className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Delete Button */}
                       <button
                         type="button"
                         onClick={() => setDeleteModalItem(slide)}
@@ -377,11 +372,9 @@ export default function HeroBannersAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* ── CREATE / EDIT MODAL ─────────────────────────────────────────── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative border border-gray-200 max-h-[92vh] overflow-y-auto">
-            {/* Close Button */}
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -390,7 +383,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Modal Header */}
             <div className="mb-4">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B2635]">
                 {editingId ? 'Modify Banner' : 'New Hero Slide'}
@@ -410,7 +402,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              {/* Image Upload Box */}
               <div>
                 <label className="block text-gray-700 font-bold mb-1">
                   Background Banner Image * (1920x1080 recommended)
@@ -472,7 +463,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Tag / Eyebrow Text */}
               <div>
                 <label className="block text-gray-700 font-bold mb-1">
                   Tag / Subtitle Text (Golden Eyebrow)
@@ -487,7 +477,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Heading */}
               <div>
                 <label className="block text-gray-700 font-bold mb-1">
                   Main Headline / Title *
@@ -503,7 +492,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Subtext */}
               <div>
                 <label className="block text-gray-700 font-bold mb-1">
                   Subtext / Description
@@ -518,7 +506,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Button Details & Sort Order */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block text-gray-700 font-bold mb-1">
@@ -563,7 +550,6 @@ export default function HeroBannersAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Form Actions */}
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
                 <button
                   type="button"
@@ -586,9 +572,8 @@ export default function HeroBannersAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* ── DELETE MODAL ─────────────────────────────────────────────────── */}
       {deleteModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative border border-gray-200 text-center">
             <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
               <Trash2 className="w-6 h-6" />

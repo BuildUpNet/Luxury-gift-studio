@@ -5,7 +5,7 @@ export const STORE_INFO = {
   tagline: "Buy Premium Gifts & Luxury Hampers Online",
   whatsapp: "+91 7506210892",
   phone: "7506210892",
-  email: "support@thegiftstudio.com",
+  email: "modient93@gmail.com",
   announcement: "FOR QUERIES PLEASE CALL OR WHATSAPP- 7506210892",
 };
 
@@ -17,7 +17,6 @@ export const ORIGINAL_NAV_LINKS = [
   { id: "anniversary", label: "Anniversary" },
   { id: "last-minute", label: "Last Minute Gifting" },
   { id: "best-sellers", label: "Best Sellers" },
-  { id: "create-own", label: "Create Your Own Hamper", isBuilder: true },
   { id: "corporate", label: "Corporate Gifts" },
   { id: "home-decor", label: "Home Decor" }
 ];
@@ -72,18 +71,18 @@ export const TESTIMONIALS = [
 
 export const HAMPER_BUILDER_OPTIONS = {
   boxes: [
-    { id: "box-1", name: "Mighty Celebration Trunk", price: 2499, image: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80", desc: "Handcrafted velvet trunk with vintage brass latch" },
+    { id: "box-1", name: "Mighty Celebration Trunk", price: 2499, image: "/images/gift_logo.jpeg", desc: "Handcrafted velvet trunk with vintage brass latch" },
     { id: "box-2", name: "The Select Keepsake Box", price: 1799, image: "https://thegiftstudio.com/cdn/shop/files/The_Select_by_Anamika_Khanna.png?v=1768808499&width=600", desc: "Sturdy rigid box with embossed floral design" },
-    { id: "box-3", name: "Artisanal Handwoven Cane Basket", price: 1299, image: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=600&auto=format&fit=crop&q=80", desc: "Natural willow basket with linen lining" },
-    { id: "box-4", name: "Midnight Luxe Gift Chest", price: 2199, image: "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=600&auto=format&fit=crop&q=80", desc: "Minimalist black magnetic closure with satin interior" }
+    { id: "box-3", name: "Artisanal Handwoven Cane Basket", price: 1299, image: "/images/gift_logo.jpeg", desc: "Natural willow basket with linen lining" },
+    { id: "box-4", name: "Midnight Luxe Gift Chest", price: 2199, image: "/images/gift_logo.jpeg", desc: "Minimalist black magnetic closure with satin interior" }
   ],
   items: [
-    { id: "item-1", name: "Artisanal Belgian Truffles Box", category: "Chocolates", price: 950, image: "https://images.unsplash.com/photo-1549007994-cb92caebd54b?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-2", name: "Imported Scented Candle (Vanilla & Oud)", category: "Decor", price: 1250, image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-3", name: "Roasted Truffle Almonds & Cashews Jar", category: "Gourmet", price: 850, image: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?w=600&auto=format&fit=crop&q=80" },
-    { id: "item-4", name: "Sparkling Botanical White Grape Nectar", category: "Beverages", price: 1100, image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-5", name: "Hammered Brass Cocktail Shaker & Tumbler", category: "Barware", price: 1850, image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400&auto=format&fit=crop&q=80" },
-    { id: "item-6", name: "Himalayan Pink Salt Dark Chocolate Bar", category: "Chocolates", price: 450, image: "https://images.unsplash.com/photo-1606312619070-d48b4c652a52?w=600&auto=format&fit=crop&q=80" }
+    { id: "item-1", name: "Artisanal Belgian Truffles Box", category: "Chocolates", price: 950, image: "/images/gift_logo.jpeg" },
+    { id: "item-2", name: "Imported Scented Candle (Vanilla & Oud)", category: "Decor", price: 1250, image: "/images/gift_logo.jpeg" },
+    { id: "item-3", name: "Roasted Truffle Almonds & Cashews Jar", category: "Gourmet", price: 850, image: "/images/gift_logo.jpeg" },
+    { id: "item-4", name: "Sparkling Botanical White Grape Nectar", category: "Beverages", price: 1100, image: "/images/gift_logo.jpeg" },
+    { id: "item-5", name: "Hammered Brass Cocktail Shaker & Tumbler", category: "Barware", price: 1850, image: "/images/gift_logo.jpeg" },
+    { id: "item-6", name: "Himalayan Pink Salt Dark Chocolate Bar", category: "Chocolates", price: 450, image: "/images/gift_logo.jpeg" }
   ],
   ribbons: [
     { id: "rib-gold", name: "Champagne Gold Ribbon", hex: "#D4AF37" },
@@ -1470,9 +1469,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.8,
     "reviews": 14,
-    "image": "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2211,9 +2210,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.75,
     "reviews": 8,
-    "image": "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2229,9 +2228,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.33,
     "reviews": 3,
-    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2266,9 +2265,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.6,
     "reviews": 5,
-    "image": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2284,9 +2283,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.8,
     "reviews": 14,
-    "image": "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2321,9 +2320,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 5.0,
     "reviews": 4,
-    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2358,9 +2357,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.8,
     "reviews": 14,
-    "image": "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2376,9 +2375,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.25,
     "reviews": 4,
-    "image": "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2434,9 +2433,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.33,
     "reviews": 3,
-    "image": "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2471,9 +2470,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.5,
     "reviews": 4,
-    "image": "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2510,9 +2509,9 @@ export const PRODUCTS = [
     "originalPrice": "",
     "rating": 4.75,
     "reviews": 4,
-    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80",
+    "image": "/images/gift_logo.jpeg",
     "images": [
-      "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80"
+      "/images/gift_logo.jpeg"
     ],
     "inStock": true,
     "description": "An exquisite hand-curated gift hamper featuring premium artisanal delights, luxury packaging, and a personalized keepsake card. Hand-tied with silk ribbon."
@@ -2995,7 +2994,7 @@ export const DIWALI_GIFTING_IDEAS = [
     title: 'Top 10 Unique Diwali Gift Hamper Ideas for Family & Friends',
     category: 'Gifting Guide',
     readTime: '4 min read',
-    image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80',
+    image: '/images/gift_logo.jpeg',
     excerpt: 'From handcrafted brass diyas and aromatic soy candles to artisanal pistachio baklava and silver keepsakes, discover meaningful gifting inspirations for your dearest.'
   },
   {

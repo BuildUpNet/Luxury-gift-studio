@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -13,7 +13,7 @@ import {
   Sparkles,
   Quote,
   CalendarHeart
-} from 'lucide-react';
+} from '../../components/FaIcons';
 
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import ProductsPage from './ProductsPage';
@@ -23,14 +23,55 @@ import TestimonialsAdminPage from './TestimonialsAdminPage';
 import SettingsAdminPage from './SettingsAdminPage';
 import HeroBannersAdminPage from './HeroBannersAdminPage';
 import OccasionsAdminPage from './OccasionsAdminPage';
+import FeatureCardsAdminPage from './FeatureCardsAdminPage';
+
+const VALID_TABS = [
+  'dashboard',
+  'hero-banners',
+  'products',
+  'categories',
+  'occasions',
+  'highlights',
+  'testimonials',
+  'festive-banner',
+  'settings'
+];
 
 export default function AdminDashboard() {
   const { logout, adminUser } = useAdminAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { tab: paramTab } = useParams();
 
-  const [currentTab, setCurrentTab] = useState('dashboard');
+  const getInitialTab = () => {
+    if (paramTab && VALID_TABS.includes(paramTab)) return paramTab;
+    const urlTab = searchParams.get('tab');
+    if (urlTab && VALID_TABS.includes(urlTab)) return urlTab;
+    const storedTab = localStorage.getItem('giftstudio_admin_active_tab');
+    if (storedTab && VALID_TABS.includes(storedTab)) return storedTab;
+    return 'dashboard';
+  };
+
+  const [currentTab, setCurrentTab] = useState(getInitialTab);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  const handleTabChange = (tabId) => {
+    setCurrentTab(tabId);
+    setSearchParams({ tab: tabId }, { replace: true });
+    localStorage.setItem('giftstudio_admin_active_tab', tabId);
+    setIsSidebarOpen(false);
+  };
+
+  useEffect(() => {
+    const activeFromUrl = paramTab || searchParams.get('tab');
+    if (activeFromUrl && VALID_TABS.includes(activeFromUrl) && activeFromUrl !== currentTab) {
+      setCurrentTab(activeFromUrl);
+      localStorage.setItem('giftstudio_admin_active_tab', activeFromUrl);
+    } else if (!activeFromUrl && currentTab) {
+      setSearchParams({ tab: currentTab }, { replace: true });
+    }
+  }, [paramTab, searchParams, currentTab, setSearchParams]);
 
   const handleLogout = () => {
     logout();
@@ -44,21 +85,18 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] flex text-gray-900 font-sans">
-      {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed bottom-6 right-6 z-50 bg-[#0B1320] text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-lg animate-in fade-in slide-in-from-bottom-2">
           {toastMessage}
         </div>
       )}
 
-      {/* 1. Left Sidebar (Dark Navy #07111E) */}
       <aside
         className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#07111E] text-white flex flex-col justify-between transition-transform duration-200 lg:static lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
         <div>
-          {/* Brand Header */}
           <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
             <div className="flex flex-col">
               <span className="font-serif text-lg font-bold tracking-wider text-white">
@@ -77,7 +115,6 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {/* Navigation Links */}
           <nav className="p-4 space-y-1.5">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -85,6 +122,7 @@ export default function AdminDashboard() {
               { id: 'products', label: 'Products', icon: Package },
               { id: 'categories', label: 'Categories', icon: FolderTree },
               { id: 'occasions', label: 'Occasions', icon: CalendarHeart },
+              { id: 'highlights', label: 'Marquee Highlights', icon: Sparkles },
               { id: 'testimonials', label: 'Testimonials', icon: Quote },
               { id: 'festive-banner', label: 'Festive Banner & Leads', icon: Sparkles },
               { id: 'settings', label: 'Settings', icon: Settings }
@@ -95,10 +133,7 @@ export default function AdminDashboard() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => {
-                    setCurrentTab(item.id);
-                    setIsSidebarOpen(false);
-                  }}
+                  onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer border-none text-left ${
                     isActive
                       ? 'bg-white/10 text-white font-semibold'
@@ -121,7 +156,6 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        {/* Sidebar Footer */}
         <div className="p-4 border-t border-white/10 space-y-2">
           <Link
             to="/"
@@ -143,7 +177,6 @@ export default function AdminDashboard() {
         </div>
       </aside>
 
-      {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
           onClick={() => setIsSidebarOpen(false)}
@@ -151,9 +184,7 @@ export default function AdminDashboard() {
         />
       )}
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* 2. Top Bar */}
         <header className="h-16 bg-white border-b border-[#E5E7EB] flex items-center justify-between px-4 sm:px-6 lg:px-8 sticky top-0 z-30">
           <div className="flex items-center gap-3">
             <button
@@ -186,7 +217,6 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Notification Bell - Disabled */}
             <div className="relative">
               <button
                 type="button"
@@ -198,7 +228,6 @@ export default function AdminDashboard() {
               </button>
             </div>
 
-            {/* Admin User Avatar */}
             <div className="flex items-center gap-2 pl-2 border-l border-gray-200">
               <div className="w-8 h-8 rounded-full bg-[#07111E] text-white flex items-center justify-center text-xs font-bold shadow-xs">
                 {(adminUser?.name || adminUser?.username || 'AD').substring(0, 2).toUpperCase()}
@@ -209,16 +238,14 @@ export default function AdminDashboard() {
                   {adminUser?.name || 'Studio Admin'}
                 </p>
                 <p className="text-[11px] text-gray-400 mt-0.5">
-                  {adminUser?.email || 'admin@thegiftstudio.com'}
+                  {adminUser?.email || 'modient93@gmail.com'}
                 </p>
               </div>
             </div>
           </div>
         </header>
 
-        {/* 3. Main Body Content */}
         <main className="p-4 sm:p-6 lg:p-8 space-y-8 flex-1">
-          {/* Dashboard Tab */}
           {currentTab === 'dashboard' && (
             <div className="space-y-6">
               <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-6">
@@ -232,7 +259,7 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('hero-banners')}
+                    onClick={() => handleTabChange('hero-banners')}
                     className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -251,7 +278,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('products')}
+                    onClick={() => handleTabChange('products')}
                     className="p-4 rounded-xl border border-blue-200 bg-blue-50/50 hover:bg-blue-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -270,7 +297,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('categories')}
+                    onClick={() => handleTabChange('categories')}
                     className="p-4 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -289,7 +316,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('occasions')}
+                    onClick={() => handleTabChange('occasions')}
                     className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -308,7 +335,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('testimonials')}
+                    onClick={() => handleTabChange('testimonials')}
                     className="p-4 rounded-xl border border-rose-200 bg-rose-50/50 hover:bg-rose-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -327,7 +354,7 @@ export default function AdminDashboard() {
 
                   <button
                     type="button"
-                    onClick={() => setCurrentTab('festive-banner')}
+                    onClick={() => handleTabChange('festive-banner')}
                     className="p-4 rounded-xl border border-amber-200 bg-amber-50/50 hover:bg-amber-50 text-left transition cursor-pointer group"
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -348,37 +375,34 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* Hero Banners Tab */}
           {currentTab === 'hero-banners' && (
             <HeroBannersAdminPage onShowToast={showToast} />
           )}
 
-          {/* Products Tab */}
           {currentTab === 'products' && (
             <ProductsPage onShowToast={showToast} />
           )}
 
-          {/* Categories Tab */}
           {currentTab === 'categories' && (
             <CategoriesPage />
           )}
 
-          {/* Occasions Tab */}
           {currentTab === 'occasions' && (
             <OccasionsAdminPage onShowToast={showToast} />
           )}
 
-          {/* Testimonials Tab */}
+          {currentTab === 'highlights' && (
+            <FeatureCardsAdminPage onShowToast={showToast} />
+          )}
+
           {currentTab === 'testimonials' && (
             <TestimonialsAdminPage onShowToast={showToast} />
           )}
 
-          {/* Festive Banner & Custom Inquiries Leads Tab */}
           {currentTab === 'festive-banner' && (
             <FestiveBannerAndLeads onShowToast={showToast} />
           )}
 
-          {/* Settings Tab */}
           {currentTab === 'settings' && (
             <SettingsAdminPage onShowToast={showToast} />
           )}

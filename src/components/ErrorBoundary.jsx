@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AlertTriangle, RotateCcw } from 'lucide-react';
+import { AlertTriangle, RotateCcw } from './FaIcons';
 
 export default class ErrorBoundary extends Component {
   constructor(props) {

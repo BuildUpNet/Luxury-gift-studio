@@ -15,7 +15,7 @@ import {
   HelpCircle,
   RotateCcw,
   SlidersHorizontal
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useProducts } from '../../context/ProductContext';
@@ -59,7 +59,6 @@ export default function HomeDecorPage({
   const popoverRef = useRef(null);
   const sortRef = useRef(null);
 
-  // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (popoverRef.current && !popoverRef.current.contains(event.target)) {
@@ -171,14 +170,12 @@ export default function HomeDecorPage({
 
   return (
     <div className="min-h-screen flex flex-col text-gray-900 font-sans selection:bg-red-100 selection:text-red-900" style={{ backgroundColor: '#FAF7F2' }}>
-      {/* 1. Header & Navigation with active Category 'home-decor' */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         activeCategory="home-decor"
       />
 
-      {/* 2. Breadcrumb Navigation */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <nav className="flex items-center gap-2 text-xs text-gray-500">
@@ -193,7 +190,6 @@ export default function HomeDecorPage({
         </div>
       </div>
 
-      {/* 3. Centered Page Header */}
       <section className="bg-gradient-to-b from-white via-[#fdfcfb] to-[#fafaf9] pt-10 pb-8 px-4 sm:px-6 text-center border-b border-gray-200/70">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200/60 text-amber-900 text-[11px] font-semibold tracking-widest uppercase mb-3 shadow-xs">
@@ -223,11 +219,9 @@ export default function HomeDecorPage({
         </div>
       </section>
 
-      {/* 4. Filter Bar (Price Dropdown Aligned to Left) */}
       <section className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
           
-          {/* Left Aligned: Filter Bar with "Price" Dropdown Filter Button */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <div className="relative" ref={popoverRef}>
               <button
@@ -253,7 +247,6 @@ export default function HomeDecorPage({
                 />
               </button>
 
-              {/* Price Filter Dropdown Popover */}
               {isPricePopoverOpen && (
                 <div className="absolute left-0 mt-2 w-72 sm:w-80 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                   <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-gray-100">
@@ -275,7 +268,6 @@ export default function HomeDecorPage({
                     )}
                   </div>
 
-                  {/* Standard Tiers */}
                   <div className="space-y-1">
                     {HOME_DECOR_PRICE_TIERS.map((tier) => {
                       const isSelected = selectedPriceTier === tier.id && !appliedCustomRange;
@@ -312,7 +304,6 @@ export default function HomeDecorPage({
                     })}
                   </div>
 
-                  {/* Custom Price Range Inputs */}
                   <div className="mt-3 pt-3 border-t border-gray-100">
                     <span className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider block mb-2">
                       Custom Range (INR)
@@ -353,7 +344,6 @@ export default function HomeDecorPage({
               )}
             </div>
 
-            {/* Active Filter Pill Badge */}
             {isFilterActive && (
               <button
                 type="button"
@@ -367,13 +357,11 @@ export default function HomeDecorPage({
             )}
           </div>
 
-          {/* Right Aligned: Product Count & Sort Dropdown */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-gray-500 hidden sm:inline">
               Showing <strong className="text-gray-900">{filteredProducts.length}</strong> items
             </span>
 
-            {/* Sort Dropdown */}
             <div className="relative" ref={sortRef}>
               <button
                 type="button"
@@ -413,7 +401,6 @@ export default function HomeDecorPage({
         </div>
       </section>
 
-      {/* 5. Responsive 4-Column Product Grid */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex-1 w-full">
         {filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-2xl border border-gray-200/80 p-8 shadow-xs max-w-lg mx-auto">
@@ -446,7 +433,6 @@ export default function HomeDecorPage({
                   key={product.id}
                   className="group relative bg-white rounded-xl border border-gray-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_28px_rgba(0,0,0,0.08)] transition-all duration-300 flex flex-col overflow-hidden hover:-translate-y-1"
                 >
-                  {/* Image Container with Uniform Aspect Ratio */}
                   <div
                     className="relative w-full aspect-square bg-[#f5f5f4] overflow-hidden cursor-pointer"
                     onMouseEnter={() =>
@@ -464,18 +450,16 @@ export default function HomeDecorPage({
                       className="w-full h-full object-cover object-center transition-all duration-500 group-hover:scale-105"
                       onError={(e) => {
                         e.currentTarget.src =
-                          'https://images.unsplash.com/photo-1512909006721-3d6018887383?w=800&auto=format&fit=crop&q=80';
+                          '/images/gift_logo.jpeg';
                       }}
                     />
 
-                    {/* Discount Sale Badge (Top Left) */}
                     {product.discountBadge && (
                       <span className="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded shadow-xs z-10">
                         {product.discountBadge}
                       </span>
                     )}
 
-                    {/* Quick View Button Hover Overlay */}
                     <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10 flex gap-2">
                       <button
                         type="button"
@@ -491,15 +475,12 @@ export default function HomeDecorPage({
                     </div>
                   </div>
 
-                  {/* Product Details Section */}
                   <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
                     <div>
-                      {/* Brand Subtext */}
                       <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-1">
                         {product.brand || 'THE GIFT STUDIO'}
                       </p>
 
-                      {/* Product Title */}
                       <h2
                         onClick={() => onQuickView && onQuickView(product)}
                         className="text-sm font-semibold text-gray-900 group-hover:text-amber-900 line-clamp-2 leading-snug cursor-pointer transition mb-2"
@@ -508,7 +489,6 @@ export default function HomeDecorPage({
                         {product.title}
                       </h2>
 
-                      {/* Star Rating with Review Count */}
                       <div className="flex items-center gap-1.5 mb-2.5">
                         <div className="flex items-center text-amber-500">
                           {[...Array(5)].map((_, i) => (
@@ -529,7 +509,6 @@ export default function HomeDecorPage({
                         </span>
                       </div>
 
-                      {/* Price in INR with strike-through and discount badge */}
                       <div className="flex items-baseline gap-2 mb-3">
                         <span className="text-base sm:text-lg font-bold text-gray-950">
                           {product.price}
@@ -547,15 +526,12 @@ export default function HomeDecorPage({
                       </div>
                     </div>
 
-                    {/* Bottom Section: Delivery Badge & Add to Bag */}
                     <div className="space-y-2.5 pt-2 border-t border-gray-100">
-                      {/* Delivery Truck Badge Pill */}
                       <div className="inline-flex items-center gap-1.5 bg-emerald-50/90 text-emerald-800 text-[11px] font-semibold px-2.5 py-1 rounded-full w-full justify-center border border-emerald-200/50">
                         <Truck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>Earliest delivery: {product.earliestDelivery || 'Today'}</span>
                       </div>
 
-                      {/* View Details Button */}
                       <button
                         type="button"
                         onClick={() => onQuickView && onQuickView(product)}
@@ -573,10 +549,8 @@ export default function HomeDecorPage({
         )}
       </main>
 
-      {/* 6. Content & SEO Section (Below Grid) */}
       <section className="bg-white border-t border-gray-200 mt-12 py-14 sm:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
-          {/* Main Editorial Heading & Introductory Paragraphs */}
           <div className="text-center mb-12">
             <span className="text-xs font-bold uppercase tracking-widest text-amber-700 block mb-2">
               The Gift Studio Journal
@@ -592,7 +566,6 @@ export default function HomeDecorPage({
             </div>
           </div>
 
-          {/* Why Choose Our Home Décor Presents? */}
           <div className="mb-14 bg-gradient-to-br from-[#fcfbf9] to-[#faf8f5] rounded-2xl p-6 sm:p-10 border border-amber-200/40">
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-gray-900 mb-6 text-center sm:text-left">
               {HOME_DECOR_SEO_CONTENT.whyChooseHeading}
@@ -616,7 +589,6 @@ export default function HomeDecorPage({
             </div>
           </div>
 
-          {/* Interactive FAQs Accordion */}
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">
@@ -659,7 +631,6 @@ export default function HomeDecorPage({
             </div>
           </div>
 
-          {/* Trust Guarantees */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-14 pt-10 border-t border-gray-200 text-center">
             <div className="space-y-1.5">
               <ShieldCheck className="w-6 h-6 text-amber-600 mx-auto" />
@@ -685,7 +656,6 @@ export default function HomeDecorPage({
         </div>
       </section>
 
-      {/* 7. Footer */}
       <Footer />
     </div>
   );

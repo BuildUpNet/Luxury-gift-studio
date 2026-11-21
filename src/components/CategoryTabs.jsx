@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Package, ChevronDown } from 'lucide-react';
+import { Package, ChevronDown } from './FaIcons';
 
 export default function CategoryTabs({ activeCategory, onSelectCategory, categories = [] }) {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const containerRef = useRef(null);
 
-  // Close dropdown on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
@@ -53,9 +52,7 @@ export default function CategoryTabs({ activeCategory, onSelectCategory, categor
       className="w-full bg-[#fdfcfb] border-b border-gray-100 py-4 relative z-30"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Clean wrapping flexbox on all screen sizes so dropdown is never clipped by overflow-x */}
         <div className="flex items-center justify-center flex-wrap gap-2.5 py-1">
-          {/* 1. All Hampers button */}
           <button
             type="button"
             onClick={() => handleSelect('all')}
@@ -69,7 +66,6 @@ export default function CategoryTabs({ activeCategory, onSelectCategory, categor
             <span>All Hampers</span>
           </button>
 
-          {/* 2. Top-level categories with subcategory dropdowns */}
           {topLevelCategories.map((category) => {
             const subcats = subcategoriesByParent[category.id] || [];
             const hasSubcats = subcats.length > 0;
@@ -137,10 +133,8 @@ export default function CategoryTabs({ activeCategory, onSelectCategory, categor
                   </button>
                 </div>
 
-                {/* Subcategory Dropdown Panel (elevation z-50 above everything) */}
                 {hasSubcats && isOpen && (
                   <div className="absolute top-full left-0 mt-1.5 min-w-48 bg-white border border-gray-200 shadow-2xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                    {/* View all in this category */}
                     <button
                       type="button"
                       onClick={() => handleSelect(category.slug || category.id)}
@@ -151,7 +145,6 @@ export default function CategoryTabs({ activeCategory, onSelectCategory, categor
                       All in {category.name}
                     </button>
 
-                    {/* Subcategories list */}
                     {subcats.map((subcat) => {
                       const isSubActive =
                         activeCategory === subcat.slug || String(activeCategory) === String(subcat.id);

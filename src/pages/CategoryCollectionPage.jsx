@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronRight,
   Filter,
@@ -15,7 +15,7 @@ import {
   Loader2,
   ChevronDown,
   Images
-} from 'lucide-react';
+} from '../components/FaIcons';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import resolveImageUrl, { parseGalleryImages } from '../utils/image';
@@ -113,9 +113,7 @@ function ProductCard({ product }) {
       to={productTarget}
       className="group bg-white rounded-xl border border-[#E8DFD3] overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-md hover:border-[#D8C7B2] hover:-translate-y-0.5 no-underline text-inherit cursor-pointer select-none"
     >
-      {/* Product Image Container with Clean 4:5 Aspect Ratio and max height constraint */}
       <div className="relative aspect-[4/5] max-h-[270px] w-full bg-[#F8F5F0] overflow-hidden select-none">
-        {/* Only clean discount badge when originalPrice > priceNum */}
         {hasDiscount && (
           <div className="absolute top-2 left-2 z-10 pointer-events-none">
             <span
@@ -127,7 +125,6 @@ function ProductCard({ product }) {
           </div>
         )}
 
-        {/* Gallery count badge if multiple photos */}
         {galleryList.length > 1 && (
           <div className="absolute bottom-2 right-2 z-10 pointer-events-none">
             <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold backdrop-blur-xs">
@@ -137,7 +134,6 @@ function ProductCard({ product }) {
           </div>
         )}
 
-        {/* Product Image or Fallback */}
         {!imgFailed ? (
           <img
             src={resolvedSrc}
@@ -156,15 +152,12 @@ function ProductCard({ product }) {
         )}
       </div>
 
-      {/* Product Information - Minimalist Card Content */}
       <div className="p-3 flex-1 flex flex-col justify-between">
         <div>
-          {/* Title - 1 line truncated with line-clamp-1, medium weight, clean sans-serif font */}
           <h3 className="font-sans text-sm font-medium text-stone-900 group-hover:text-[#8B2635] transition-colors line-clamp-1 leading-snug" title={product?.title}>
             {product?.title || 'Untitled Gift'}
           </h3>
 
-          {/* Price right below the title (bold, clean formatting) */}
           <div className="flex items-baseline gap-1.5 mt-1">
             <span className="font-sans text-sm font-bold text-stone-950">
               ₹{priceNumeric.toLocaleString('en-IN')}
@@ -184,6 +177,8 @@ function ProductCard({ product }) {
 export default function CategoryCollectionPage() {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
   const isAllCategories = !slug || slug === 'all';
 
   // State
@@ -200,7 +195,14 @@ export default function CategoryCollectionPage() {
   const [sortBy, setSortBy] = useState('featured');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const [isPriceFilterOpen, setIsPriceFilterOpen] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(urlSearch);
+  const [showProductsOverride, setShowProductsOverride] = useState(false);
+
+  // Sync searchQuery when URL query param changes
+  useEffect(() => {
+    const q = searchParams.get('search') || '';
+    setSearchQuery(q);
+  }, [searchParams]);
 
   // Pagination (16 items per page for clean 4-column responsive grid)
   const [currentPage, setCurrentPage] = useState(1);
@@ -230,6 +232,7 @@ export default function CategoryCollectionPage() {
       setSelectedPriceBracket('all');
       setSelectedCategoryFilter(slug || 'all');
       setSortBy('featured');
+      setShowProductsOverride(false);
 
       try {
         // Fetch categories list for filters & navigation
@@ -243,7 +246,6 @@ export default function CategoryCollectionPage() {
         }
 
         if (isAllCategories) {
-          // ── All Categories Mode (/category) ──────────────────────────────
           if (!isMounted) return;
           setCategory({ name: 'All Categories', slug: 'all' });
 
@@ -256,7 +258,6 @@ export default function CategoryCollectionPage() {
             }
           }
         } else {
-          // ── Specific Category Mode (/category/:slug) ─────────────────────
           const catRes = await apiService.getCategoryBySlug(slug);
           if (!catRes?.success || !catRes?.category) {
             throw new Error(catRes?.message || 'Category not found');
@@ -330,6 +331,14 @@ export default function CategoryCollectionPage() {
       (c) => c.parent_id === null || c.parent_id === undefined
     );
   }, [allCategories]);
+
+  // Current category subcategories (if this is a parent category with children)
+  const currentCategorySubcategories = useMemo(() => {
+    if (isAllCategories || !category?.id) return [];
+    return (allCategories || []).filter(
+      (c) => c.parent_id === category.id
+    );
+  }, [allCategories, category, isAllCategories]);
 
   // Live item counts per category (for /category All Categories mode)
   const categoryCounts = useMemo(() => {
@@ -410,7 +419,6 @@ export default function CategoryCollectionPage() {
     return list;
   }, [products, isAllCategories, selectedCategoryFilter, selectedPriceBracket, sortBy, searchQuery, priceBrackets]);
 
-  // Reset pagination when filters, sort, search, or slug change
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedCategoryFilter, selectedPriceBracket, sortBy, searchQuery, slug]);
@@ -436,6 +444,7 @@ export default function CategoryCollectionPage() {
     setSelectedPriceBracket('all');
     setSortBy('featured');
     setSearchQuery('');
+    setSearchParams({});
     setCurrentPage(1);
   };
 
@@ -495,8 +504,7 @@ export default function CategoryCollectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
-      {/* 1. Header Navigation */}
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#E4EDE5' }}>
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -510,8 +518,7 @@ export default function CategoryCollectionPage() {
         }}
       />
 
-      {/* 2. Breadcrumbs Navigation */}
-      <div className="border-b border-[#E8DFD3]/80 bg-[#FDFBF7]">
+      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
             <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
@@ -524,8 +531,19 @@ export default function CategoryCollectionPage() {
                 isAllCategories ? 'text-stone-900 font-semibold' : 'text-stone-500'
               }`}
             >
-              Category
+              Categories
             </Link>
+            {!isAllCategories && category?.parent_id && (
+              <>
+                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <Link
+                  to={`/category/${allCategories.find((c) => String(c.id) === String(category.parent_id))?.slug || category.parent_id}`}
+                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap text-stone-500 capitalize"
+                >
+                  {allCategories.find((c) => String(c.id) === String(category.parent_id))?.name || 'Parent Category'}
+                </Link>
+              </>
+            )}
             {!isAllCategories && (
               <>
                 <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
@@ -538,8 +556,7 @@ export default function CategoryCollectionPage() {
         </div>
       </div>
 
-      {/* 3. Hero / Category Banner Section */}
-      <section className="py-8 sm:py-10 border-b border-[#E8DFD3]/70" style={{ backgroundColor: '#F3ECE1' }}>
+      <section className="py-8 sm:py-10 border-b border-[#BACBBD]" style={{ backgroundColor: '#DBE6DC' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -548,20 +565,21 @@ export default function CategoryCollectionPage() {
                 <span>Curated Luxury Gifting</span>
               </div>
               <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-950 capitalize">
-                {isAllCategories ? 'Shop All Gifts' : (category?.name || slug)}
+                {isAllCategories ? 'All Categories' : (category?.name || slug)}
               </h1>
               <p className="mt-2 text-stone-600 text-sm sm:text-base max-w-2xl leading-relaxed">
                 {isAllCategories
-                  ? 'Discover our complete collection of bespoke luxury hampers, curated gourmet celebration boxes, and unforgettable artisanal gifts across all collections.'
+                  ? 'Explore our complete collection of gift categories, crafted to elevate every celebration.'
                   : `Discover our signature collection of handcrafted ${category?.name || 'luxury gifts'}, specially selected to elevate every celebration.`}
               </p>
             </div>
 
-            {/* Product Count Pill */}
             {!isLoading && (
               <div className="shrink-0 flex items-center gap-2">
                 <span className="px-4 py-2 rounded-full bg-white border border-[#E8DFD3] text-stone-800 text-xs sm:text-sm font-semibold shadow-xs">
-                  {filteredProducts.length} {filteredProducts.length === 1 ? 'Gift' : 'Gifts'} Available
+                  {isAllCategories
+                    ? `${filterableCategories.length} ${filterableCategories.length === 1 ? 'Category' : 'Categories'}`
+                    : `${filteredProducts.length} ${filteredProducts.length === 1 ? 'Gift' : 'Gifts'} Available`}
                 </span>
               </div>
             )}
@@ -569,18 +587,15 @@ export default function CategoryCollectionPage() {
         </div>
       </section>
 
-      {/* 4. Main Collection Body: Left Sidebar Filters + Product Grid */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Loading Spinner */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-12 h-12 border-3 border-[#C62828] border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="font-serif text-lg text-stone-800 font-medium">Curating category collection...</p>
+            <p className="font-serif text-lg text-stone-800 font-medium">Curating collection...</p>
             <p className="text-stone-500 text-xs mt-1">Fetching the finest gift hampers</p>
           </div>
         )}
 
-        {/* Error / Not Found Message */}
         {!isLoading && errorMessage && (
           <div className="text-center py-20 px-4 max-w-md mx-auto">
             <div className="w-16 h-16 rounded-full bg-red-50 text-[#C62828] flex items-center justify-center mx-auto mb-4 border border-red-200">
@@ -598,13 +613,174 @@ export default function CategoryCollectionPage() {
           </div>
         )}
 
-        {/* Loaded Content */}
-        {!isLoading && !errorMessage && (
+        {!isLoading && !errorMessage && isAllCategories && (
           <div>
-            {/* Top Toolbar: Showing count on the left, Sort dropdown on the right */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+              {filterableCategories.map((cat) => {
+                const count = categoryCounts[cat.id] || 0;
+                return (
+                  <Link
+                    key={cat.id}
+                    to={`/category/${cat.slug || cat.id}`}
+                    className="editorial-category-card group no-underline text-inherit"
+                    style={{ flex: 'none', minWidth: 'unset', maxWidth: 'unset', width: '100%' }}
+                  >
+                    <div className="editorial-card-image-wrap">
+                      {cat.image_url ? (
+                        <img
+                          src={resolveImageUrl(cat.image_url)}
+                          alt={cat.name}
+                          loading="lazy"
+                          className="editorial-card-image"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex flex-col items-center justify-center p-6 text-center select-none"
+                          style={{
+                            background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
+                          }}
+                        >
+                          <div
+                            className="w-14 h-14 rounded-full flex items-center justify-center font-serif text-lg font-bold tracking-widest shadow-xs mb-2"
+                            style={{
+                              background: '#FFFFFF',
+                              color: '#C62828',
+                              border: '1.5px solid rgba(198, 40, 40, 0.3)'
+                            }}
+                          >
+                            {cat.name ? cat.name.substring(0, 2).toUpperCase() : 'TG'}
+                          </div>
+                          <span className="font-serif text-xs text-stone-600 italic">The Gift Studio</span>
+                        </div>
+                      )}
+
+                      {count > 0 && (
+                        <span
+                          className="absolute top-3 right-3 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md"
+                          style={{ background: 'rgba(30, 30, 30, 0.78)' }}
+                        >
+                          {count} Gifts
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
+                      <h3 className="editorial-category-title font-serif text-[1rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1 text-stone-900">
+                        {cat.name}
+                      </h3>
+                      <span className="text-[11px] text-stone-400 font-medium tracking-wider uppercase mt-0.5">
+                        View Collection
+                      </span>
+                    </div>
+
+                    <span className="editorial-card-accent-bar" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !errorMessage && !isAllCategories && currentCategorySubcategories.length > 0 && !showProductsOverride && (
+          <div className="mb-10">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+              <div>
+                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1 text-[#8B2635]">
+                  Subcategories in {category?.name}
+                </span>
+                <h2 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+                  Explore Specific Collections
+                </h2>
+              </div>
+
+              {products.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowProductsOverride(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#D5C2AD] bg-white text-stone-800 text-xs font-semibold hover:border-[#8B2635] hover:text-[#8B2635] transition shadow-2xs self-start sm:self-auto cursor-pointer"
+                >
+                  <span>View All {products.length} Products</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+              {currentCategorySubcategories.map((subcat) => {
+                const subcount = categoryCounts[subcat.id] || 0;
+                return (
+                  <Link
+                    key={subcat.id}
+                    to={`/category/${subcat.slug || subcat.id}`}
+                    className="editorial-category-card group no-underline text-inherit"
+                    style={{ flex: 'none', minWidth: 'unset', maxWidth: 'unset', width: '100%' }}
+                  >
+                    <div className="editorial-card-image-wrap">
+                      {subcat.image_url ? (
+                        <img
+                          src={resolveImageUrl(subcat.image_url)}
+                          alt={subcat.name}
+                          loading="lazy"
+                          className="editorial-card-image"
+                        />
+                      ) : (
+                        <div
+                          className="w-full h-full flex flex-col items-center justify-center p-6 text-center select-none"
+                          style={{
+                            background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
+                          }}
+                        >
+                          <div
+                            className="w-12 h-12 rounded-full flex items-center justify-center font-serif text-base font-bold tracking-widest shadow-xs mb-2 bg-white text-[#8B2635] border border-[#8B2635]/20"
+                          >
+                            {subcat.name ? subcat.name.substring(0, 2).toUpperCase() : 'TG'}
+                          </div>
+                          <span className="font-serif text-[11px] text-stone-600 italic">{category?.name}</span>
+                        </div>
+                      )}
+
+                      {subcount > 0 && (
+                        <span
+                          className="absolute top-3 right-3 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm backdrop-blur-md"
+                          style={{ background: 'rgba(30, 30, 30, 0.78)' }}
+                        >
+                          {subcount} Gifts
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-3 pb-1 px-1 text-center flex flex-col items-center justify-center">
+                      <h3 className="editorial-category-title font-serif text-[0.95rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1 text-stone-900">
+                        {subcat.name}
+                      </h3>
+                      <span className="text-[11px] text-stone-400 font-medium tracking-wider uppercase mt-0.5">
+                        Browse Subcategory
+                      </span>
+                    </div>
+
+                    <span className="editorial-card-accent-bar" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {!isLoading && !errorMessage && !isAllCategories && (currentCategorySubcategories.length === 0 || showProductsOverride) && (
+          <div>
+            {currentCategorySubcategories.length > 0 && showProductsOverride && (
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => setShowProductsOverride(false)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border border-[#D5C2AD] bg-white text-xs font-semibold text-stone-700 hover:text-[#8B2635] hover:border-[#8B2635] transition shadow-2xs cursor-pointer mb-2"
+                >
+                  <span>← Back to Subcategories</span>
+                </button>
+              </div>
+            )}
             <div id="collection-grid-top" className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-[#E8DFD3]/80 scroll-mt-28">
               <div className="flex items-center gap-2.5">
-                {/* Mobile Filter Button */}
                 <button
                   type="button"
                   onClick={() => setIsMobileFilterOpen(true)}
@@ -638,27 +814,6 @@ export default function CategoryCollectionPage() {
                   items
                 </span>
 
-                {/* Active Category Filter Pill (in All Categories mode) */}
-                {isAllCategories && selectedCategoryFilter !== 'all' && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#FAF7F2] border border-[#8B2635]/30 text-[#8B2635]">
-                    <span>
-                      {filterableCategories.find(
-                        (c) =>
-                          String(c.id) === String(selectedCategoryFilter) ||
-                          c.slug === selectedCategoryFilter
-                      )?.name || 'Category'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedCategoryFilter('all')}
-                      className="hover:opacity-75 cursor-pointer bg-transparent border-none p-0 text-[#8B2635]"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </span>
-                )}
-
-                {/* Active Price Bracket Filter Pill */}
                 {selectedPriceBracket !== 'all' && (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#FAF7F2] border border-[#8B2635]/30 text-[#8B2635]">
                     <span>{priceBrackets.find((b) => b.id === selectedPriceBracket)?.label}</span>
@@ -673,7 +828,6 @@ export default function CategoryCollectionPage() {
                 )}
               </div>
 
-              {/* Sorting Selector */}
               <div className="flex items-center gap-2 ml-auto">
                 <span className="text-xs text-stone-500 font-normal">Sort:</span>
                 <select
@@ -690,114 +844,8 @@ export default function CategoryCollectionPage() {
               </div>
             </div>
 
-            {/* Layout: Sidebar + Product Grid with clean top edge alignment */}
             <div className="flex flex-col lg:flex-row items-start gap-6">
-              {/* Left Sidebar */}
               <aside className="hidden lg:block w-60 shrink-0 self-start sticky top-24 space-y-3">
-                {/* Collapsible Filter Box: Categories (in All Categories mode) */}
-                {isAllCategories && filterableCategories.length > 0 && (
-                  <div className="border border-[#E8DFD3] rounded-xl bg-white shadow-2xs overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => setIsCategoryFilterOpen(!isCategoryFilterOpen)}
-                      className="w-full flex items-center justify-between text-left cursor-pointer border-none bg-transparent py-2.5 px-4 select-none group"
-                    >
-                      <span className="text-xs font-semibold text-stone-900 tracking-wide">
-                        Categories
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        {selectedCategoryFilter !== 'all' && (
-                          <span
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCategoryFilter('all');
-                            }}
-                            className="text-[10px] font-medium text-[#8B2635] hover:underline cursor-pointer"
-                          >
-                            Reset
-                          </span>
-                        )}
-                        <ChevronDown
-                          className={`w-3.5 h-3.5 text-stone-500 transition-transform duration-200 group-hover:text-stone-900 ${
-                            isCategoryFilterOpen ? 'rotate-180' : ''
-                          }`}
-                        />
-                      </div>
-                    </button>
-
-                    {isCategoryFilterOpen && (
-                      <div className="pt-2 pb-3 px-4 border-t border-[#E8DFD3]/60 max-h-56 overflow-y-auto space-y-1">
-                        {/* All Categories Option */}
-                        <label className="flex items-center justify-between py-1 px-1 rounded-sm cursor-pointer hover:bg-stone-50 text-xs transition select-none">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <input
-                              type="radio"
-                              name="category-filter"
-                              value="all"
-                              checked={selectedCategoryFilter === 'all'}
-                              onChange={() => setSelectedCategoryFilter('all')}
-                              className="w-3.5 h-3.5 accent-[#8B2635] cursor-pointer shrink-0"
-                            />
-                            <span
-                              className={`text-xs truncate ${
-                                selectedCategoryFilter === 'all'
-                                  ? 'text-stone-900 font-medium'
-                                  : 'text-stone-600 font-normal'
-                              }`}
-                            >
-                              All Categories
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-stone-400 font-normal pl-2 shrink-0">
-                            ({categoryCounts.all || 0})
-                          </span>
-                        </label>
-
-                        {/* Dynamic Category List */}
-                        {filterableCategories.map((cat) => {
-                          const count = categoryCounts[cat.id] || 0;
-                          const isSelected = String(selectedCategoryFilter) === String(cat.id);
-
-                          return (
-                            <label
-                              key={cat.id}
-                              className="flex items-center justify-between py-1 px-1 rounded-sm cursor-pointer hover:bg-stone-50 text-xs transition select-none"
-                            >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <input
-                                  type="radio"
-                                  name="category-filter"
-                                  value={cat.id}
-                                  checked={isSelected}
-                                  onChange={() => setSelectedCategoryFilter(cat.id)}
-                                  className="w-3.5 h-3.5 accent-[#8B2635] cursor-pointer shrink-0"
-                                />
-                                <span
-                                  className={`text-xs truncate ${
-                                    isSelected
-                                      ? 'text-stone-900 font-medium'
-                                      : 'text-stone-600 font-normal'
-                                  }`}
-                                >
-                                  {cat.name}
-                                </span>
-                              </div>
-                              <span
-                                className={`text-[11px] font-normal pl-2 shrink-0 ${
-                                  isSelected ? 'text-[#8B2635] font-medium' : 'text-stone-400'
-                                }`}
-                              >
-                                ({count})
-                              </span>
-                            </label>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* Compact Collapsible Filter Box: Price Range */}
                 <div className="border border-[#E8DFD3] rounded-xl bg-white shadow-2xs overflow-hidden">
                   <button
                     type="button"
@@ -829,7 +877,6 @@ export default function CategoryCollectionPage() {
 
                   {isPriceFilterOpen && (
                     <div className="pt-2 pb-3 px-4 border-t border-[#E8DFD3]/60 max-h-56 overflow-y-auto space-y-1">
-                      {/* All Prices Option */}
                       <label className="flex items-center justify-between py-1 px-1 rounded-sm cursor-pointer hover:bg-stone-50 text-xs transition select-none">
                         <div className="flex items-center gap-2 min-w-0">
                           <input
@@ -855,7 +902,6 @@ export default function CategoryCollectionPage() {
                         </span>
                       </label>
 
-                      {/* Dynamically Generated Price Brackets */}
                       {priceBrackets.map((bracket) => {
                         const count = bracketCounts[bracket.id] || 0;
                         const isSelected = selectedPriceBracket === bracket.id;
@@ -899,7 +945,6 @@ export default function CategoryCollectionPage() {
                 </div>
               </aside>
 
-              {/* Product Grid Area */}
               <div className="flex-1 w-full min-w-0">
                 {filteredProducts.length === 0 ? (
                   <div className="bg-white rounded-2xl border border-[#E8DFD3] p-12 text-center my-2">
@@ -935,7 +980,6 @@ export default function CategoryCollectionPage() {
                       ))}
                     </div>
 
-                    {/* Pagination Controls */}
                     {totalPages > 1 && (
                       <div className="mt-8 pt-6 border-t border-[#E8DFD3]/80 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <span className="text-xs text-stone-500 font-normal order-2 sm:order-1">
@@ -1005,7 +1049,6 @@ export default function CategoryCollectionPage() {
         )}
       </main>
 
-      {/* ── Mobile Filter Drawer ─────────────────────────────────────────── */}
       {isMobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div
@@ -1031,7 +1074,6 @@ export default function CategoryCollectionPage() {
             </div>
 
             <div className="p-4 flex-1 overflow-y-auto space-y-6">
-              {/* Category Filter for Mobile (All Categories mode) */}
               {isAllCategories && filterableCategories.length > 0 && (
                 <div>
                   <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">
@@ -1093,7 +1135,6 @@ export default function CategoryCollectionPage() {
                 </div>
               )}
 
-              {/* Price Range Filter for Mobile */}
               <div>
                 <h4 className="text-xs font-bold text-stone-900 uppercase tracking-wider mb-2">
                   Price Range
@@ -1176,18 +1217,14 @@ export default function CategoryCollectionPage() {
         </div>
       )}
 
-      {/* ── 5. Product Inquiry Modal Flow ─────────────────────────────────── */}
       {inquireModalProduct && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* Modal Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={handleCloseInquireModal}
           />
 
-          {/* Modal Container */}
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden z-10 border border-[#E8DFD3] animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#E8DFD3] bg-[#FAF7F2]">
               <div>
                 <span className="text-[10px] font-bold tracking-widest uppercase text-[#C62828] block">
@@ -1206,9 +1243,7 @@ export default function CategoryCollectionPage() {
               </button>
             </div>
 
-            {/* Modal Content */}
             <div className="p-6">
-              {/* Product Summary Header inside Modal */}
               <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-200/60 mb-5">
                 <img
                   src={resolveImageUrl(inquireModalProduct.image)}
@@ -1236,7 +1271,6 @@ export default function CategoryCollectionPage() {
                 </div>
               </div>
 
-              {/* Inquiry Success State */}
               {inquirySuccess ? (
                 <div className="text-center py-6">
                   <div className="w-14 h-14 rounded-full bg-emerald-50 text-[#1B7A43] flex items-center justify-center mx-auto mb-3 border border-emerald-200">
@@ -1378,7 +1412,6 @@ export default function CategoryCollectionPage() {
         </div>
       )}
 
-      {/* 6. Footer */}
       <Footer />
     </div>
   );

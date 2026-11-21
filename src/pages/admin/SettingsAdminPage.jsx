@@ -11,7 +11,7 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import { apiService } from '../../services/api';
 
 export default function SettingsAdminPage({ onShowToast }) {
@@ -26,7 +26,6 @@ export default function SettingsAdminPage({ onShowToast }) {
   const [isSaving, setIsSaving] = useState(false);
   const [statusMessage, setStatusMessage] = useState({ type: '', text: '' });
 
-  // Fetch current store settings
   useEffect(() => {
     let isMounted = true;
     async function loadSettings() {
@@ -94,7 +93,6 @@ export default function SettingsAdminPage({ onShowToast }) {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      {/* 1. Header Bar */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -109,7 +107,6 @@ export default function SettingsAdminPage({ onShowToast }) {
         </div>
       </div>
 
-      {/* 2. Alert Feedback */}
       {statusMessage.text && (
         <div
           className={`p-3.5 rounded-xl border flex items-center gap-2.5 text-xs font-medium animate-in fade-in duration-150 ${
@@ -127,9 +124,7 @@ export default function SettingsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* 3. Settings Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Social Media Channels Box */}
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -144,7 +139,6 @@ export default function SettingsAdminPage({ onShowToast }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Instagram URL */}
             <div className="md:col-span-2">
               <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
@@ -177,7 +171,6 @@ export default function SettingsAdminPage({ onShowToast }) {
               </p>
             </div>
 
-            {/* Facebook URL */}
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
@@ -206,7 +199,6 @@ export default function SettingsAdminPage({ onShowToast }) {
               />
             </div>
 
-            {/* WhatsApp Link */}
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1 flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
@@ -237,7 +229,6 @@ export default function SettingsAdminPage({ onShowToast }) {
           </div>
         </div>
 
-        {/* Concierge & Direct Contact Details */}
         <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-gray-100">
             <div className="flex items-center gap-2">
@@ -275,14 +266,13 @@ export default function SettingsAdminPage({ onShowToast }) {
                 name="support_email"
                 value={formData.support_email}
                 onChange={handleChange}
-                placeholder="contact@thegiftstudio.com"
+                placeholder="modient93@gmail.com"
                 className="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-gray-50/40"
               />
             </div>
           </div>
         </div>
 
-        {/* Save Button */}
         <div className="flex items-center justify-end gap-3 pt-2">
           <button
             type="submit"

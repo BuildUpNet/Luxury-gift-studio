@@ -4,8 +4,8 @@ import Header from '../components/Header';
 import HeroSlider from '../components/HeroSlider';
 import HomeCarousels from '../components/HomeCarousels';
 import GiftingBannerSection from '../components/GiftingBannerSection';
-import HamperBuilder from '../components/HamperBuilder';
 import Testimonials from '../components/Testimonials';
+import InfiniteHighlightsMarquee from '../components/InfiniteHighlightsMarquee';
 import Footer from '../components/Footer';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
@@ -21,28 +21,11 @@ export default function HomePage() {
     return !Array.isArray(cached) || cached.length === 0;
   });
 
-  const scrollToHamperBuilder = () => {
-    const el = document.getElementById('build-hamper-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   const handleCategorySelect = (id) => {
-    if (id === 'create-own') {
-      scrollToHamperBuilder();
-    } else {
-      setActiveCategory(id);
-      setSearchQuery('');
-    }
+    setActiveCategory(id);
+    setSearchQuery('');
   };
 
-  const handleDesignerSelect = (designerName) => {
-    setSearchQuery(designerName);
-    window.scrollTo({ top: 600, behavior: 'smooth' });
-  };
-
-  // Fetch categories dynamically from API (Stale-While-Revalidate)
   useEffect(() => {
     let isMounted = true;
     const fetchCategories = async () => {
@@ -73,8 +56,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
-      {/* Shared Header */}
+    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#E4EDE5' }}>
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -82,19 +64,15 @@ export default function HomePage() {
         activeCategory={activeCategory}
       />
 
-      {/* Hero Slider */}
       <HeroSlider
         onExploreClick={() => {
           setActiveCategory('all');
           const el = document.getElementById('shop-by-category-section') || document.querySelector('.editorial-category-card');
           if (el) el.scrollIntoView({ behavior: 'smooth' });
         }}
-        onBuildCustomClick={scrollToHamperBuilder}
       />
 
-      {/* Dynamic Luxury Carousels: Shop by Category & Shop by Occasion */}
       {isLoadingCategories && categories.length === 0 ? (
-        /* Fixed-height skeleton container preventing layout jump */
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full min-h-[460px]">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -123,16 +101,12 @@ export default function HomePage() {
         />
       )}
 
-      {/* Dynamic Festive Promotional Banner & Custom Gifting Inquiry Section */}
       <GiftingBannerSection />
 
-      {/* Create Your Own Hamper Studio */}
-      <HamperBuilder />
-
-      {/* Testimonials */}
       <Testimonials />
 
-      {/* Shared Footer */}
+      <InfiniteHighlightsMarquee />
+
       <Footer onSelectCategory={handleCategorySelect} />
     </div>
   );

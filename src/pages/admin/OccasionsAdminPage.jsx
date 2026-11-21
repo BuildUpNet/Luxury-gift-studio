@@ -12,8 +12,10 @@ import {
   X,
   AlertCircle,
   ExternalLink,
-  Loader2
-} from 'lucide-react';
+  Loader2,
+  ChevronUp,
+  ChevronDown
+} from '../../components/FaIcons';
 import { apiService } from '../../services/api';
 import resolveImageUrl from '../../utils/image';
 
@@ -35,6 +37,7 @@ export default function OccasionsAdminPage({ onShowToast }) {
     id: null,
     name: '',
     slug: '',
+    sort_order: 1,
     image_url: '',
     description: '',
     product_ids: []
@@ -96,10 +99,12 @@ export default function OccasionsAdminPage({ onShowToast }) {
 
   // Open Create Modal
   const handleOpenCreateModal = () => {
+    const maxOrder = occasions.reduce((max, o) => Math.max(max, o.sort_order || 0), 0);
     setFormData({
       id: null,
       name: '',
       slug: '',
+      sort_order: maxOrder + 1,
       image_url: '',
       description: '',
       product_ids: []
@@ -114,12 +119,59 @@ export default function OccasionsAdminPage({ onShowToast }) {
       id: occ.id,
       name: occ.name || '',
       slug: occ.slug || '',
+      sort_order: occ.sort_order ?? 1,
       image_url: occ.image_url || '',
       description: occ.description || '',
       product_ids: []
     });
     setFormError('');
     setIsEditModalOpen(true);
+  };
+
+  // Quick move occasion priority up / down
+  const handleMoveOccasionOrder = async (occ, direction) => {
+    const sorted = [...occasions].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const currentIndex = sorted.findIndex((o) => o.id === occ.id);
+    if (currentIndex === -1) return;
+
+    const targetIndex = currentIndex + direction;
+    if (targetIndex < 0 || targetIndex >= sorted.length) return;
+
+    const currentItem = sorted[currentIndex];
+    const targetItem = sorted[targetIndex];
+
+    let currentOrder = currentItem.sort_order || (currentIndex + 1);
+    let targetOrder = targetItem.sort_order || (targetIndex + 1);
+
+    if (currentOrder === targetOrder) {
+      currentOrder = currentIndex + 1;
+      targetOrder = targetIndex + 1;
+    }
+
+    const newCurrentOrder = targetOrder;
+    const newTargetOrder = currentOrder;
+
+    // Optimistically update local state
+    setOccasions((prev) =>
+      prev.map((o) => {
+        if (o.id === currentItem.id) return { ...o, sort_order: newCurrentOrder };
+        if (o.id === targetItem.id) return { ...o, sort_order: newTargetOrder };
+        return o;
+      })
+    );
+
+    try {
+      await Promise.all([
+        apiService.updateOccasion(currentItem.id, { ...currentItem, sort_order: newCurrentOrder }),
+        apiService.updateOccasion(targetItem.id, { ...targetItem, sort_order: newTargetOrder })
+      ]);
+      notify(`Priority updated for "${currentItem.name}"`);
+      loadData();
+    } catch (err) {
+      console.error('Failed to update occasion order:', err);
+      notify('Failed to update occasion order');
+      loadData();
+    }
   };
 
   // Open Product Assignment Modal
@@ -275,7 +327,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Card */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -304,7 +355,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-100">
           <div className="relative w-full sm:w-72">
             <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -322,7 +372,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
         </div>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <div className="bg-rose-50 border border-rose-200 text-rose-700 rounded-lg p-3 text-xs flex items-center gap-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -330,7 +379,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* 2. Occasions Grid */}
       {isLoading ? (
         <div className="p-16 text-center text-gray-400 bg-white rounded-xl border border-gray-200">
           <Loader2 className="w-7 h-7 animate-spin mx-auto text-amber-600 mb-2" />
@@ -365,7 +413,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 className="bg-white rounded-xl border border-gray-200 shadow-xs overflow-hidden flex flex-col justify-between hover:border-amber-300/80 transition group"
               >
                 <div>
-                  {/* Image Cover */}
                   <div className="relative h-44 bg-gradient-to-br from-stone-800 to-stone-900 overflow-hidden">
                     {coverImg ? (
                       <img
@@ -384,19 +431,44 @@ export default function OccasionsAdminPage({ onShowToast }) {
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     
-                    {/* Badge */}
                     <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-bold text-gray-800 uppercase tracking-wider border border-white/40">
                       /occasion/{occ.slug}
                     </div>
 
-                    {/* Products Counter Badge */}
+                    <div className="absolute top-3 right-3 flex items-center gap-1 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-amber-300 shadow-xs">
+                      <span className="text-[11px] font-bold text-amber-900">
+                        Priority #{occ.sort_order ?? 0}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveOccasionOrder(occ, -1);
+                        }}
+                        className="p-0.5 text-gray-500 hover:text-black rounded hover:bg-gray-100 transition cursor-pointer"
+                        title="Move Up (Higher Priority)"
+                      >
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleMoveOccasionOrder(occ, 1);
+                        }}
+                        className="p-0.5 text-gray-500 hover:text-black rounded hover:bg-gray-100 transition cursor-pointer"
+                        title="Move Down (Lower Priority)"
+                      >
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
                     <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-semibold text-white">
                       <Package className="w-3.5 h-3.5 text-amber-400" />
                       <span>{occ.products_count} Assigned Gifts</span>
                     </div>
                   </div>
 
-                  {/* Body Content */}
                   <div className="p-4 space-y-2">
                     <h3 className="font-serif text-base font-bold text-gray-900 group-hover:text-amber-800 transition">
                       {occ.name}
@@ -407,7 +479,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                   </div>
                 </div>
 
-                {/* Card Footer Actions */}
                 <div className="p-4 pt-2 border-t border-gray-100 flex items-center justify-between gap-2">
                   <button
                     type="button"
@@ -443,11 +514,9 @@ export default function OccasionsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* 3. Add / Edit Occasion Modal */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base text-gray-900">
@@ -466,7 +535,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
               </button>
             </div>
 
-            {/* Modal Form */}
             <form onSubmit={handleSubmitOccasion} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
               {formError && (
                 <div className="bg-rose-50 border border-rose-200 text-rose-700 p-2.5 rounded-lg text-xs flex items-center gap-2">
@@ -475,7 +543,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 </div>
               )}
 
-              {/* Name */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Occasion Name *
@@ -497,7 +564,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Slug */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   URL Slug
@@ -517,7 +583,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Cover Image Upload / URL */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Cover Image
@@ -578,7 +643,30 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Description */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">
+                  Display Priority / Sequence (1 = First, 2 = Second...)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="1"
+                    value={formData.sort_order ?? 1}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        sort_order: parseInt(e.target.value, 10) || 0
+                      })
+                    }
+                    className="w-28 px-3 py-2 text-xs border border-gray-300 rounded-lg focus:outline-none focus:border-amber-500 font-bold text-gray-900"
+                  />
+                  <span className="text-xs text-gray-500">
+                    Lower number appears earlier in "Shop by Occasion" carousel
+                  </span>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Description
@@ -592,7 +680,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Actions */}
               <div className="pt-3 border-t border-gray-200 flex items-center justify-end gap-2">
                 <button
                   type="button"
@@ -616,11 +703,9 @@ export default function OccasionsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* 4. Product Assignment Modal */}
       {isAssignModalOpen && selectedOccasion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[85vh]">
-            {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div>
                 <h3 className="font-bold text-base text-gray-900">
@@ -639,7 +724,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
               </button>
             </div>
 
-            {/* Product Search & Select Controls */}
             <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-3 bg-gray-50/50">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -670,7 +754,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
               </div>
             </div>
 
-            {/* Product Checkboxes List */}
             <div className="p-6 overflow-y-auto flex-1 divide-y divide-gray-100">
               {products
                 .filter((p) => {
@@ -728,7 +811,6 @@ export default function OccasionsAdminPage({ onShowToast }) {
                 })}
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-gray-200 flex items-center justify-between bg-gray-50">
               <span className="text-xs text-gray-500">
                 {assignedProductIds.length} products assigned
@@ -756,9 +838,8 @@ export default function OccasionsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* 5. Delete Confirmation Modal */}
       {isDeleteModalOpen && selectedOccasion && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl border border-gray-200 shadow-2xl max-w-sm w-full p-6 text-center animate-in fade-in zoom-in-95 duration-150">
             <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 mx-auto flex items-center justify-center mb-3">
               <Trash2 className="w-6 h-6" />

@@ -223,7 +223,7 @@ async function safelyDeleteImageFile(filename, excludeProductId = null) {
 // Get all products with category and occasion details (optional ?category=ID_OR_SLUG filter)
 router.get('/', async (req, res) => {
   try {
-    const { category: categoryParam, occasion: occasionParam } = req.query;
+    const { category: categoryParam, occasion: occasionParam, search: searchParam } = req.query;
 
     if (!dbPool) {
       return res.status(500).json({ success: false, message: 'Database not connected.' });
@@ -266,6 +266,13 @@ router.get('/', async (req, res) => {
         whereClauses.push('(o.slug = ? OR o.name = ? OR occ.slug = ? OR occ.name = ?)');
         queryParams.push(occasionParam, occasionParam, occasionParam, occasionParam);
       }
+    }
+
+    // Filter by search query if provided
+    if (searchParam && searchParam.trim()) {
+      const s = `%${searchParam.trim()}%`;
+      whereClauses.push('(p.title LIKE ? OR p.description LIKE ? OR c.name LIKE ? OR o.name LIKE ? OR occ.name LIKE ?)');
+      queryParams.push(s, s, s, s, s);
     }
 
     if (whereClauses.length > 0) {

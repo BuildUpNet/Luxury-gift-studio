@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, CheckCircle2, AlertCircle, MessageCircle, Gift, Loader2 } from 'lucide-react';
+import { Sparkles, ArrowRight, CheckCircle2, AlertCircle, MessageCircle, Gift, Loader2 } from './FaIcons';
 import { apiService } from '../services/api';
 import { resolveImageUrl } from '../utils/image';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
@@ -9,7 +9,7 @@ const DEFAULT_BANNER = {
   heading: 'Curate Your Custom Gift Hamper',
   subheading: 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.',
   button_text: 'Request Custom Quote →',
-  bg_image: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop',
+  bg_image: '/images/gift_logo.jpeg',
   overlay_opacity: 0.65,
   is_active: 1
 };
@@ -131,7 +131,7 @@ export default function GiftingBannerSection() {
 
   const bgImageUrl = resolveImageUrl(
     bannerConfig.bg_image,
-    'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop'
+    '/images/gift_logo.jpeg'
   );
 
   const overlayOpacity = Math.max(0, Math.min(1, parseFloat(bannerConfig.overlay_opacity) || 0.65));
@@ -191,7 +191,6 @@ export default function GiftingBannerSection() {
         boxSizing: 'border-box'
       }}
     >
-      {/* Banner Frame with Hairline Gold Border & Soft Ambient Box-Shadow */}
       <div
         className="relative overflow-hidden rounded-2xl transition-all duration-500"
         onMouseEnter={() => setIsHovered(true)}
@@ -203,7 +202,6 @@ export default function GiftingBannerSection() {
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.25)'
         }}
       >
-        {/* Dynamic Background Image with Smooth Slow Zoom Micro-interaction */}
         <div
           className="absolute inset-0 w-full h-full pointer-events-none transition-transform duration-700 ease-out"
           style={{
@@ -215,7 +213,6 @@ export default function GiftingBannerSection() {
           }}
         />
 
-        {/* Directional Dark Gradient Overlay: Left-to-right ensures crisp text contrast over any festive photo */}
         <div
           className="absolute inset-0 pointer-events-none transition-opacity duration-300"
           style={{
@@ -224,7 +221,6 @@ export default function GiftingBannerSection() {
           }}
         />
 
-        {/* Secondary Overlay Respecting Admin Opacity Config */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -232,18 +228,14 @@ export default function GiftingBannerSection() {
           }}
         />
 
-        {/* Ambient Warm-Gold Glow Accent */}
         <div
           className="absolute -top-32 -left-32 w-96 h-96 rounded-full pointer-events-none opacity-25 blur-3xl"
           style={{ background: 'radial-gradient(circle, #F4C95D 0%, transparent 70%)' }}
         />
 
-        {/* Content Grid: Left Column 38% Branding & Text / Right Column 62% Interactive Form */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 p-6 sm:p-8 lg:p-12 items-center">
           
-          {/* Left Column (approx 38% width on desktop) */}
           <div className="lg:col-span-5 flex flex-col justify-center space-y-5 text-left">
-            {/* Eyebrow Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full w-fit bg-[#F4C95D]/10 border border-[#F4C95D]/40 backdrop-blur-md shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-[#FFE082]" />
               <span className="text-[11px] font-bold tracking-[0.14em] text-[#FFE082] uppercase">
@@ -251,7 +243,6 @@ export default function GiftingBannerSection() {
               </span>
             </div>
 
-            {/* Main Heading: Pure White + Luminous Champagne-Gold (#FFE082) */}
             <h2
               className="font-heading font-bold tracking-tight leading-[1.15]"
               style={{
@@ -262,7 +253,6 @@ export default function GiftingBannerSection() {
               {renderLuxuryHeading(bannerConfig.heading)}
             </h2>
 
-            {/* Subtitle in High-Contrast Warm Off-White (#F3F4F6) */}
             <p
               className="text-[#F3F4F6] text-sm sm:text-base leading-relaxed font-normal max-w-lg"
               style={{ textShadow: '0 1px 8px rgba(0, 0, 0, 0.6)' }}
@@ -271,7 +261,6 @@ export default function GiftingBannerSection() {
                 'Celebrate Diwali, weddings, and corporate milestones with handcrafted luxury hampers tailored to your taste.'}
             </p>
 
-            {/* 3 Sleek Dark-Glass Badges with Gold Icons */}
             <div className="pt-2 sm:pt-4 flex flex-wrap gap-2.5">
               <div
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full backdrop-blur-md transition-all duration-200"
@@ -311,7 +300,6 @@ export default function GiftingBannerSection() {
             </div>
           </div>
 
-          {/* Right Column (approx 62% width on desktop — Interactive Glass Form) */}
           <div className="lg:col-span-7">
             <div
               className="rounded-2xl p-6 sm:p-8 transition-all duration-300"
@@ -346,7 +334,6 @@ export default function GiftingBannerSection() {
                     </p>
                   </div>
 
-                  {/* Summary of Submitted Details */}
                   <div
                     className="max-w-md mx-auto rounded-xl p-4 text-left border border-white/10 text-xs space-y-2.5"
                     style={{ background: 'rgba(255, 255, 255, 0.04)' }}
@@ -393,7 +380,6 @@ export default function GiftingBannerSection() {
               ) : (
                 /* Interactive Hamper Inquiry Form */
                 <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                  {/* Error Notification */}
                   {submitError && (
                     <div className="flex items-center gap-2 p-3 rounded-lg bg-rose-950/60 border border-rose-500/50 text-rose-200 text-xs">
                       <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
@@ -401,9 +387,7 @@ export default function GiftingBannerSection() {
                     </div>
                   )}
 
-                  {/* 2x2 Grid of Input Fields with Floating Micro-Labels & High Contrast */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    {/* 1. Full Name */}
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-200 uppercase tracking-wider mb-1.5">
                         Your Full Name <span className="text-[#FFE082]">*</span>
@@ -420,7 +404,6 @@ export default function GiftingBannerSection() {
                       />
                     </div>
 
-                    {/* 2. Email Address */}
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-200 uppercase tracking-wider mb-1.5">
                         Email Address <span className="text-[#FFE082]">*</span>
@@ -437,7 +420,6 @@ export default function GiftingBannerSection() {
                       />
                     </div>
 
-                    {/* 3. Mobile Number */}
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-200 uppercase tracking-wider mb-1.5">
                         Mobile Number <span className="text-[#FFE082]">*</span>
@@ -454,7 +436,6 @@ export default function GiftingBannerSection() {
                       />
                     </div>
 
-                    {/* 4. Delivery City or Pincode */}
                     <div>
                       <label className="block text-[11px] font-semibold text-slate-200 uppercase tracking-wider mb-1.5">
                         Delivery City / Pincode <span className="text-[#FFE082]">*</span>
@@ -472,7 +453,6 @@ export default function GiftingBannerSection() {
                     </div>
                   </div>
 
-                  {/* Full-Width Message / Requirements Textarea */}
                   <div>
                     <label className="block text-[11px] font-semibold text-slate-200 uppercase tracking-wider mb-1.5">
                       Message / Requirements
@@ -488,7 +468,6 @@ export default function GiftingBannerSection() {
                     />
                   </div>
 
-                  {/* Mandatory Terms & Conditions Checkbox */}
                   <div className="pt-0.5">
                     <label className="flex items-center gap-2.5 cursor-pointer text-xs text-slate-200 hover:text-white transition select-none">
                       <input
@@ -504,14 +483,12 @@ export default function GiftingBannerSection() {
                     </label>
                   </div>
 
-                  {/* Submit Button Row */}
                   <div className="pt-2 border-t border-white/10 flex justify-end">
                     <button
                       type="submit"
                       disabled={isSubmitting || !formData.agreedToTerms}
                       className="group relative overflow-hidden inline-flex items-center justify-center gap-2.5 px-7 py-3 rounded-full text-xs sm:text-sm font-bold text-[#111111] bg-[#F4C95D] hover:bg-[#ffcf66] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_22px_rgba(244,201,93,0.4)] hover:shadow-[0_8px_32px_rgba(244,201,93,0.6)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none cursor-pointer border-none"
                     >
-                      {/* Diagonal Shimmer Sweep Animation on Hover */}
                       <span
                         className="absolute inset-0 w-full h-full pointer-events-none transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"
                         style={{

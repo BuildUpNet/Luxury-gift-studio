@@ -13,7 +13,7 @@ import {
   Package,
   ArrowLeft,
   Loader2
-} from 'lucide-react';
+} from '../components/FaIcons';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import resolveImageUrl from '../utils/image';
@@ -79,12 +79,10 @@ export default function TestimonialsPage() {
       : '5.0';
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
-      {/* 1. Header Navigation */}
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#E4EDE5' }}>
       <Header />
 
-      {/* 2. Breadcrumbs */}
-      <div className="border-b border-[#E8DFD3]/80 bg-[#FDFBF7]">
+      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
           <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
             <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
@@ -98,8 +96,7 @@ export default function TestimonialsPage() {
         </div>
       </div>
 
-      {/* 3. Hero Header Section */}
-      <section className="py-10 sm:py-12 border-b border-[#E8DFD3]/70" style={{ backgroundColor: '#F3ECE1' }}>
+      <section className="py-10 sm:py-12 border-b border-[#BACBBD]/70" style={{ backgroundColor: '#DBE6DC' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
@@ -115,7 +112,6 @@ export default function TestimonialsPage() {
               </p>
             </div>
 
-            {/* Score Card Pill */}
             {!isLoading && (
               <div className="shrink-0 bg-white rounded-2xl border border-[#E8DFD3] p-4 sm:p-5 shadow-xs flex items-center gap-4">
                 <div className="flex flex-col items-center justify-center pr-4 border-r border-stone-200">
@@ -150,11 +146,8 @@ export default function TestimonialsPage() {
         </div>
       </section>
 
-      {/* 4. Main Body: Filter Bar & Reviews List */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        {/* Filter Toolbar */}
         <div className="bg-white rounded-xl border border-[#E8DFD3] p-3.5 sm:p-4 mb-8 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-          {/* Occasion Filter Buttons */}
           <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 scrollbar-none">
             <button
               type="button"
@@ -183,7 +176,6 @@ export default function TestimonialsPage() {
             ))}
           </div>
 
-          {/* Rating Dropdown Filter */}
           <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
             <span className="text-xs text-stone-500 font-medium">Rating:</span>
             <select
@@ -199,7 +191,6 @@ export default function TestimonialsPage() {
           </div>
         </div>
 
-        {/* Loading Spinner */}
         {isLoading && (
           <div className="py-24 text-center">
             <Loader2 className="w-8 h-8 animate-spin text-[#8B2635] mx-auto mb-3" />
@@ -208,7 +199,6 @@ export default function TestimonialsPage() {
           </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && filteredList.length === 0 && (
           <div className="bg-white rounded-2xl border border-[#E8DFD3] p-12 text-center max-w-md mx-auto my-6 shadow-2xs">
             <div className="w-12 h-12 rounded-full bg-stone-100 text-stone-400 flex items-center justify-center mx-auto mb-3">
@@ -234,7 +224,6 @@ export default function TestimonialsPage() {
           </div>
         )}
 
-        {/* Reviews List with Side-by-Side Product/Gift Photos on the Right */}
         {!isLoading && filteredList.length > 0 && (
           <div className="space-y-5">
             {filteredList.map((t, idx) => {
@@ -251,9 +240,7 @@ export default function TestimonialsPage() {
                   key={t.id || idx}
                   className="bg-white rounded-2xl border border-[#E8DFD3] p-5 sm:p-6 shadow-2xs hover:shadow-md hover:border-[#D8C7B2] transition duration-300 flex flex-col md:flex-row items-start justify-between gap-6"
                 >
-                  {/* Left Column: Customer Details, Rating, Quote & Tags */}
                   <div className="flex-1 min-w-0">
-                    {/* Header Row: Avatar, Name, Verified, Time Ago & Green Rating Pill */}
                     <div className="flex items-center justify-between gap-3 mb-3 pb-3 border-b border-stone-100 flex-wrap">
                       <div className="flex items-center gap-3 min-w-0">
                         {avatar ? (
@@ -287,14 +274,12 @@ export default function TestimonialsPage() {
                         </div>
                       </div>
 
-                      {/* FNP Style Star Rating Badge */}
                       <div className="flex items-center gap-1 bg-[#0A8754] text-white px-2.5 py-1 rounded-md text-xs font-bold shrink-0 shadow-2xs">
                         <span>{Number(t.rating || 5).toFixed(1)}</span>
                         <Star className="w-3.5 h-3.5 fill-white text-white" />
                       </div>
                     </div>
 
-                    {/* Review Quote Body */}
                     <div className="relative mb-4">
                       <Quote className="w-4 h-4 text-stone-300 absolute -top-1 -left-1 opacity-50" />
                       <p className="text-xs sm:text-sm text-stone-700 italic pl-3 leading-relaxed">
@@ -302,7 +287,6 @@ export default function TestimonialsPage() {
                       </p>
                     </div>
 
-                    {/* Tags: Occasion & City Location */}
                     <div className="flex items-center gap-2 flex-wrap text-xs pt-1">
                       {t.occasion && (
                         <span className="inline-flex items-center px-3 py-0.5 rounded-full font-semibold text-[#8B2635] bg-[#FAF7F2] border border-[#E8DFD3] text-[11px]">
@@ -321,7 +305,6 @@ export default function TestimonialsPage() {
                     </div>
                   </div>
 
-                  {/* Right Column: Featured Product/Gift Photo Showcase */}
                   {productImg ? (
                     <div className="w-full md:w-44 shrink-0 rounded-xl overflow-hidden border border-[#E8DFD3] bg-[#F8F5F0] p-2 flex flex-col items-center text-center self-stretch justify-center">
                       <div className="relative w-full aspect-square rounded-lg overflow-hidden border border-[#E8DFD3] bg-white mb-2">
@@ -359,7 +342,6 @@ export default function TestimonialsPage() {
         )}
       </main>
 
-      {/* 5. Footer */}
       <Footer />
     </div>
   );

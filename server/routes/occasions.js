@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
       FROM occasions o
       LEFT JOIN product_occasions po ON o.id = po.occasion_id
       GROUP BY o.id
-      ORDER BY o.name ASC
+      ORDER BY o.sort_order ASC, o.name ASC
     `);
 
     return res.json({
@@ -98,7 +98,7 @@ router.get('/:idOrSlug', async (req, res) => {
  * Create a new occasion (Protected)
  */
 router.post('/', authenticateToken, async (req, res) => {
-  const { name, slug, image_url, description, product_ids } = req.body;
+  const { name, slug, image_url, description, product_ids, sort_order } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({
@@ -125,8 +125,8 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     const [result] = await executeWithRetry(
-      'INSERT INTO occasions (name, slug, image_url, description) VALUES (?, ?, ?, ?)',
-      [cleanName, cleanSlug, image_url || null, description || null]
+      'INSERT INTO occasions (name, slug, image_url, description, sort_order) VALUES (?, ?, ?, ?, ?)',
+      [cleanName, cleanSlug, image_url || null, description || null, Number(sort_order) || 0]
     );
 
     const occasionId = result.insertId;
@@ -166,7 +166,7 @@ router.post('/', authenticateToken, async (req, res) => {
  */
 router.put('/:id', authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { name, slug, image_url, description, product_ids } = req.body;
+  const { name, slug, image_url, description, product_ids, sort_order } = req.body;
 
   if (!name || !name.trim()) {
     return res.status(400).json({
@@ -201,8 +201,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
       });
     }
 
+    const sortClause = sort_order !== undefined ? `, sort_order = ${Number(sort_order)}` : '';
     await executeWithRetry(
-      'UPDATE occasions SET name = ?, slug = ?, image_url = ?, description = ? WHERE id = ?',
+      `UPDATE occasions SET name = ?, slug = ?, image_url = ?, description = ?${sortClause} WHERE id = ?`,
       [cleanName, cleanSlug, image_url || null, description || null, id]
     );
 
@@ -351,6 +352,49 @@ router.delete('/:id', authenticateToken, async (req, res) => {
       success: false,
       message: error.message || 'Failed to delete occasion'
     });
+  }
+});
+
+/**
+ * POST /api/occasions/reorder
+ * Reorder occasions batch update (Protected)
+ */
+router.post('/reorder', authenticateToken, async (req, res) => {
+  const { order } = req.body; // array of { id, sort_order }
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ success: false, message: 'Order array is required' });
+  }
+
+  try {
+    for (const item of order) {
+      if (item?.id !== undefined && item?.sort_order !== undefined) {
+        await executeWithRetry('UPDATE occasions SET sort_order = ? WHERE id = ?', [
+          Number(item.sort_order),
+          item.id
+        ]);
+      }
+    }
+
+    const [occasions] = await executeWithRetry(`
+      SELECT o.*,
+             COUNT(DISTINCT po.product_id) AS products_count
+      FROM occasions o
+      LEFT JOIN product_occasions po ON o.id = po.occasion_id
+      GROUP BY o.id
+      ORDER BY o.sort_order ASC, o.name ASC
+    `);
+
+    return res.json({
+      success: true,
+      message: 'Occasions reordered successfully',
+      occasions: occasions.map((o) => ({
+        ...o,
+        products_count: Number(o.products_count) || 0
+      }))
+    });
+  } catch (err) {
+    console.error('Error reordering occasions:', err);
+    return res.status(500).json({ success: false, message: 'Failed to reorder occasions' });
   }
 });
 

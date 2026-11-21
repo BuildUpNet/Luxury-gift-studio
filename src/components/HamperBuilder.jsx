@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Gift, Check, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Gift, Check, Plus, ShoppingBag, ArrowRight } from './FaIcons';
 import confetti from 'canvas-confetti';
 import { HAMPER_BUILDER_OPTIONS } from '../data/giftStudioData';
 
@@ -75,9 +75,9 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
       id="build-hamper-section"
       style={{
         width: '100%',
-        backgroundColor: '#F3ECE1',
-        borderTop: '1px solid #E8DFD3',
-        borderBottom: '1px solid #E8DFD3',
+        backgroundColor: '#F2ECE1',
+        borderTop: '1px solid #E5DED5',
+        borderBottom: '1px solid #E5DED5',
         padding: '50px 0 60px'
       }}
     >
@@ -87,9 +87,8 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
         padding: '0 24px',
         boxSizing: 'border-box'
       }}>
-        {/* Title */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <span style={{ fontSize: '0.78rem', color: '#C62828', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+          <span style={{ fontSize: '0.78rem', color: '#8B2635', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em' }}>
             Personalized Gifting
           </span>
           <h2 className="font-heading" style={{ fontSize: '2rem', color: '#1E1E1E', fontWeight: 600, marginTop: '6px' }}>
@@ -99,7 +98,6 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
             Choose your box, curate artisanal delicacies, and write a personalized wax-sealed message.
           </p>
 
-          {/* Step Tabs */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginTop: '24px' }}>
             {[
               { num: 1, label: "1. Select Box" },
@@ -112,9 +110,9 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                 style={{
                   padding: '9px 20px',
                   borderRadius: 'var(--radius-sm)',
-                  background: step === s.num ? '#C62828' : '#FFFFFF',
+                  background: step === s.num ? '#145E33' : '#FFFFFF',
                   color: step === s.num ? '#FFFFFF' : '#1E1E1E',
-                  border: step === s.num ? '1px solid #C62828' : '1px solid #E8DFD3',
+                  border: step === s.num ? '1px solid #145E33' : '1px solid #BACBBD',
                   boxShadow: step === s.num ? '0 3px 10px rgba(198, 40, 40, 0.25)' : 'none',
                   fontWeight: 600,
                   fontSize: '0.84rem',
@@ -128,14 +126,12 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
           </div>
         </div>
 
-        {/* Grid */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
           gap: '30px',
           alignItems: 'start'
         }}>
-          {/* Left Builder Config */}
           <div className="card-clean" style={{ padding: '24px' }}>
             {step === 1 && (
               <div>
@@ -150,7 +146,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                         key={box.id}
                         onClick={() => setSelectedBox(box)}
                         style={{
-                          border: isSelected ? '2px solid #C62828' : '1px solid #E8DFD3',
+                          border: isSelected ? '2px solid #145E33' : '1px solid #BACBBD',
                           borderRadius: 'var(--radius-sm)',
                           padding: '12px',
                           cursor: 'pointer',
@@ -165,7 +161,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                             position: 'absolute',
                             top: '8px',
                             right: '8px',
-                            background: '#C62828',
+                            background: '#145E33',
                             color: '#fff',
                             width: '20px',
                             height: '20px',
@@ -180,7 +176,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                         <img src={box.image} alt={box.name} style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }} />
                         <h4 style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1E1E1E' }}>{box.name}</h4>
                         <p style={{ fontSize: '0.72rem', color: '#666', margin: '4px 0' }}>{box.desc}</p>
-                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#C62828' }}>
+                        <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#8B2635' }}>
                           ₹{box.price.toLocaleString('en-IN')}
                         </div>
                       </div>
@@ -210,7 +206,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                         key={item.id}
                         onClick={() => toggleItem(item)}
                         style={{
-                          border: isSelected ? '2px solid #1B7A43' : '1px solid #E8DFD3',
+                          border: isSelected ? '2px solid #1B7A43' : '1px solid #BACBBD',
                           borderRadius: 'var(--radius-sm)',
                           padding: '10px',
                           cursor: 'pointer',
@@ -227,7 +223,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                           width: '20px',
                           height: '20px',
                           borderRadius: '50%',
-                          background: isSelected ? '#1B7A43' : '#F3ECE1',
+                          background: isSelected ? '#1B7A43' : '#D6E4D8',
                           color: isSelected ? '#fff' : '#666',
                           display: 'flex',
                           alignItems: 'center',
@@ -241,7 +237,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                           style={{ width: '100%', height: '110px', objectFit: 'cover', borderRadius: '4px', marginBottom: '8px' }}
                           onError={(e) => {
                             e.currentTarget.onerror = null;
-                            e.currentTarget.src = "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=600&auto=format&fit=crop&q=80";
+                            e.currentTarget.src = "/images/gift_logo.jpeg";
                           }}
                         />
                         <h4 style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1E1E1E', minHeight: '2.4em' }}>{item.name}</h4>
@@ -279,7 +275,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                           gap: '6px',
                           padding: '6px 12px',
                           borderRadius: 'var(--radius-sm)',
-                          border: selectedRibbon.id === rib.id ? '2px solid #C62828' : '1px solid #E8DFD3',
+                          border: selectedRibbon.id === rib.id ? '2px solid #145E33' : '1px solid #BACBBD',
                           background: '#fff',
                           cursor: 'pointer',
                           fontSize: '0.82rem'
@@ -300,7 +296,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                       value={giftNote.recipient}
                       onChange={(e) => setGiftNote({ ...giftNote, recipient: e.target.value })}
                       placeholder="Recipient's Name"
-                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #E8DFD3', borderRadius: '4px', fontSize: '0.85rem' }}
+                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #BACBBD', borderRadius: '4px', fontSize: '0.85rem' }}
                     />
                   </div>
                   <div>
@@ -310,7 +306,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                       value={giftNote.sender}
                       onChange={(e) => setGiftNote({ ...giftNote, sender: e.target.value })}
                       placeholder="Your Name"
-                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #E8DFD3', borderRadius: '4px', fontSize: '0.85rem' }}
+                      style={{ width: '100%', padding: '8px 12px', border: '1px solid #BACBBD', borderRadius: '4px', fontSize: '0.85rem' }}
                     />
                   </div>
                 </div>
@@ -321,7 +317,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                     rows={3}
                     value={giftNote.message}
                     onChange={(e) => setGiftNote({ ...giftNote, message: e.target.value })}
-                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #E8DFD3', borderRadius: '4px', fontSize: '0.85rem', fontFamily: 'inherit', resize: 'none' }}
+                    style={{ width: '100%', padding: '8px 12px', border: '1px solid #BACBBD', borderRadius: '4px', fontSize: '0.85rem', fontFamily: 'inherit', resize: 'none' }}
                   />
                 </div>
 
@@ -336,7 +332,6 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
             )}
           </div>
 
-          {/* Right Preview */}
           <div className="card-clean" style={{ padding: '20px', position: 'sticky', top: '120px' }}>
             <h4 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1E1E1E', marginBottom: '12px' }}>
               Hamper Summary
@@ -344,7 +339,7 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
             <img src={selectedBox.image} alt={selectedBox.name} style={{ width: '100%', height: '170px', objectFit: 'cover', borderRadius: '4px', marginBottom: '12px' }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h5 style={{ fontSize: '1rem', fontWeight: 600, margin: 0, color: '#1E1E1E' }}>{selectedBox.name}</h5>
-              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#C62828' }}>
+              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#8B2635' }}>
                 ₹{(selectedBox.price || 0).toLocaleString('en-IN')}
               </span>
             </div>
@@ -364,9 +359,9 @@ export default function HamperBuilder({ onAddCustomHamperToCart }) {
                 </li>
               ))}
             </ul>
-            <div style={{ borderTop: '1px solid #E8DFD3', marginTop: '14px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <div style={{ borderTop: '1px solid #E5DED5', marginTop: '14px', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
               <span style={{ fontWeight: 600, color: '#1E1E1E' }}>Total:</span>
-              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#C62828' }}>₹{totalPrice.toLocaleString('en-IN')}</span>
+              <span style={{ fontSize: '1.3rem', fontWeight: 800, color: '#8B2635' }}>₹{totalPrice.toLocaleString('en-IN')}</span>
             </div>
             <button onClick={handleCompleteHamper} className="btn-primary" style={{ width: '100%', marginTop: '12px' }}>
               Add Custom Hamper to Bag

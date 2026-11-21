@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Gift, Clock, Truck, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Gift, Clock, Truck, ShieldCheck, Sparkles } from './FaIcons';
 
 export default function HeroBanner({ onExploreClick, onBuildCustomClick }) {
   return (
@@ -16,7 +16,6 @@ export default function HeroBanner({ onExploreClick, onBuildCustomClick }) {
         alignItems: 'center',
         gap: '40px'
       }}>
-        {/* Left Column: Headlines */}
         <div>
           <span style={{
             fontSize: '0.78rem',
@@ -70,7 +69,6 @@ export default function HeroBanner({ onExploreClick, onBuildCustomClick }) {
           </div>
         </div>
 
-        {/* Right Column: Hero Visual Banner */}
         <div style={{
           position: 'relative',
           borderRadius: 'var(--radius-md)',
@@ -117,7 +115,6 @@ export default function HeroBanner({ onExploreClick, onBuildCustomClick }) {
         </div>
       </div>
 
-      {/* 4 Trust USPs */}
       <div style={{
         maxWidth: '1360px',
         margin: '36px auto 0',

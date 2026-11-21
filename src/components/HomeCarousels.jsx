@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowRight, Grid, CalendarHeart } from './FaIcons';
 import resolveImageUrl from '../utils/image';
 import { apiService } from '../services/api';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
@@ -25,7 +25,6 @@ export default function HomeCarousels({
   const [canScrollOccasionLeft, setCanScrollOccasionLeft] = useState(false);
   const [canScrollOccasionRight, setCanScrollOccasionRight] = useState(true);
 
-  // Fetch dynamic occasions from backend
   useEffect(() => {
     let isMounted = true;
     const fetchOccasions = async () => {
@@ -45,7 +44,6 @@ export default function HomeCarousels({
     };
   }, []);
 
-  // Smooth scroll helper
   const scroll = (ref, direction) => {
     if (ref.current) {
       const scrollAmount = direction === 'left' ? -380 : 380;
@@ -84,20 +82,18 @@ export default function HomeCarousels({
     };
   }, [categories, occasions]);
 
-  // Top-level product categories for Shop by Category
-  const shopByCategories = (categories || []).filter(
-    (c) => (c.parent_id === null || c.parent_id === undefined) && (c.section_type === 'category' || !c.section_type)
+  // Top-level product categories for Shop by Category, ordered strictly by priority (sort_order)
+  const shopByCategories = (categories || [])
+    .filter(
+      (c) => (c.parent_id === null || c.parent_id === undefined) && (c.section_type === 'category' || !c.section_type)
+    )
+    .sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+
+  // Occasions ordered strictly by priority (sort_order)
+  const sortedOccasions = [...(occasions || [])].sort(
+    (a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0)
   );
 
-  const handleCategoryClick = (category) => {
-    if (onSelectCategory) {
-      onSelectCategory(category.slug || category.id);
-      const el = document.getElementById('shop-by-category-section') || document.querySelector('.editorial-category-card');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  // Indicators count for Shop by Category
   const indicatorCount = Math.min(5, Math.max(2, Math.ceil((shopByCategories?.length || 0) / 2)));
   const activeCategoryDot = Math.min(
     indicatorCount - 1,
@@ -124,7 +120,6 @@ export default function HomeCarousels({
         to={occasionTarget}
         className="editorial-category-card group no-underline text-inherit"
       >
-        {/* Tall Image Frame with 3:4 Aspect Ratio */}
         <div className="editorial-card-image-wrap">
           {occasion.image_url && !imgFailed ? (
             <img
@@ -139,12 +134,12 @@ export default function HomeCarousels({
             <div
               className="w-full h-full flex flex-col items-center justify-between p-6 relative select-none"
               style={{
-                background: 'linear-gradient(145deg, #FDF8F2 0%, #F3E6D8 100%)'
+                background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
               }}
             >
               <div
                 className="absolute inset-3 rounded-lg border pointer-events-none"
-                style={{ borderColor: 'rgba(198, 40, 40, 0.15)' }}
+                style={{ borderColor: 'rgba(27, 122, 67, 0.25)' }}
               />
               <div
                 className="absolute inset-4 rounded-md border pointer-events-none"
@@ -153,7 +148,7 @@ export default function HomeCarousels({
 
               <span
                 className="text-[10px] uppercase font-bold tracking-widest pt-2 z-10"
-                style={{ color: '#1B7A43' }}
+                style={{ color: '#C59D5F' }}
               >
                 Celebration Collection
               </span>
@@ -164,7 +159,7 @@ export default function HomeCarousels({
                   style={{
                     background: '#FFFFFF',
                     color: '#C62828',
-                    border: '1.5px solid rgba(198, 40, 40, 0.3)'
+                    border: '1.5px solid rgba(27, 122, 67, 0.35)'
                   }}
                 >
                   {occasion.name ? occasion.name.substring(0, 2).toUpperCase() : 'OC'}
@@ -176,14 +171,13 @@ export default function HomeCarousels({
 
               <span
                 className="text-[11px] font-semibold tracking-wider uppercase pb-1 z-10 transition-colors group-hover:underline"
-                style={{ color: '#C62828' }}
+                style={{ color: '#8B2635' }}
               >
                 Explore Occasion
               </span>
             </div>
           )}
 
-          {/* Product count tag */}
           {occasion.products_count !== undefined && occasion.products_count > 0 && (
             <span
               className="absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-md"
@@ -194,7 +188,6 @@ export default function HomeCarousels({
           )}
         </div>
 
-        {/* Clean White Card Footer with Occasion Title and VIEW COLLECTION Link */}
         <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
           <h3
             className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1"
@@ -207,7 +200,6 @@ export default function HomeCarousels({
           </span>
         </div>
 
-        {/* Bottom Crimson Accent Bar on Hover */}
         <span className="editorial-card-accent-bar" />
       </Link>
     );
@@ -227,9 +219,8 @@ export default function HomeCarousels({
             onSelectCategory(category.slug || category.id);
           }
         }}
-        className={`editorial-category-card group no-underline text-inherit ${isSelected ? 'selected ring-2 ring-[#C62828]/60' : ''}`}
+        className={`editorial-category-card group no-underline text-inherit ${isSelected ? 'selected ring-2 ring-[#8B2635]/60' : ''}`}
       >
-        {/* Tall Image Frame with 3:4 Aspect Ratio */}
         <div className="editorial-card-image-wrap">
           {category.image_url && !imgFailed ? (
             <img
@@ -244,13 +235,12 @@ export default function HomeCarousels({
             <div
               className="w-full h-full flex flex-col items-center justify-between p-6 relative select-none"
               style={{
-                background: 'linear-gradient(145deg, #FDF8F2 0%, #F3E6D8 100%)'
+                background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
               }}
             >
-              {/* Decorative Corner Inset Frame */}
               <div
                 className="absolute inset-3 rounded-lg border pointer-events-none"
-                style={{ borderColor: 'rgba(198, 40, 40, 0.15)' }}
+                style={{ borderColor: 'rgba(27, 122, 67, 0.25)' }}
               />
               <div
                 className="absolute inset-4 rounded-md border pointer-events-none"
@@ -259,19 +249,18 @@ export default function HomeCarousels({
 
               <span
                 className="text-[10px] uppercase font-bold tracking-widest pt-2 z-10"
-                style={{ color: '#1B7A43' }}
+                style={{ color: '#C59D5F' }}
               >
                 Signature Collection
               </span>
 
-              {/* Monogram Badge */}
               <div className="my-auto flex flex-col items-center z-10">
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center font-serif text-xl font-bold tracking-widest shadow-xs transition-transform duration-500 group-hover:scale-110"
                   style={{
                     background: '#FFFFFF',
                     color: '#C62828',
-                    border: '1.5px solid rgba(198, 40, 40, 0.3)'
+                    border: '1.5px solid rgba(27, 122, 67, 0.35)'
                   }}
                 >
                   {category.name ? category.name.substring(0, 2).toUpperCase() : 'TG'}
@@ -283,14 +272,13 @@ export default function HomeCarousels({
 
               <span
                 className="text-[11px] font-semibold tracking-wider uppercase pb-1 z-10 transition-colors group-hover:underline"
-                style={{ color: '#C62828' }}
+                style={{ color: '#8B2635' }}
               >
                 Explore Collection
               </span>
             </div>
           )}
 
-          {/* Product count tag */}
           {category.product_count !== undefined && category.product_count > 0 && (
             <span
               className="absolute top-3 right-3 text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm backdrop-blur-md"
@@ -301,12 +289,11 @@ export default function HomeCarousels({
           )}
         </div>
 
-        {/* Clean White Card Footer with Category Title */}
         <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
           <h3
             className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1"
             style={{
-              color: isSelected ? '#C62828' : '#1E1E1E'
+              color: isSelected ? '#8B2635' : '#1E1E1E'
             }}
           >
             {category.name}
@@ -316,95 +303,25 @@ export default function HomeCarousels({
           </span>
         </div>
 
-        {/* Bottom Crimson Accent Bar on Hover */}
         <span className="editorial-card-accent-bar" />
       </Link>
     );
   };
 
-  // Luxury Card Component for Occasions
-  const CategoryCard = ({ category, isOccasion = false }) => {
-    const isSelected = activeCategory === category.slug || String(activeCategory) === String(category.id);
-    const categoryTarget = `/category/${category.slug || category.id}`;
-
-    return (
-      <Link
-        to={categoryTarget}
-        onClick={() => {
-          if (onSelectCategory) {
-            onSelectCategory(category.slug || category.id);
-          }
-        }}
-        className="group flex flex-col items-center shrink-0 w-36 sm:w-44 md:w-48 cursor-pointer select-none transition-transform duration-300 hover:-translate-y-1 no-underline text-inherit"
-      >
-        {/* Card Image Container */}
-        <div
-          className={`relative w-full aspect-square rounded-2xl overflow-hidden bg-[#f7f6f4] border transition-all duration-300 ${isSelected
-            ? 'border-gray-900 shadow-lg ring-2 ring-gray-900'
-            : 'border-gray-200/80 shadow-xs group-hover:border-gray-400 group-hover:shadow-md'
-            }`}
-        >
-          {category.image_url ? (
-            <img
-              src={resolveImageUrl(category.image_url)}
-              alt={category.name}
-              loading="lazy"
-              className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-108"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-[#fcfbf9] to-gray-100 p-4 text-center">
-              <div className="w-12 h-12 rounded-full bg-[#07111E] text-white flex items-center justify-center font-serif text-base font-bold mb-2 shadow-xs group-hover:scale-110 transition-transform">
-                {category.name.substring(0, 2).toUpperCase()}
-              </div>
-              <span className="text-[11px] text-gray-400 uppercase tracking-widest font-medium">
-                {isOccasion ? 'Occasion' : 'Collection'}
-              </span>
-            </div>
-          )}
-
-          {/* Subtle gold badge for product count */}
-          {category.product_count !== undefined && category.product_count > 0 && (
-            <span className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-xs text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-              {category.product_count} gifts
-            </span>
-          )}
-        </div>
-
-        {/* Centered Title */}
-        <div className="mt-3 text-center px-1">
-          <h4
-            className={`font-serif text-xs sm:text-sm tracking-wide transition-colors line-clamp-1 ${isSelected ? 'font-bold text-black' : 'font-semibold text-gray-800 group-hover:text-black'
-              }`}
-          >
-            {category.name}
-          </h4>
-          <span className="text-[11px] text-gray-400 font-medium tracking-wider uppercase mt-0.5 block">
-            Explore
-          </span>
-        </div>
-      </Link>
-    );
-  };
-
   return (
-    <div className="w-full space-y-12">
-      {/* ── 1. SHOP BY CATEGORY (TALL EDITORIAL CAROUSEL) ────────────────── */}
+    <div className="w-full">
       {shopByCategories.length > 0 && (
         <section
           id="shop-by-category-section"
           className="w-full py-12"
           style={{
-            backgroundColor: '#F3ECE1',
-            borderTop: '1px solid #E8DFD3',
-            borderBottom: '1px solid #E8DFD3'
+            backgroundColor: '#E4EDE5',
+            borderBottom: '1px solid #BACBBD'
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="mb-5">
-              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#C62828' }}>
+              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#8B2635' }}>
                 Curated Hampers
               </span>
               <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-950 tracking-tight">
@@ -412,9 +329,7 @@ export default function HomeCarousels({
               </h2>
             </div>
 
-            {/* Carousel Viewport with Floating Edge Arrows */}
             <div className="relative group/category-carousel">
-              {/* Left Floating Edge Arrow */}
               {canScrollCategoryLeft && (
                 <button
                   type="button"
@@ -426,7 +341,6 @@ export default function HomeCarousels({
                 </button>
               )}
 
-              {/* Scroll Track (Hidden Native Scrollbar) */}
               <div
                 ref={categoryScrollRef}
                 onScroll={handleCategoryScroll}
@@ -435,9 +349,40 @@ export default function HomeCarousels({
                 {shopByCategories.map((category) => (
                   <EditorialCategoryCard key={category.id} category={category} />
                 ))}
+
+                <Link
+                  to="/category"
+                  className="editorial-category-card group no-underline text-inherit"
+                >
+                  <div className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none bg-gradient-to-br from-[#E6F0E8] via-[#DAE7DC] to-[#CCDDCF]">
+                    <div className="w-16 h-16 rounded-full bg-white border border-[#C59D5F]/30 flex items-center justify-center text-[#8B2635] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#8B2635] group-hover:text-white transition-all duration-300">
+                      <Grid className="w-7 h-7" />
+                    </div>
+                    <span className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#8B2635] transition-colors">
+                      View All
+                    </span>
+                    <span className="text-xs text-stone-500 mt-1">
+                      Explore All Categories
+                    </span>
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#8B2635] text-white text-xs font-semibold shadow-xs group-hover:bg-[#C59D5F] transition-colors">
+                      <span>Explore</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+
+                  <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
+                    <h3 className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1 text-stone-900">
+                      All Categories
+                    </h3>
+                    <span className="text-[11px] text-[#8B2635] font-bold tracking-wider uppercase mt-0.5 group-hover:underline">
+                      See Everything →
+                    </span>
+                  </div>
+
+                  <span className="editorial-card-accent-bar" />
+                </Link>
               </div>
 
-              {/* Right Floating Edge Arrow */}
               {canScrollCategoryRight && (
                 <button
                   type="button"
@@ -450,7 +395,6 @@ export default function HomeCarousels({
               )}
             </div>
 
-            {/* Minimal Bottom Indicator Dots */}
             {shopByCategories.length > 4 && (
               <div className="flex items-center justify-center gap-2 pt-2">
                 {[...Array(indicatorCount)].map((_, idx) => (
@@ -466,7 +410,7 @@ export default function HomeCarousels({
                       style={{
                         height: '6px',
                         width: activeCategoryDot === idx ? '22px' : '6px',
-                        backgroundColor: activeCategoryDot === idx ? '#C62828' : '#D8CDBC'
+                        backgroundColor: activeCategoryDot === idx ? '#8B2635' : '#BACBBD'
                       }}
                     />
                   </button>
@@ -477,21 +421,19 @@ export default function HomeCarousels({
         </section>
       )}
 
-      {/* ── 2. SHOP BY OCCASION (MATCHING EXACT EDITORIAL CARD STYLING) ────────────────── */}
-      {occasions.length > 0 && (
+      {sortedOccasions.length > 0 && (
         <section
           id="shop-by-occasion-section"
           className="w-full py-12"
           style={{
-            backgroundColor: '#FAF7F2',
-            borderTop: '1px solid #E8DFD3',
-            borderBottom: '1px solid #E8DFD3'
+            backgroundColor: '#E4EDE5',
+            borderBottom: '1px solid #BACBBD'
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-end justify-between mb-5">
               <div>
-                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#1B7A43' }}>
+                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#C59D5F' }}>
                   Festivals & Milestones
                 </span>
                 <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-gray-950 tracking-tight">
@@ -499,12 +441,11 @@ export default function HomeCarousels({
                 </h2>
               </div>
 
-              {/* Floating Edge Navigation Buttons */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => scroll(occasionScrollRef, 'left')}
-                  className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  className="w-9 h-9 rounded-full border border-[#BACBBD] bg-white hover:bg-[#C4D9C8] hover:text-[#8B2635] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
                   disabled={!canScrollOccasionLeft}
                   aria-label="Scroll occasions left"
                 >
@@ -513,7 +454,7 @@ export default function HomeCarousels({
                 <button
                   type="button"
                   onClick={() => scroll(occasionScrollRef, 'right')}
-                  className="w-9 h-9 rounded-full border border-[#E8DFD3] bg-white hover:bg-[#FAF7F2] hover:text-[#C62828] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
+                  className="w-9 h-9 rounded-full border border-[#BACBBD] bg-white hover:bg-[#C4D9C8] hover:text-[#8B2635] text-gray-700 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
                   disabled={!canScrollOccasionRight}
                   aria-label="Scroll occasions right"
                 >
@@ -522,9 +463,7 @@ export default function HomeCarousels({
               </div>
             </div>
 
-            {/* Carousel Viewport with Floating Edge Arrows */}
             <div className="relative group/occasion-carousel">
-              {/* Left Floating Edge Arrow */}
               {canScrollOccasionLeft && (
                 <button
                   type="button"
@@ -536,18 +475,48 @@ export default function HomeCarousels({
                 </button>
               )}
 
-              {/* Scroll Track matching category-scroll-track */}
               <div
                 ref={occasionScrollRef}
                 onScroll={handleOccasionScroll}
                 className="category-scroll-track"
               >
-                {occasions.map((occasion) => (
+                {sortedOccasions.map((occasion) => (
                   <EditorialOccasionCard key={occasion.id} occasion={occasion} />
                 ))}
+
+                <Link
+                  to="/occasion"
+                  className="editorial-category-card group no-underline text-inherit"
+                >
+                  <div className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none bg-gradient-to-br from-[#E6F0E8] via-[#DAE7DC] to-[#CCDDCF]">
+                    <div className="w-16 h-16 rounded-full bg-white border border-[#C59D5F]/25 flex items-center justify-center text-[#C59D5F] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#C59D5F] group-hover:text-white transition-all duration-300">
+                      <CalendarHeart className="w-7 h-7" />
+                    </div>
+                    <span className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#C59D5F] transition-colors">
+                      View All
+                    </span>
+                    <span className="text-xs text-stone-500 mt-1">
+                      Explore All Occasions
+                    </span>
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C59D5F] text-white text-xs font-semibold shadow-xs group-hover:bg-[#8B2635] transition-colors">
+                      <span>Explore</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </div>
+                  </div>
+
+                  <div className="pt-3.5 pb-1 px-1 text-center flex flex-col items-center justify-center">
+                    <h3 className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1 text-stone-900">
+                      All Occasions
+                    </h3>
+                    <span className="text-[11px] text-[#C59D5F] font-bold tracking-wider uppercase mt-0.5 group-hover:underline">
+                      See Everything →
+                    </span>
+                  </div>
+
+                  <span className="editorial-card-accent-bar" style={{ background: '#C59D5F' }} />
+                </Link>
               </div>
 
-              {/* Right Floating Edge Arrow */}
               {canScrollOccasionRight && (
                 <button
                   type="button"

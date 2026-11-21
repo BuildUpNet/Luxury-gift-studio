@@ -1,63 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from './FaIcons';
 import { apiService } from '../services/api';
 import resolveImageUrl from '../utils/image';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
-const FALLBACK_SLIDES = [
-  {
-    id: 1,
-    image_url: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2070&auto=format&fit=crop',
-    tag_text: 'THE ART OF LUXURY GIFTING',
-    heading: 'Curated Hampers For Every Celebration',
-    subtext: 'Discover exquisite gift hampers crafted with artisanal treats, fine confectionery, and memorable keepsakes.',
-    button_text: 'GIFT NOW',
-    button_link: '#shop-now',
-  },
-  {
-    id: 2,
-    image_url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070&auto=format&fit=crop',
-    tag_text: 'CELEBRATE SPECIAL MILESTONES',
-    heading: 'Thoughtful Presents, Unforgettable Smiles',
-    subtext: 'Handcrafted with warmth and presented in signature designer packaging delivered directly to their doorstep.',
-    button_text: 'UNWRAP JOY',
-    button_link: '#shop-now',
-  },
-  {
-    id: 3,
-    image_url: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop',
-    tag_text: 'CORPORATE & BESPOKE GIFTING',
-    heading: 'Elevate Business Relationships with Signature Gifts',
-    subtext: 'Custom-branded boxes, premium gourmet selections, and seamless multi-address Pan-India shipping.',
-    button_text: 'BUILD YOUR HAMPER',
-    button_link: '#build-hamper-section',
-  },
-];
-
-const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
+const HeroSlider = ({ onExploreClick }) => {
   const navigate = useNavigate();
   const [slides, setSlides] = useState(() => {
     const cached = getCachedData(CACHE_KEYS.HERO_SLIDES, null);
-    if (Array.isArray(cached) && cached.length > 0) {
+    if (Array.isArray(cached)) {
       return cached;
     }
-    return FALLBACK_SLIDES;
+    return [];
   });
+  const [isLoaded, setIsLoaded] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  // Fetch dynamic hero slides from API (Stale-While-Revalidate)
+  // Fetch dynamic hero slides strictly from API
   useEffect(() => {
     let isMounted = true;
     async function loadSlides() {
       try {
         const res = await apiService.getHeroSlides();
-        if (res?.success && Array.isArray(res.slides) && res.slides.length > 0 && isMounted) {
-          setSlides(res.slides);
-          setCachedData(CACHE_KEYS.HERO_SLIDES, res.slides);
+        if (res?.success && isMounted) {
+          const fetchedSlides = Array.isArray(res.slides) ? res.slides : [];
+          setSlides(fetchedSlides);
+          setCachedData(CACHE_KEYS.HERO_SLIDES, fetchedSlides);
+          setIsLoaded(true);
         }
       } catch (err) {
         console.error('Failed to load hero slides for homepage slider:', err);
+      } finally {
+        if (isMounted) setIsLoaded(true);
       }
     }
 
@@ -122,9 +97,12 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
     }
   };
 
+  if (!slides || slides.length === 0) {
+    return null;
+  }
+
   return (
     <div className="relative w-full h-[430px] sm:h-[470px] md:h-[500px] lg:h-[520px] xl:h-[535px] overflow-hidden bg-[#0A101D]">
-      {/* Slides */}
       {slides.map((slide, index) => {
         const isActive = index === currentSlide;
         const resolvedImage = resolveImageUrl(slide.image_url);
@@ -136,7 +114,6 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
               isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
             }`}
           >
-            {/* Background Image with Ken Burns Motion and Dark Gradient Overlay */}
             <div className="absolute inset-0 overflow-hidden">
               <img
                 key={`img-${slide.id}-${isActive}`}
@@ -153,7 +130,6 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
               <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/35" />
             </div>
 
-            {/* Slide Content with Staggered Entrance */}
             <div className="relative h-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 py-8 lg:py-12 flex flex-col justify-center items-start text-white">
               {isActive && (
                 <div key={`text-${slide.id}-${currentSlide}`} className="max-w-2xl space-y-3 sm:space-y-3.5 md:space-y-4">
@@ -163,7 +139,7 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
                     </span>
                   )}
 
-                  <h1 className="hero-stagger-2 font-serif text-2xl sm:text-3xl md:text-4xl lg:text-[46px] font-bold leading-tight tracking-tight text-white">
+                  <h1 className="hero-stagger-2 font-serif text-2xl sm:text-3xl md:text-4xl lg:text-[46px] font-bold leading-[1.3] sm:leading-[1.35] lg:leading-[1.38] tracking-tight text-white">
                     {slide.heading}
                   </h1>
 
@@ -188,7 +164,6 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
         );
       })}
 
-      {/* Navigation Arrows with Frosted Glass Effects (shown only when multiple slides) */}
       {slides.length > 1 && (
         <>
           <button
@@ -207,7 +182,6 @@ const HeroSlider = ({ onExploreClick, onBuildCustomClick }) => {
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Dots Indicator with Animated Active Pill */}
           <div className="absolute bottom-5 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
             {slides.map((_, idx) => (
               <button

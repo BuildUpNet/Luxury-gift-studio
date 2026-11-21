@@ -109,7 +109,7 @@ router.get('/', async (req, res) => {
       FROM categories c
       LEFT JOIN products p ON c.id = p.category_id
       GROUP BY c.id
-      ORDER BY COALESCE(c.parent_id, c.id), c.parent_id IS NOT NULL, c.name ASC
+      ORDER BY c.sort_order ASC, COALESCE(c.parent_id, c.id), c.parent_id IS NOT NULL, c.name ASC
     `);
 
     res.json({
@@ -165,7 +165,8 @@ router.post('/', authenticateToken, async (req, res) => {
     show_in_navbar = 1,
     parent_id = null,
     image_url = null,
-    section_type = 'category'
+    section_type = 'category',
+    sort_order = 0
   } = req.body;
 
   if (!name || !name.trim()) {
@@ -233,14 +234,15 @@ router.post('/', authenticateToken, async (req, res) => {
 
     // Insert new category
     const [result] = await dbPool.execute(
-      'INSERT INTO categories (parent_id, name, slug, image_url, section_type, show_in_navbar) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO categories (parent_id, name, slug, image_url, section_type, show_in_navbar, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [
         resolvedParentId,
         name.trim(),
         slug,
         image_url?.trim() || null,
         resolvedSectionType,
-        navbarValue
+        navbarValue,
+        Number(sort_order) || 0
       ]
     );
 
@@ -278,7 +280,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
     show_in_navbar,
     parent_id,
     image_url,
-    section_type
+    section_type,
+    sort_order
   } = req.body;
 
   if (!name || !name.trim()) {
@@ -373,9 +376,10 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     // Update category
+    const sortOrderClause = sort_order !== undefined ? `, sort_order = ${Number(sort_order)}` : '';
     await dbPool.execute(
       `UPDATE categories 
-       SET parent_id = ?, name = ?, slug = ?, image_url = ?, section_type = ?, show_in_navbar = ?, updated_at = NOW() 
+       SET parent_id = ?, name = ?, slug = ?, image_url = ?, section_type = ?, show_in_navbar = ?${sortOrderClause}, updated_at = NOW() 
        WHERE id = ?`,
       [resolvedParentId, name.trim(), newSlug, resolvedImageUrl, resolvedSectionType, newNavbarValue, id]
     );
@@ -520,6 +524,43 @@ router.get('/:id/products', async (req, res) => {
   } catch (error) {
     console.error('Get category products error:', error);
     return res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+});
+
+// ── POST /api/categories/reorder ───────────────────────────────────────────
+// Reorder categories batch update (admin only)
+router.post('/reorder', authenticateToken, async (req, res) => {
+  const { order } = req.body; // array of { id, sort_order }
+  if (!Array.isArray(order)) {
+    return res.status(400).json({ success: false, message: 'Order array is required' });
+  }
+
+  try {
+    for (const item of order) {
+      if (item?.id !== undefined && item?.sort_order !== undefined) {
+        await dbPool.execute('UPDATE categories SET sort_order = ? WHERE id = ?', [
+          Number(item.sort_order),
+          item.id
+        ]);
+      }
+    }
+
+    const [categories] = await dbPool.execute(`
+      SELECT c.*, COUNT(p.id) as product_count
+      FROM categories c
+      LEFT JOIN products p ON c.id = p.category_id
+      GROUP BY c.id
+      ORDER BY c.sort_order ASC, COALESCE(c.parent_id, c.id), c.parent_id IS NOT NULL, c.name ASC
+    `);
+
+    return res.json({
+      success: true,
+      message: 'Categories reordered successfully',
+      categories
+    });
+  } catch (err) {
+    console.error('Error reordering categories:', err);
+    return res.status(500).json({ success: false, message: 'Failed to reorder categories' });
   }
 });
 

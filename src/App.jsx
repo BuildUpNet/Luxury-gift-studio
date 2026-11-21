@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import ContactPage from './pages/ContactPage';
-import DiwaliHampersPage from './pages/collections/diwali-hampers';
-import HomeDecorPage from './pages/collections/tgs-home';
 import CategoryCollectionPage from './pages/CategoryCollectionPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import TestimonialsPage from './pages/TestimonialsPage';
@@ -30,8 +28,7 @@ export default function App() {
       <ProductProvider>
         <ErrorBoundary>
           <Router>
-            <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
-              {/* Global Toast */}
+            <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#E4EDE5' }}>
               {toastMessage && (
                 <div
                   style={{
@@ -53,34 +50,21 @@ export default function App() {
                 </div>
               )}
 
-              {/* Application Routes */}
               <Routes>
-                {/* 1. Dedicated Home Page Route */}
                 <Route path="/" element={<HomePage />} />
 
-                {/* 2. Dedicated Diwali Gift Hampers Collection Page */}
-                <Route path="/collections/diwali-hampers" element={<DiwaliHampersPage />} />
-
-                {/* 3. Dedicated Home Decor Collection Page */}
-                <Route path="/collections/tgs-home" element={<HomeDecorPage />} />
-
-                {/* 4. All Categories & Dynamic Category Pages */}
                 <Route path="/category" element={<CategoryCollectionPage />} />
                 <Route path="/category/:slug" element={<CategoryCollectionPage />} />
 
-                {/* 4b. Dedicated Occasions Collection Page */}
+                <Route path="/occasion" element={<OccasionPage />} />
                 <Route path="/occasion/:slug" element={<OccasionPage />} />
 
-                {/* 5. Storefront Product Detail Page */}
                 <Route path="/product/:slug" element={<ProductDetailPage />} />
 
-                {/* 6. Contact Us Page Route */}
                 <Route path="/contact" element={<ContactPage />} />
 
-                {/* 7. Dedicated Testimonials & Reviews Page */}
                 <Route path="/testimonials" element={<TestimonialsPage />} />
 
-                {/* 8. Admin Authentication & Dashboard Routes */}
                 <Route path="/admin/login" element={<AdminLogin />} />
                 <Route
                   path="/admin"
@@ -98,8 +82,15 @@ export default function App() {
                     </AdminProtectedRoute>
                   }
                 />
+                <Route
+                  path="/admin/:tab"
+                  element={
+                    <AdminProtectedRoute>
+                      <AdminDashboard />
+                    </AdminProtectedRoute>
+                  }
+                />
 
-                {/* Fallback Route */}
                 <Route path="*" element={<HomePage />} />
               </Routes>
             </div>

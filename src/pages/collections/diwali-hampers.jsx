@@ -13,7 +13,7 @@ import {
   X,
   Calendar,
   ArrowRight
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import { useProducts } from '../../context/ProductContext';
@@ -131,14 +131,12 @@ export default function DiwaliHampersPage({
 
   return (
     <div className="min-h-screen flex flex-col text-gray-900 font-sans" style={{ backgroundColor: '#FAF7F2' }}>
-      {/* 1. Shared Header */}
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         activeCategory="diwali"
       />
 
-      {/* Breadcrumb Navigation */}
       <div className="bg-[#faf9f6] border-b border-gray-100 py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-xs text-gray-500">
@@ -153,7 +151,6 @@ export default function DiwaliHampersPage({
         </div>
       </div>
 
-      {/* 2. Page Hero / Title */}
       <section className="bg-gradient-to-b from-[#faf9f6] via-[#fcfbf9] to-white py-12 px-4 sm:px-6 text-center border-b border-gray-100">
         <div className="max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-50 border border-amber-200/60 text-amber-900 text-xs font-semibold tracking-wider uppercase mb-4 shadow-sm">
@@ -183,13 +180,10 @@ export default function DiwaliHampersPage({
         </div>
       </section>
 
-      {/* 3. Filter Bar & Controls */}
       <section className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm transition">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
           
-          {/* Left: Filter Controls */}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Price Dropdown Popover */}
             <div className="relative" ref={popoverRef}>
               <button
                 type="button"
@@ -214,7 +208,6 @@ export default function DiwaliHampersPage({
                 />
               </button>
 
-              {/* Price Popover Panel */}
               {isPricePopoverOpen && (
                 <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl shadow-2xl border border-gray-200 p-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="flex items-center justify-between pb-2 mb-3 border-b border-gray-100">
@@ -271,7 +264,6 @@ export default function DiwaliHampersPage({
               )}
             </div>
 
-            {/* Sort Pill: "Just Arrived" */}
             <button
               type="button"
               onClick={() => {
@@ -291,7 +283,6 @@ export default function DiwaliHampersPage({
               )}
             </button>
 
-            {/* Additional Sort Options Dropdown */}
             <div className="relative" ref={sortRef}>
               <button
                 type="button"
@@ -338,7 +329,6 @@ export default function DiwaliHampersPage({
               )}
             </div>
 
-            {/* Clear Filters Button if filtered */}
             {selectedPriceTier !== 'all' && (
               <button
                 type="button"
@@ -351,14 +341,12 @@ export default function DiwaliHampersPage({
             )}
           </div>
 
-          {/* Right: Products Count */}
           <div className="text-xs text-gray-500 font-medium">
             Showing <strong className="text-gray-900">{filteredProducts.length}</strong> Diwali Hampers
           </div>
         </div>
       </section>
 
-      {/* 4. Product Grid Section (4-column responsive grid) */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
         {filteredProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-7">
@@ -371,14 +359,12 @@ export default function DiwaliHampersPage({
                   key={product.id}
                   className="group bg-white rounded-lg border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden relative"
                 >
-                  {/* Top Badges */}
                   <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between pointer-events-none">
                     <span className="pointer-events-auto px-2.5 py-1 rounded bg-slate-900/90 text-white text-[11px] font-bold tracking-wide uppercase shadow-sm backdrop-blur-sm">
                       {product.badge || 'Diwali Special'}
                     </span>
                   </div>
 
-                  {/* Product Image Container */}
                   <div
                     onClick={() => onQuickView(product)}
                     className="relative w-full pt-[100%] bg-gray-50 overflow-hidden cursor-pointer"
@@ -394,7 +380,6 @@ export default function DiwaliHampersPage({
                       }}
                     />
 
-                    {/* Image Carousel Arrows (shown on hover if multiple images) */}
                     {images.length > 1 && (
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
@@ -414,7 +399,6 @@ export default function DiwaliHampersPage({
                       </div>
                     )}
 
-                    {/* Quick View Button on Hover */}
                     <div className="absolute inset-x-3 bottom-3 opacity-0 group-hover:opacity-100 transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-10">
                       <button
                         type="button"
@@ -430,14 +414,11 @@ export default function DiwaliHampersPage({
                     </div>
                   </div>
 
-                  {/* Product Details */}
                   <div className="p-4 flex flex-col flex-1">
-                    {/* Brand Name */}
                     <div className="text-[11px] font-bold text-gray-400 tracking-widest uppercase mb-1">
                       {product.brand || 'THE GIFT STUDIO'}
                     </div>
 
-                    {/* Title */}
                     <h3
                       onClick={() => onQuickView(product)}
                       className="text-sm font-semibold text-gray-900 group-hover:text-amber-800 transition line-clamp-2 min-h-[2.5rem] leading-snug cursor-pointer mb-2"
@@ -446,7 +427,6 @@ export default function DiwaliHampersPage({
                       {product.title}
                     </h3>
 
-                    {/* Star Ratings */}
                     <div className="flex items-center gap-1 mb-3 text-xs">
                       <div className="flex items-center text-amber-500">
                         <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -455,13 +435,11 @@ export default function DiwaliHampersPage({
                       <span className="text-gray-400 text-[11px]">({product.reviews})</span>
                     </div>
 
-                    {/* "Earliest delivery: Tomorrow" Badge */}
                     <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-100/80 text-emerald-800 text-[11px] font-semibold">
                       <Clock className="w-3 h-3 text-emerald-600" />
                       <span>{product.deliveryBadge || 'Earliest delivery: Tomorrow'}</span>
                     </div>
 
-                    {/* Pricing & Add to Bag */}
                     <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-base font-extrabold text-gray-950">
@@ -511,7 +489,6 @@ export default function DiwaliHampersPage({
         )}
       </main>
 
-      {/* 5. SEO / Description Section */}
       <section className="bg-[#fbfaf8] border-t border-b border-gray-200 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-left sm:text-center">
           <span className="text-xs font-bold tracking-widest text-amber-700 uppercase mb-2 block">
@@ -563,7 +540,6 @@ export default function DiwaliHampersPage({
         </div>
       </section>
 
-      {/* 6. Gifting Ideas Section (3-card blog grid) */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-bold tracking-widest text-amber-700 uppercase block mb-2">
@@ -577,14 +553,12 @@ export default function DiwaliHampersPage({
           </p>
         </div>
 
-        {/* 3-card blog grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {DIWALI_GIFTING_IDEAS.map((idea) => (
             <article
               key={idea.id}
               className="group bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col"
             >
-              {/* Blog Image */}
               <div className="relative w-full h-52 overflow-hidden bg-gray-100">
                 <img
                   src={idea.image}
@@ -596,9 +570,7 @@ export default function DiwaliHampersPage({
                 </span>
               </div>
 
-              {/* Blog Body */}
               <div className="p-6 flex flex-col flex-1">
-                {/* Date */}
                 <div className="flex items-center gap-2 text-xs text-amber-700 font-semibold mb-2.5">
                   <Calendar className="w-3.5 h-3.5" />
                   <span>{idea.date}</span>
@@ -606,17 +578,14 @@ export default function DiwaliHampersPage({
                   <span className="text-gray-400 font-normal">{idea.readTime}</span>
                 </div>
 
-                {/* Title */}
                 <h3 className="font-serif text-lg font-bold text-gray-900 group-hover:text-amber-800 transition line-clamp-2 mb-3 leading-snug">
                   {idea.title}
                 </h3>
 
-                {/* Excerpt */}
                 <p className="text-xs text-gray-600 leading-relaxed mb-6 line-clamp-3">
                   {idea.excerpt}
                 </p>
 
-                {/* Read Action */}
                 <div className="mt-auto pt-4 border-t border-gray-100 flex items-center justify-between">
                   <span className="text-xs font-bold text-gray-900 group-hover:text-amber-700 transition flex items-center gap-1">
                     Read Story <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -628,7 +597,6 @@ export default function DiwaliHampersPage({
         </div>
       </section>
 
-      {/* 7. Shared Footer */}
       <Footer />
     </div>
   );

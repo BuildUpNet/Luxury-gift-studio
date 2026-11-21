@@ -11,7 +11,7 @@ import {
   X,
   Sparkles,
   ArrowLeft
-} from 'lucide-react';
+} from '../components/FaIcons';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import resolveImageUrl, { parseGalleryImages } from '../utils/image';
@@ -22,6 +22,7 @@ export default function ProductDetailPage() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -40,12 +41,12 @@ export default function ProductDetailPage() {
   const [inquirySuccess, setInquirySuccess] = useState(false);
   const [inquiryError, setInquiryError] = useState('');
 
-  // Fetch product on mount or slug change
+  // Fetch product and categories on mount or slug change
   useEffect(() => {
     let isMounted = true;
     window.scrollTo({ top: 0, behavior: 'instant' });
 
-    async function loadProduct() {
+    async function loadData() {
       if (!slug) return;
       setIsLoading(true);
       setErrorMessage('');
@@ -53,13 +54,20 @@ export default function ProductDetailPage() {
       setImgFailed(false);
 
       try {
-        const res = await apiService.getProductById(slug);
-        if (!res?.success || !res?.product) {
-          throw new Error(res?.message || 'Product not found');
+        const [prodRes, catRes] = await Promise.all([
+          apiService.getProductById(slug),
+          apiService.getCategories().catch(() => ({ success: false }))
+        ]);
+
+        if (!prodRes?.success || !prodRes?.product) {
+          throw new Error(prodRes?.message || 'Product not found');
         }
 
         if (isMounted) {
-          setProduct(res.product);
+          setProduct(prodRes.product);
+          if (catRes?.success && Array.isArray(catRes.categories)) {
+            setCategories(catRes.categories);
+          }
         }
       } catch (err) {
         console.error('Failed to load product details from API:', err);
@@ -73,7 +81,7 @@ export default function ProductDetailPage() {
       }
     }
 
-    loadProduct();
+    loadData();
 
     return () => {
       isMounted = false;
@@ -162,32 +170,64 @@ export default function ProductDetailPage() {
     }
   };
 
-  const categorySlug = product?.category_slug || (product?.category ? product.category.toLowerCase().replace(/\s+/g, '-') : '');
+  const directCategory = categories.find(
+    (c) =>
+      (product?.category_id && String(c.id) === String(product.category_id)) ||
+      (product?.category_slug && c.slug === product.category_slug) ||
+      (product?.category && c.name?.toLowerCase() === product.category.toLowerCase())
+  );
+
+  const parentCategory = directCategory?.parent_id
+    ? categories.find((c) => String(c.id) === String(directCategory.parent_id))
+    : null;
+
+  const categorySlug =
+    directCategory?.slug ||
+    product?.category_slug ||
+    (product?.category ? product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
-      {/* 1. Header Navigation */}
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#E4EDE5' }}>
       <Header />
 
-      {/* 2. Breadcrumbs Navigation */}
-      <div className="border-b border-[#E8DFD3]/80 bg-[#FDFBF7]">
+      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
             <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
               Home
             </Link>
             <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            {product?.category ? (
+            <Link to="/category" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
+              Categories
+            </Link>
+            {parentCategory && (
               <>
-                <Link
-                  to={categorySlug ? `/category/${categorySlug}` : '/'}
-                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap capitalize"
-                >
-                  {product.category}
-                </Link>
                 <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <Link
+                  to={`/category/${parentCategory.slug || parentCategory.id}`}
+                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap capitalize text-stone-500"
+                >
+                  {parentCategory.name}
+                </Link>
+              </>
+            )}
+            {directCategory ? (
+              <>
+                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <Link
+                  to={`/category/${directCategory.slug || directCategory.id}`}
+                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap capitalize text-stone-500"
+                >
+                  {directCategory.name}
+                </Link>
+              </>
+            ) : product?.category ? (
+              <>
+                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <span className="text-stone-500 capitalize">{product.category}</span>
               </>
             ) : null}
+            <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
             <span className="text-stone-900 font-semibold truncate max-w-xs sm:max-w-md">
               {product?.title || 'Product'}
             </span>
@@ -195,9 +235,7 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {/* 3. Main Product Section */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
-        {/* Loading Spinner */}
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-10 h-10 border-3 border-[#C62828] border-t-transparent rounded-full animate-spin mb-3" />
@@ -206,7 +244,6 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Error / Not Found Message */}
         {!isLoading && (errorMessage || !product) && (
           <div className="text-center py-16 px-4 max-w-md mx-auto">
             <div className="w-14 h-14 rounded-full bg-red-50 text-[#C62828] flex items-center justify-center mx-auto mb-3 border border-red-200">
@@ -227,14 +264,11 @@ export default function ProductDetailPage() {
           </div>
         )}
 
-        {/* Loaded Product Content */}
         {!isLoading && product && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
             
-            {/* ── LEFT SIDE: INTERACTIVE IMAGE GALLERY (Col 7) ────────────────── */}
             <div className="lg:col-span-7 flex flex-col-reverse sm:flex-row gap-3.5 items-start">
               
-              {/* Vertical Thumbnail Sidebar (Far Left on Desktop, Horizontal Below on Mobile) */}
               {galleryImages.length > 1 && (
                 <div
                   className="flex sm:flex-col gap-2 overflow-x-auto sm:overflow-y-auto w-full sm:w-14 shrink-0 max-h-[460px] pb-1 sm:pb-0 select-none scrollbar-thin"
@@ -286,9 +320,7 @@ export default function ProductDetailPage() {
                 </div>
               )}
 
-              {/* Main Stage Image (Balanced, constrained max height h-[420px] to h-[460px]) */}
               <div className="flex-1 w-full h-[360px] sm:h-[440px] max-h-[460px] rounded-xl overflow-hidden border border-[#E8DFD3] bg-[#F8F5F0] relative shadow-xs flex items-center justify-center group">
-                {/* Discount Badge */}
                 {hasDiscount && (
                   <div className="absolute top-3 left-3 z-10 pointer-events-none">
                     <span
@@ -300,7 +332,6 @@ export default function ProductDetailPage() {
                   </div>
                 )}
 
-                {/* Main Product Image */}
                 {!imgFailed && currentImageUrl ? (
                   <img
                     src={resolveImageUrl(currentImageUrl)}
@@ -317,7 +348,6 @@ export default function ProductDetailPage() {
                   </div>
                 )}
 
-                {/* Prev / Next navigation arrows when multiple images exist */}
                 {galleryImages.length > 1 && (
                   <>
                     <button
@@ -353,7 +383,6 @@ export default function ProductDetailPage() {
                   </>
                 )}
 
-                {/* Gallery photo indicator pill */}
                 {galleryImages.length > 1 && (
                   <div className="absolute bottom-2.5 right-2.5 bg-black/60 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full backdrop-blur-xs select-none">
                     {safeActiveIndex + 1} / {galleryImages.length}
@@ -362,10 +391,8 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* ── RIGHT SIDE: PRODUCT DETAILS (Col 5) ─────────────────────────── */}
             <div className="lg:col-span-5 space-y-4">
               
-              {/* Brand & Collection Eyebrow */}
               <div>
                 {product.brand && (
                   <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B2635] mb-1 block">
@@ -373,12 +400,10 @@ export default function ProductDetailPage() {
                   </span>
                 )}
                 
-                {/* Product Title */}
                 <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-stone-950 tracking-tight leading-snug">
                   {product.title}
                 </h1>
 
-                {/* Category Pill */}
                 {product.category && (
                   <div className="mt-2">
                     <Link
@@ -392,7 +417,6 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Pricing Block - Sleek and compact py-3 px-4 */}
               <div className="py-3 px-4 rounded-xl bg-white border border-[#E8DFD3] shadow-2xs">
                 <div className="flex items-baseline gap-2.5 flex-wrap">
                   <span className="font-serif text-2xl sm:text-3xl font-bold text-stone-950">
@@ -418,9 +442,7 @@ export default function ProductDetailPage() {
                 </p>
               </div>
 
-              {/* Inquiry Action Buttons - Refined py-2.5 text-sm rounded-lg */}
               <div className="space-y-2.5 pt-0.5">
-                {/* Primary Inquire Button */}
                 <button
                   type="button"
                   onClick={handleOpenInquire}
@@ -431,7 +453,6 @@ export default function ProductDetailPage() {
                   <span>Inquire About This Gift</span>
                 </button>
 
-                {/* Direct WhatsApp Concierge Button */}
                 <a
                   href={`https://wa.me/917506210892?text=${encodeURIComponent(
                     `Hi, I am interested in inquiring about "${product.title}" (₹${priceNumeric.toLocaleString('en-IN')}) from The Gift Studio.`
@@ -446,7 +467,6 @@ export default function ProductDetailPage() {
                 </a>
               </div>
 
-              {/* Product Description */}
               {product.description && (
                 <div className="pt-3 border-t border-[#E8DFD3]/80">
                   <h3 className="font-serif text-sm font-bold text-stone-900 mb-1.5">
@@ -464,11 +484,9 @@ export default function ProductDetailPage() {
         )}
       </main>
 
-      {/* ── INQUIRY MODAL (Matching CategoryCollectionPage exactly) ───────── */}
       {isInquireModalOpen && product && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-2xl relative border border-[#E8DFD3] max-h-[90vh] overflow-y-auto">
-            {/* Close button */}
             <button
               type="button"
               onClick={handleCloseInquire}
@@ -478,7 +496,6 @@ export default function ProductDetailPage() {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Modal Title */}
             <div className="mb-4">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#C62828]">
                 Concierge Assistance
@@ -491,7 +508,6 @@ export default function ProductDetailPage() {
               </p>
             </div>
 
-            {/* Product Snapshot Card */}
             <div className="flex items-center gap-3 p-3 rounded-xl bg-stone-50 border border-stone-200/70 mb-5">
               <img
                 src={resolveImageUrl(product.image)}
@@ -511,7 +527,6 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Success State */}
             {inquirySuccess ? (
               <div className="py-6 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
@@ -652,7 +667,6 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      {/* 4. Footer */}
       <Footer />
     </div>
   );

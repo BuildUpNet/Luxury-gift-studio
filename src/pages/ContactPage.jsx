@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Clock } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle2, AlertCircle, Clock } from '../components/FaIcons';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { API_URLS } from '../config/api';
@@ -105,7 +105,6 @@ export default function ContactPage() {
         error: null
       });
 
-      // Clear form on success
       setFormData({
         name: '',
         email: '',
@@ -123,43 +122,38 @@ export default function ContactPage() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#FAF7F2' }}>
-      {/* Shared Header */}
+    <div className="min-h-screen w-full flex flex-col bg-[#E4EDE5]">
       <Header />
 
-      {/* Main Content Area */}
-      <main className="flex-1 py-12 md:py-16" style={{ backgroundColor: '#FAF7F2' }}>
+      <main className="flex-1 py-12 md:py-16 bg-[#E4EDE5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Breadcrumb & Title Header */}
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#07111E] bg-gray-100 px-3 py-1 rounded-full inline-block mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#145E33] bg-[#D4E2D6] border border-[#BACBBD] px-3.5 py-1 rounded-full inline-block mb-3">
               Get in Touch
             </span>
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-950 tracking-tight mb-4">
               Contact Us
             </h1>
-            <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-              Have a question about our bespoke hampers, corporate gifting or order delivery? We are here to help you craft unforgettable experiences.
+            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+              Have a question about our bespoke hampers, gifting solutions or order delivery? We are here to help you craft unforgettable experiences.
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
-            {/* Left Column: Contact Information Cards */}
             <div className="lg:col-span-5 space-y-6">
               
-              <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 shadow-xs">
+              <div className="bg-[#DBE6DC] rounded-2xl border border-[#BACBBD] p-6 sm:p-8 shadow-sm">
                 <h2 className="font-serif text-xl font-bold text-gray-900 mb-6">
                   Customer Concierge
                 </h2>
 
-                <div className="space-y-6">
+                <div className="space-y-3.5">
                   
-                  {/* Phone / WhatsApp */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#07111E] text-white flex items-center justify-center shrink-0">
-                      <Phone className="w-5 h-5 text-amber-200" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#145E33]/40 hover:bg-[#D4E2D6] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
+                      <Phone className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
                     </div>
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
@@ -169,7 +163,7 @@ export default function ContactPage() {
                         href={`https://wa.me/91${STORE_INFO.phone}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-base font-semibold text-gray-900 hover:text-amber-800 transition no-underline block"
+                        className="text-base font-semibold text-gray-900 hover:text-[#8B2635] transition-colors no-underline block"
                       >
                         +91 {STORE_INFO.phone}
                       </a>
@@ -177,10 +171,9 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  {/* Email Support */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#07111E] text-white flex items-center justify-center shrink-0">
-                      <Mail className="w-5 h-5 text-amber-200" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#D4AF37]/40 hover:bg-[#EFEAE2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
+                      <Mail className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
                     </div>
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
@@ -188,7 +181,7 @@ export default function ContactPage() {
                       </h3>
                       <a
                         href={`mailto:${STORE_INFO.email}`}
-                        className="text-base font-semibold text-gray-900 hover:text-amber-800 transition no-underline block"
+                        className="text-base font-semibold text-gray-900 hover:text-[#8B2635] transition-colors no-underline block"
                       >
                         {STORE_INFO.email}
                       </a>
@@ -196,35 +189,16 @@ export default function ContactPage() {
                     </div>
                   </div>
 
-                  {/* Headquarters / Studio */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#07111E] text-white flex items-center justify-center shrink-0">
-                      <MapPin className="w-5 h-5 text-amber-200" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#D4AF37]/40 hover:bg-[#EFEAE2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
+                      <MapPin className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
                     </div>
                     <div>
                       <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
                         Gifting Studio
                       </h3>
-                      <p className="text-sm font-semibold text-gray-900">
-                        The Gift Studio | Nature's Basket
-                      </p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        Mumbai, Delhi NCR, Bengaluru, Kolkata, Hyderabad, Pune, Chennai
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Hours */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-full bg-[#07111E] text-white flex items-center justify-center shrink-0">
-                      <Clock className="w-5 h-5 text-amber-200" />
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                        Corporate & Bulk Orders
-                      </h3>
-                      <p className="text-sm text-gray-700">
-                        Dedicated concierge available for custom branding and pan-India multi-address shipping.
+                      <p className="text-base font-semibold text-gray-900 m-0">
+                        Premium Gift Solutions
                       </p>
                     </div>
                   </div>
@@ -232,28 +206,34 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              {/* Direct Quick WhatsApp Card */}
-              <div className="bg-[#07111E] text-white rounded-xl p-6 sm:p-7 shadow-xs">
-                <h3 className="font-serif text-lg font-bold mb-2">Need an instant response?</h3>
-                <p className="text-xs text-gray-300 leading-relaxed mb-4">
-                  Chat directly with our gifting experts on WhatsApp for fast hamper recommendations and tracking updates.
+              <div className="bg-[#0B1528] text-white rounded-2xl p-6 sm:p-7 shadow-lg border border-white/10 transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/30">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                    Instant Concierge
+                  </span>
+                </div>
+                <h3 className="font-serif text-lg font-bold text-white mb-2 tracking-wide">
+                  Need an instant response?
+                </h3>
+                <p className="text-xs text-slate-300 leading-relaxed mb-5">
+                  Chat directly with our gifting experts on WhatsApp for fast hamper recommendations, personalized curation and tracking updates.
                 </p>
                 <a
                   href={`https://wa.me/91${STORE_INFO.phone}?text=Hi,%20I%20have%20an%20enquiry%20regarding%20The%20Gift%20Studio`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-bold px-4 py-2.5 rounded-lg transition duration-200 no-underline shadow-xs"
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20ba5a] hover:to-[#0f7a6e] text-white text-sm font-bold py-3 px-5 rounded-xl transition-all duration-300 no-underline shadow-md hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
                 >
-                  <i className="fa-brands fa-whatsapp text-sm"></i>
+                  <i className="fa-brands fa-whatsapp text-lg shrink-0"></i>
                   <span>Chat on WhatsApp</span>
                 </a>
               </div>
 
             </div>
 
-            {/* Right Column: Contact Form */}
             <div className="lg:col-span-7">
-              <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-10 shadow-xs">
+              <div className="bg-[#DBE6DC] rounded-2xl border border-[#BACBBD] p-6 sm:p-10 shadow-sm">
                 <h2 className="font-serif text-2xl font-bold text-gray-900 mb-2">
                   Send us a Message
                 </h2>
@@ -261,7 +241,6 @@ export default function ContactPage() {
                   Fill in the details below and our team will get back to you shortly.
                 </p>
 
-                {/* Status Messages */}
                 {status.success && (
                   <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3 text-emerald-900">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -286,7 +265,6 @@ export default function ContactPage() {
 
                 <form onSubmit={handleSubmit} noValidate autoComplete="off" className="space-y-5">
                   
-                  {/* Full Name */}
                   <div>
                     <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                       Full Name <span className="text-rose-600">*</span>
@@ -300,10 +278,10 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. Ananya Sharma"
-                      className={`w-full px-4 py-3 bg-[#F9F9F9] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white transition ${
+                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
                         formErrors.name
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-gray-200 focus:border-gray-900'
+                          : 'border-[#DDD5C7]'
                       }`}
                     />
                     {formErrors.name && (
@@ -311,7 +289,6 @@ export default function ContactPage() {
                     )}
                   </div>
 
-                  {/* Email Address */}
                   <div>
                     <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                       Email Address <span className="text-rose-600">*</span>
@@ -325,10 +302,10 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. ananya@example.com"
-                      className={`w-full px-4 py-3 bg-[#F9F9F9] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white transition ${
+                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
                         formErrors.email
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-gray-200 focus:border-gray-900'
+                          : 'border-[#DDD5C7]'
                       }`}
                     />
                     {formErrors.email && (
@@ -336,7 +313,6 @@ export default function ContactPage() {
                     )}
                   </div>
 
-                  {/* Subject */}
                   <div>
                     <label htmlFor="subject" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                       Subject <span className="text-rose-600">*</span>
@@ -350,10 +326,10 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. Inquiry about Custom Corporate Hamper"
-                      className={`w-full px-4 py-3 bg-[#F9F9F9] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white transition ${
+                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
                         formErrors.subject
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-gray-200 focus:border-gray-900'
+                          : 'border-[#DDD5C7]'
                       }`}
                     />
                     {formErrors.subject && (
@@ -361,7 +337,6 @@ export default function ContactPage() {
                     )}
                   </div>
 
-                  {/* Message / Query */}
                   <div>
                     <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                       Message / Query <span className="text-rose-600">*</span>
@@ -374,10 +349,10 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="Please share details about your requirement, destination city, delivery dates, or specific questions..."
-                      className={`w-full px-4 py-3 bg-[#F9F9F9] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white transition resize-y ${
+                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition resize-y ${
                         formErrors.message
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-gray-200 focus:border-gray-900'
+                          : 'border-[#DDD5C7]'
                       }`}
                     />
                     {formErrors.message && (
@@ -385,12 +360,11 @@ export default function ContactPage() {
                     )}
                   </div>
 
-                  {/* Submit Button */}
                   <div className="pt-2">
                     <button
                       type="submit"
                       disabled={status.submitting}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#020919] hover:bg-[#1a2233] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider px-8 py-3.5 rounded-lg transition duration-200 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#020919] hover:bg-[#8B2635] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider px-8 py-3.5 rounded-lg transition duration-300 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                     >
                       {status.submitting ? (
                         <>
@@ -415,7 +389,6 @@ export default function ContactPage() {
         </div>
       </main>
 
-      {/* Shared Footer */}
       <Footer />
     </div>
   );

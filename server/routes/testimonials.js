@@ -5,7 +5,7 @@ import { authenticateToken } from '../middlewares/auth.js';
 const router = express.Router();
 
 // Auto-seed helper to guarantee initial luxury reviews exist
-async function ensureTestimonialsTableAndSeed() {
+async function ensureTestimonialsTable() {
   try {
     await dbPool.query(`
       CREATE TABLE IF NOT EXISTS testimonials (
@@ -23,51 +23,11 @@ async function ensureTestimonialsTableAndSeed() {
         KEY idx_created_at (created_at)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-
-    const [rows] = await dbPool.query('SELECT COUNT(*) as count FROM testimonials');
-    if (rows[0].count === 0) {
-      const seedItems = [
-        [
-          'Sonam K. Ahuja',
-          'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
-          'https://thegiftstudio.com/cdn/shop/files/The_Select_by_Anamika_Khanna.png?v=1768808499&width=600',
-          5.0,
-          'Incredible array of hampers and experiences with an assured personal touch.',
-          'Diwali Gifting',
-          'Mumbai'
-        ],
-        [
-          'Suhel Seth',
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&auto=format&fit=crop&q=80',
-          'https://thegiftstudio.com/cdn/shop/files/Artful_Indulgence_by_Paresh_Maity_1472899_01.jpg?v=1789036880&width=600',
-          5.0,
-          'The Gift Studio is World Class! Exquisite curation of gourmet and luxury decor.',
-          'Corporate Celebrations',
-          'New Delhi'
-        ],
-        [
-          'Anamika Khanna',
-          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&auto=format&fit=crop&q=80',
-          'https://thegiftstudio.com/cdn/shop/files/The_Select_by_Anamika_Khanna.png?v=1768808499&width=600',
-          5.0,
-          'The Gift Studio helps you express the extra love and effort for your loved ones with bespoke craftsmanship.',
-          'Weddings',
-          'Kolkata'
-        ]
-      ];
-
-      for (const item of seedItems) {
-        await dbPool.query(
-          'INSERT INTO testimonials (customer_name, avatar_url, product_image_url, rating, review_text, occasion, city) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          item
-        );
-      }
-    }
   } catch (err) {
-    console.error('Failed to auto-seed testimonials:', err.message);
+    console.error('Failed to ensure testimonials table:', err.message);
   }
 }
-ensureTestimonialsTableAndSeed();
+ensureTestimonialsTable();
 
 // -------------------------------------------------------------
 // 1. GET /api/testimonials (Public - List all testimonials)

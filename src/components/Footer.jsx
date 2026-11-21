@@ -1,335 +1,201 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { MapPin, Mail, Phone } from './FaIcons';
 import { STORE_INFO } from '../data/giftStudioData';
 import { apiService } from '../services/api';
+import { getCachedData, CACHE_KEYS } from '../utils/cache';
 
-export default function Footer({ onSelectCategory }) {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+const DEFAULT_SETTINGS = {
+  facebook_url: 'https://facebook.com/thegiftstudio',
+  whatsapp_url: 'https://wa.me/917506210892',
+  instagram_url: 'https://instagram.com/thegiftstudio',
+  bulk_enquiry_phone: '917506210892',
+  support_email: 'modient93@gmail.com'
+};
 
-  const handleSubscribe = async (e) => {
-    e.preventDefault();
-    const cleanEmail = email.trim();
-    if (!cleanEmail) return;
+export default function Footer() {
+  const [storeSettings, setStoreSettings] = useState(() => {
+    return getCachedData(CACHE_KEYS.STORE_SETTINGS, DEFAULT_SETTINGS);
+  });
 
-    setErrorMessage('');
-    setIsSubmitting(true);
-
-    try {
-      const res = await apiService.subscribeNewsletter(cleanEmail);
-      if (res?.success) {
-        setSubscribed(true);
-        setSuccessMessage(res.message || 'Thank you for subscribing to our newsletter! A welcome email is on its way.');
-        setEmail('');
-      } else {
-        setErrorMessage(res?.message || 'Failed to subscribe. Please try again.');
+  useEffect(() => {
+    let isMounted = true;
+    const loadSettings = async () => {
+      try {
+        const res = await apiService.getSettings();
+        if (res?.success && res?.settings && isMounted) {
+          setStoreSettings(res.settings);
+        }
+      } catch (err) {
+        // Fallback silently to cached / default settings
       }
-    } catch (err) {
-      console.error('Subscription error:', err);
-      setErrorMessage(err?.data?.message || err?.message || 'Unable to subscribe right now. Please check your connection.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    };
+    loadSettings();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const phoneNum = storeSettings.bulk_enquiry_phone || STORE_INFO.phone;
+  const emailAddr = storeSettings.support_email || STORE_INFO.email;
+  const waUrl = storeSettings.whatsapp_url || `https://wa.me/91${phoneNum}`;
+  const fbUrl = storeSettings.facebook_url || 'https://facebook.com';
+  const igUrl = storeSettings.instagram_url || 'https://instagram.com';
 
   return (
-    <footer className="w-full bg-[#07111E] text-white">
-      {/* 1. Newsletter / Subscribe Section */}
-      <div
-        className="text-gray-900 py-10 sm:py-12 px-4 sm:px-6 lg:px-8"
-        style={{
-          backgroundColor: '#FDFBF7',
-          borderTop: '1px solid #E8DFD3',
-          borderBottom: '1px solid #E8DFD3'
-        }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="text-center md:text-left max-w-xl">
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-gray-950 mb-2">
-              Subscribe to The Gift Studio
-            </h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Be the first to know about new celebrity curations, festive hampers, and exclusive offers.
-            </p>
-          </div>
-
-          <div className="w-full md:w-auto md:min-w-[420px]">
-            {subscribed ? (
-              <div className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-5 py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 animate-in fade-in">
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                <span>{successMessage}</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <input
-                    type="email"
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Enter your email address"
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      if (errorMessage) setErrorMessage('');
-                    }}
-                    className="flex-1 px-4 py-3 bg-white border border-[#E8DFD3] rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:border-[#C62828] transition disabled:opacity-60"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all duration-300 shadow-sm whitespace-nowrap cursor-pointer active:scale-98 disabled:opacity-60 flex items-center justify-center gap-2"
-                    style={{ backgroundColor: '#C62828' }}
-                    onMouseEnter={(e) => {
-                      if (!isSubmitting) e.currentTarget.style.backgroundColor = '#1B7A43';
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSubmitting) e.currentTarget.style.backgroundColor = '#C62828';
-                    }}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin text-white" />
-                        <span>Subscribing...</span>
-                      </>
-                    ) : (
-                      'Subscribe'
-                    )}
-                  </button>
-                </div>
-
-                {errorMessage && (
-                  <div className="flex items-center gap-1.5 text-xs text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-md mt-1 animate-in fade-in">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-                    <span>{errorMessage}</span>
-                  </div>
-                )}
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Main Footer Section (Rich Deep Navy-Black #07111E) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
+    <footer className="w-full bg-[#202020] text-[#a0a0a0] font-sans text-sm border-t border-[#2e2e2e]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           
-          {/* Brand Logo & Contacts */}
-          <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center gap-3">
-              <img
-                src="/images/gift_logo.jpeg"
-                alt="The Gift Studio"
-                className="h-10 sm:h-11 w-auto object-contain rounded-xs bg-white p-1"
-                style={{ height: '42px', width: 'auto', objectFit: 'contain' }}
-              />
-              <span className="h-6 w-px" style={{ background: 'rgba(255, 255, 255, 0.25)' }} />
-              <span className="font-serif text-xs sm:text-sm font-bold tracking-wide italic" style={{ color: '#F3ECE1', letterSpacing: '0.04em' }}>
-                Premium Gifting Solutions
-              </span>
-            </div>
+          <div className="md:col-span-5 lg:col-span-5 space-y-4">
+            <Link to="/" className="inline-block no-underline">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/images/gift_logo.jpeg"
+                  alt={STORE_INFO.name}
+                  className="h-10 w-auto object-contain rounded bg-white p-1"
+                />
+                <span className="text-white font-serif font-bold text-lg tracking-wide">
+                  {STORE_INFO.name}
+                </span>
+              </div>
+            </Link>
 
-            <p className="text-sm text-[#D1D5DB] leading-relaxed max-w-sm">
-              Buy premium gifts and luxury hampers online. Thoughtfully handcrafted celebrations, artisanal delights, and keepsake treasures delivered pan-India.
+            <h3 className="text-white text-base font-semibold tracking-wide pt-1">
+              About us
+            </h3>
+
+            <p className="text-[#9e9e9e] text-sm leading-relaxed max-w-md m-0">
+              {STORE_INFO.name} brings you bespoke luxury hampers, curated gourmet celebration boxes, and unforgettable artisanal gifts crafted with excellence for every special occasion.
             </p>
-
-            <div className="space-y-3 pt-2">
-              <a
-                href={`https://wa.me/91${STORE_INFO.phone}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-3 text-white hover:text-amber-200 transition group no-underline"
-              >
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition">
-                  <Phone className="w-4 h-4 text-[#07111E]" />
-                </div>
-                <div className="text-left">
-                  <span className="text-[11px] uppercase tracking-wider text-[#9CA3AF] block font-medium">Call or WhatsApp</span>
-                  <span className="text-sm font-semibold text-white group-hover:text-amber-200 transition">
-                    +91 {STORE_INFO.phone}
-                  </span>
-                </div>
-              </a>
-
-              <a
-                href={`mailto:${STORE_INFO.email}`}
-                className="flex items-center gap-3 text-white hover:text-amber-200 transition group no-underline"
-              >
-                <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition">
-                  <Mail className="w-4 h-4 text-[#07111E]" />
-                </div>
-                <div className="text-left">
-                  <span className="text-[11px] uppercase tracking-wider text-[#9CA3AF] block font-medium">Email Support</span>
-                  <span className="text-sm font-semibold text-white group-hover:text-amber-200 transition">
-                    {STORE_INFO.email}
-                  </span>
-                </div>
-              </a>
-            </div>
           </div>
 
-          {/* Curated Hampers */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-5">
-              Curated Hampers
-            </h4>
-            <ul className="space-y-3 text-sm text-[#D1D5DB] list-none p-0 m-0">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('celebrity')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Celebrity Hampers
-                </button>
-              </li>
-              <li>
+          <div className="md:col-span-3 lg:col-span-3">
+            <h3 className="text-white text-base font-semibold tracking-wide mb-4">
+              Information
+            </h3>
+            <ul className="space-y-2.5 list-none p-0 m-0 text-sm">
+              <li className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">○</span>
                 <Link
-                  to="/collections/diwali-hampers"
-                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
+                  to="/"
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
                 >
-                  Diwali Hampers
+                  Home
                 </Link>
               </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('birthdays')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Birthday Hampers
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('anniversary')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Anniversary Hampers
-                </button>
-              </li>
-              <li>
-                <a
-                  href="#build-hamper-section"
-                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
-                >
-                  Create Your Own Hamper
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-5">
-              Quick Links
-            </h4>
-            <ul className="space-y-3 text-sm text-[#D1D5DB] list-none p-0 m-0">
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('best-sellers')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Best Sellers
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('corporate')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Corporate Gifting
-                </button>
-              </li>
-              <li>
+              <li className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">○</span>
                 <Link
-                  to="/collections/tgs-home"
-                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
+                  to="/category"
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
                 >
-                  Home Decor
+                  All Categories
                 </Link>
               </li>
-              <li>
-                <button
-                  type="button"
-                  onClick={() => onSelectCategory && onSelectCategory('last-minute')}
-                  className="hover:text-amber-200 hover:opacity-90 transition text-left cursor-pointer bg-transparent border-none p-0 text-inherit text-sm"
-                >
-                  Same Day Delivery
-                </button>
-              </li>
-              <li>
+              <li className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">○</span>
                 <Link
-                  to="/collections/tgs-home"
-                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
+                  to="/testimonials"
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
                 >
-                  Festive Decor & Diya Sets
+                  Client Reviews & Stories
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          {/* Customer Care */}
-          <div>
-            <h4 className="text-xs font-bold uppercase tracking-widest text-white mb-5">
-              Customer Care
-            </h4>
-            <ul className="space-y-3 text-sm text-[#D1D5DB] list-none p-0 m-0">
-              <li>
+              <li className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">○</span>
                 <Link
                   to="/contact"
-                  className="text-inherit hover:text-amber-200 hover:opacity-90 transition no-underline block"
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
                 >
                   Contact Us
                 </Link>
               </li>
-              <li>
-                <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
-                  Track Order
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
-                  Delivery Policy
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
-                  Returns & Refunds
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
-                  FAQs & Support
-                </span>
-              </li>
-              <li>
-                <span className="hover:text-amber-200 hover:opacity-90 transition cursor-pointer">
-                  Bulk & Corporate Concierge
-                </span>
-              </li>
             </ul>
+          </div>
+
+          <div className="md:col-span-4 lg:col-span-4 space-y-4">
+            <h3 className="text-white text-base font-semibold tracking-wide mb-4">
+              Our Contacts
+            </h3>
+
+            <div className="space-y-3.5 text-sm">
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-[#00bcd4] shrink-0 mt-0.5" />
+                <span className="text-[#b0b0b0] leading-snug">
+                  Aggarwal Street, Lehragaga, Punjab 148031
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-[#00bcd4] shrink-0" />
+                <a
+                  href={`mailto:${emailAddr}`}
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
+                >
+                  {emailAddr}
+                </a>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-[#00bcd4] shrink-0" />
+                <a
+                  href={`tel:+91${phoneNum}`}
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
+                >
+                  +91 {phoneNum}
+                </a>
+              </div>
+            </div>
           </div>
 
         </div>
 
-        {/* 3. Bottom Copyright Bar */}
-        <div className="mt-14 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9CA3AF]">
-          <p className="text-center sm:text-left m-0">
-            © {new Date().getFullYear()} {STORE_INFO.name}. All Rights Reserved. Handcrafted with excellence.
+        <div className="mt-8 pt-6 border-t border-[#2e2e2e]/60 flex items-center gap-3">
+          {fbUrl && (
+            <a
+              href={fbUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-white hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+            >
+              <i className="fa-brands fa-facebook-f text-sm"></i>
+            </a>
+          )}
+          {igUrl && (
+            <a
+              href={igUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-white hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+            >
+              <i className="fa-brands fa-instagram text-sm"></i>
+            </a>
+          )}
+          {waUrl && (
+            <a
+              href={waUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-emerald-400 hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+            >
+              <i className="fa-brands fa-whatsapp text-sm"></i>
+            </a>
+          )}
+        </div>
+      </div>
+
+      <div className="bg-[#181818] py-4 border-t border-[#2a2a2a] text-xs text-[#737373]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <p className="m-0">
+            © {new Date().getFullYear()} {STORE_INFO.name}. All Rights Reserved.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-6">
-            <span className="hover:text-white transition cursor-pointer">Privacy Policy</span>
-            <span className="hover:text-white transition cursor-pointer">Terms of Service</span>
-            <span className="hover:text-white transition cursor-pointer">Shipping & Delivery</span>
-            <span className="hover:text-white transition cursor-pointer">Cancellation Policy</span>
-          </div>
+          <p className="m-0 text-[#666]">
+            Crafted with excellence.
+          </p>
         </div>
       </div>
     </footer>

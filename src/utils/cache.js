@@ -31,6 +31,18 @@ export const setCachedData = (key, data) => {
   }
 };
 
+export const clearCache = (key) => {
+  try {
+    if (key) {
+      localStorage.removeItem(key);
+    } else {
+      Object.values(CACHE_KEYS).forEach((k) => localStorage.removeItem(k));
+    }
+  } catch (err) {
+    console.warn('[cache] Failed to clear cache:', err);
+  }
+};
+
 export const CACHE_KEYS = {
   CATEGORIES: 'tgs_cached_categories',
   OCCASIONS: 'tgs_cached_occasions',

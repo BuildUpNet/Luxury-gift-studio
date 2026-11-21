@@ -22,26 +22,26 @@ import {
   Building,
   Check,
   ChevronDown
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import { apiService } from '../../services/api';
 import { resolveImageUrl } from '../../utils/image';
 
 const PRESET_FESTIVE_IMAGES = [
   {
     name: 'Diwali & Festive Glow',
-    url: 'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop'
+    url: '/images/gift_logo.jpeg'
   },
   {
     name: 'Christmas & Holiday Luxury',
-    url: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2070&auto=format&fit=crop'
+    url: '/images/gift_logo.jpeg'
   },
   {
     name: 'Royal Wedding & Celebration',
-    url: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070&auto=format&fit=crop'
+    url: '/images/gift_logo.jpeg'
   },
   {
     name: 'Corporate & Gourmet Black Tie',
-    url: 'https://images.unsplash.com/photo-1511285560929-80b456fea0bc?q=80&w=2069&auto=format&fit=crop'
+    url: '/images/gift_logo.jpeg'
   }
 ];
 
@@ -214,7 +214,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
 
   return (
     <div className="space-y-6">
-      {/* Tab Switcher & Header */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -226,7 +225,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
           </p>
         </div>
 
-        {/* Sub-tab pills */}
         <div className="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg">
           <button
             type="button"
@@ -257,12 +255,8 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
         </div>
       </div>
 
-      {/* ------------------------------------------------------------- */}
-      {/* 1. BANNER CONFIGURATION SUB-TAB */}
-      {/* ------------------------------------------------------------- */}
       {activeSubTab === 'banner' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Form: Edit Texts, Upload & Settings */}
           <div className="lg:col-span-5 bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-6 space-y-5">
             <div className="border-b border-gray-100 pb-3">
               <h3 className="text-sm font-bold text-gray-900">Banner Content & Festive Settings</h3>
@@ -270,7 +264,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
             </div>
 
             <form onSubmit={handleSaveBanner} className="space-y-4">
-              {/* Eyebrow Badge */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Eyebrow Badge Text
@@ -284,7 +277,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
               </div>
 
-              {/* Main Heading */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Main Heading <span className="text-amber-500">*</span>
@@ -299,7 +291,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
               </div>
 
-              {/* Subheading */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Subtitle Description
@@ -313,7 +304,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
               </div>
 
-              {/* Button Text */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   CTA Button Label
@@ -327,7 +317,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
               </div>
 
-              {/* Festive Wallpaper Upload (Multer) */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1">
                   Upload Festive Background Image
@@ -356,7 +345,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Curated Festive Themes Presets */}
               <div>
                 <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                   Or Quick Select Festive Theme:
@@ -382,7 +370,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Overlay Opacity Slider */}
               <div>
                 <div className="flex items-center justify-between text-xs font-semibold text-gray-700 mb-1">
                   <span>Dark Overlay Opacity</span>
@@ -404,7 +391,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 </span>
               </div>
 
-              {/* Is Active Toggle */}
               <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
                 <div>
                   <span className="text-xs font-semibold text-gray-900 block">Show Banner on Homepage</span>
@@ -425,7 +411,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 </button>
               </div>
 
-              {/* Save Button */}
               <button
                 type="submit"
                 disabled={isSavingBanner}
@@ -446,7 +431,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
             </form>
           </div>
 
-          {/* Right Live Preview: Shows exact live look */}
           <div className="lg:col-span-7 space-y-4">
             <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-5">
               <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
@@ -461,7 +445,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 </span>
               </div>
 
-              {/* Render simulated banner */}
               <div
                 className="relative rounded-xl overflow-hidden shadow-lg p-5 sm:p-7 min-h-[360px] flex flex-col justify-between"
                 style={{
@@ -470,7 +453,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                   boxShadow: '0 20px 40px rgba(0, 0, 0, 0.25)'
                 }}
               >
-                {/* Background image preview */}
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-all duration-300"
                   style={{
@@ -478,7 +460,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                   }}
                 />
 
-                {/* Directional Dark Gradient Overlay */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -487,7 +468,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                   }}
                 />
 
-                {/* Secondary Opacity Overlay */}
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -495,9 +475,7 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                   }}
                 />
 
-                {/* Preview Content */}
                 <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                  {/* Left preview */}
                   <div className="md:col-span-5 space-y-2.5">
                     <span className="inline-block text-[9px] font-bold tracking-[0.14em] text-[#FFE082] uppercase px-2.5 py-1 rounded-full bg-[#F4C95D]/10 border border-[#F4C95D]/40">
                       {bannerConfig.eyebrow || 'BESPOKE GIFTING & BULK ORDERS'}
@@ -517,7 +495,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                     </p>
                   </div>
 
-                  {/* Right simulated form preview */}
                   <div
                     className="md:col-span-7 p-4 rounded-xl border border-white/15 space-y-2.5"
                     style={{
@@ -567,7 +544,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
               </div>
             </div>
 
-            {/* Quick stats on banner */}
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs p-4 text-center">
                 <span className="text-[11px] text-gray-500 block">Total Inquiries</span>
@@ -590,12 +566,8 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
         </div>
       )}
 
-      {/* ------------------------------------------------------------- */}
-      {/* 2. CUSTOMER INQUIRIES & LEADS SUB-TAB */}
-      {/* ------------------------------------------------------------- */}
       {activeSubTab === 'leads' && (
         <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-xs overflow-hidden">
-          {/* Controls Bar */}
           <div className="p-4 sm:p-5 border-b border-[#E5E7EB] flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 className="text-base font-bold text-gray-900">Custom Hamper Inquiries</h3>
@@ -605,7 +577,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-2.5">
-              {/* Search */}
               <div className="relative w-full sm:w-56">
                 <Search className="w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
                 <input
@@ -617,7 +588,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 />
               </div>
 
-              {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -631,7 +601,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 <option value="Closed">Closed</option>
               </select>
 
-              {/* Type Filter */}
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
@@ -642,7 +611,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                 <option value="Corporate / Bulk">Corporate / Bulk</option>
               </select>
 
-              {/* Reload Button */}
               <button
                 type="button"
                 onClick={loadData}
@@ -655,7 +623,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
             </div>
           </div>
 
-          {/* Inquiries Table */}
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -686,13 +653,11 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
 
                     return (
                       <tr key={inq.id} className="hover:bg-gray-50/80 transition">
-                        {/* Customer */}
                         <td className="py-3.5 px-4">
                           <div className="font-semibold text-gray-900">{inq.name}</div>
                           <div className="text-[10px] text-gray-400">Lead #{inq.id}</div>
                         </td>
 
-                        {/* Contact details */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1.5 text-gray-800 font-mono text-[11px]">
                             <Phone className="w-3 h-3 text-gray-400" />
@@ -708,7 +673,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                           </div>
                         </td>
 
-                        {/* Location */}
                         <td className="py-3.5 px-4">
                           <div className="flex items-center gap-1 text-gray-700">
                             <MapPin className="w-3 h-3 text-gray-400 shrink-0" />
@@ -716,7 +680,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                           </div>
                         </td>
 
-                        {/* Requirements / Message */}
                         <td className="py-3.5 px-4 max-w-xs">
                           {inq.message ? (
                             <span className="text-gray-800 text-[11px] line-clamp-2 leading-relaxed" title={inq.message}>
@@ -731,7 +694,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                           )}
                         </td>
 
-                        {/* Date */}
                         <td className="py-3.5 px-4 text-gray-500 text-[11px] whitespace-nowrap">
                           {inq.created_at ? new Date(inq.created_at).toLocaleDateString('en-IN', {
                             day: 'numeric',
@@ -740,7 +702,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                           }) : '—'}
                         </td>
 
-                        {/* Status Dropdown */}
                         <td className="py-3.5 px-4">
                           <select
                             value={inq.status || 'New'}
@@ -765,10 +726,8 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                           </select>
                         </td>
 
-                        {/* Actions */}
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
-                            {/* WhatsApp Direct Chat */}
                             <a
                               href={waLink}
                               target="_blank"
@@ -779,7 +738,6 @@ export default function FestiveBannerAndLeads({ onShowToast }) {
                               <MessageSquare className="w-4 h-4" />
                             </a>
 
-                            {/* Delete inquiry */}
                             <button
                               type="button"
                               onClick={() => handleDeleteInquiry(inq.id)}

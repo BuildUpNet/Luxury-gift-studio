@@ -134,7 +134,7 @@ CREATE TABLE IF NOT EXISTS `store_settings` (
   `whatsapp_url` varchar(255) DEFAULT 'https://wa.me/917506210892',
   `instagram_url` varchar(255) DEFAULT 'https://instagram.com/thegiftstudio',
   `bulk_enquiry_phone` varchar(50) DEFAULT '917506210892',
-  `support_email` varchar(150) DEFAULT 'contact@thegiftstudio.com',
+  `support_email` varchar(150) DEFAULT 'modient93@gmail.com',
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Search,
-  MapPin,
   ChevronDown,
   Menu,
-  X
-} from 'lucide-react';
+  X,
+  Sparkles,
+  ArrowRight,
+  Package
+} from './FaIcons';
 import { apiService } from '../services/api';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
+import resolveImageUrl from '../utils/image';
 
 const DEFAULT_SETTINGS = {
   facebook_url: 'https://facebook.com/thegiftstudio',
@@ -41,13 +44,81 @@ const Header = ({
     return !Array.isArray(cached) || cached.length === 0;
   });
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
-  const [selectedCity, setSelectedCity] = useState('Mumbai');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [storeSettings, setStoreSettings] = useState(() => {
     return getCachedData(CACHE_KEYS.STORE_SETTINGS, DEFAULT_SETTINGS);
   });
+
+  // Live Search state
+  const [internalSearch, setInternalSearch] = useState(searchQuery || '');
+  const [suggestions, setSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const searchWrapRef = useRef(null);
+
+  useEffect(() => {
+    setInternalSearch(searchQuery || '');
+  }, [searchQuery]);
+
+  // Close live search dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchWrapRef.current && !searchWrapRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Debounced live product suggestions fetch
+  useEffect(() => {
+    const term = (internalSearch || '').trim();
+    if (!term) {
+      setSuggestions([]);
+      setIsSearching(false);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsSearching(true);
+        const res = await apiService.getProducts({ search: term });
+        if (res?.success && Array.isArray(res.products)) {
+          setSuggestions(res.products.slice(0, 6));
+          setShowDropdown(true);
+        }
+      } catch (err) {
+        console.error('Failed to fetch search suggestions:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [internalSearch]);
+
+  const handleSearchSubmit = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    setShowDropdown(false);
+    const q = (internalSearch || '').trim();
+    if (setSearchQuery) setSearchQuery(q);
+    if (q) {
+      navigate(`/category?search=${encodeURIComponent(q)}`);
+    } else {
+      navigate('/category');
+    }
+  };
+
+  const handleSelectSuggestion = (product) => {
+    setShowDropdown(false);
+    if (product.slug) {
+      navigate(`/product/${product.slug}`);
+    } else if (product.id) {
+      navigate(`/product/${product.id}`);
+    }
+  };
 
   // Fetch categories and store settings dynamically (Stale-While-Revalidate)
   useEffect(() => {
@@ -98,8 +169,6 @@ const Header = ({
     }
   });
 
-  const cities = ['Mumbai', 'Delhi NCR', 'Bengaluru', 'Kolkata', 'Hyderabad', 'Pune', 'Chennai'];
-
   const handleCategoryClick = (categorySlugOrId) => {
     setActiveDropdown(null);
     setIsMobileMenuOpen(false);
@@ -117,16 +186,14 @@ const Header = ({
   const hasOverflow = navbarCategories.length > 6;
 
   return (
-    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#FDFBF7', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}>
-      {/* Main Brand / Search / City Bar */}
-      <div style={{ borderBottom: '1px solid rgba(198, 40, 40, 0.10)' }}>
+    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#DBE6DC', borderBottom: '1px solid #BACBBD' }}>
+      <div style={{ borderBottom: '1px solid rgba(27, 122, 67, 0.15)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           
-          {/* Left: Brand Logo & Mobile Toggle */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-1.5 text-gray-700 hover:text-black hover:bg-stone-100 rounded-md cursor-pointer border-none bg-transparent"
+              className="lg:hidden p-1.5 text-stone-700 hover:text-black hover:bg-[#CFE0D2] rounded-md cursor-pointer border-none bg-transparent"
               aria-label="Toggle Menu"
             >
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -147,103 +214,152 @@ const Header = ({
                 className="transition-transform duration-300 group-hover:scale-[1.02]"
                 style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
               />
-              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(198, 40, 40, 0.25)' }} />
+              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(27, 122, 67, 0.35)' }} />
               <span
                 className="hidden sm:inline-block font-serif text-xs sm:text-sm font-bold tracking-wide italic"
-                style={{ color: '#C62828', letterSpacing: '0.04em' }}
+                style={{ color: '#145E33', letterSpacing: '0.04em' }}
               >
                 Premium Gifting Solutions
               </span>
             </Link>
           </div>
 
-          {/* Center: Search Bar */}
-          <div className="flex-1 max-w-md hidden md:block">
-            <div className="relative flex items-center bg-gray-100 hover:bg-gray-50 focus-within:bg-white border border-transparent focus-within:border-gray-300 rounded-full px-4 py-2 transition">
-              <Search className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
+          <div ref={searchWrapRef} className="flex-1 max-w-md hidden md:block relative">
+            <form onSubmit={handleSearchSubmit} className="relative flex items-center bg-[#F0EBE1] hover:bg-white focus-within:bg-white border border-[#DFD6C9] focus-within:border-[#8B2635] shadow-sm rounded-full px-4 py-2 transition shadow-2xs">
+              <button
+                type="submit"
+                aria-label="Submit search"
+                className="bg-transparent border-none p-0 cursor-pointer text-stone-500 hover:text-[#145E33] mr-2 shrink-0 flex items-center"
+              >
+                <Search className="w-4 h-4" />
+              </button>
               <input
                 type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-                placeholder="Search Gifts"
-                className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 focus:outline-none"
+                value={internalSearch}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setInternalSearch(val);
+                  if (setSearchQuery) setSearchQuery(val);
+                  setShowDropdown(true);
+                }}
+                onFocus={() => {
+                  if (suggestions.length > 0) setShowDropdown(true);
+                }}
+                placeholder="Search Gifts, Hampers, Occasions..."
+                className="w-full bg-transparent text-sm text-stone-900 placeholder-stone-500 focus:outline-none"
               />
-              {searchQuery && (
+              {internalSearch && (
                 <button
-                  onClick={() => setSearchQuery && setSearchQuery('')}
-                  className="text-gray-400 hover:text-black ml-1 cursor-pointer bg-transparent border-none p-0"
+                  type="button"
+                  onClick={() => {
+                    setInternalSearch('');
+                    if (setSearchQuery) setSearchQuery('');
+                    setSuggestions([]);
+                    setShowDropdown(false);
+                  }}
+                  className="text-stone-400 hover:text-black ml-1 cursor-pointer bg-transparent border-none p-0"
                 >
                   <X className="w-4 h-4" />
                 </button>
               )}
-            </div>
+            </form>
+
+            {showDropdown && internalSearch.trim().length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-[#BACBBD] overflow-hidden z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                {isSearching ? (
+                  <div className="p-4 text-center text-xs text-stone-500 flex items-center justify-center gap-2">
+                    <span className="w-3.5 h-3.5 border-2 border-[#1B7A43] border-t-transparent rounded-full animate-spin" />
+                    Searching gifts...
+                  </div>
+                ) : suggestions.length > 0 ? (
+                  <div>
+                    <div className="px-4 py-2 bg-[#EAF2EC] border-b border-[#BACBBD]/40 flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-[#145E33] uppercase tracking-wider">
+                        Products ({suggestions.length})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleSearchSubmit}
+                        className="text-[11px] font-semibold text-[#145E33] hover:underline bg-transparent border-none cursor-pointer flex items-center gap-1"
+                      >
+                        View all results <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                    <ul className="divide-y divide-stone-100 max-h-72 overflow-y-auto m-0 p-0 list-none">
+                      {suggestions.map((prod) => (
+                        <li key={prod.id}>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectSuggestion(prod)}
+                            className="w-full text-left px-4 py-2.5 flex items-center gap-3 hover:bg-[#F2F7F3] transition cursor-pointer bg-transparent border-none"
+                          >
+                            <img
+                              src={resolveImageUrl(prod.image || (Array.isArray(prod.images) ? prod.images[0] : null))}
+                              alt={prod.title}
+                              className="w-10 h-10 rounded-lg object-cover bg-stone-100 shrink-0 border border-stone-200"
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold text-stone-900 truncate m-0">
+                                {prod.title}
+                              </p>
+                              <p className="text-[11px] text-stone-500 truncate m-0">
+                                {prod.category || 'Luxury Gift'}
+                              </p>
+                            </div>
+                            <span className="text-xs font-bold text-[#145E33] shrink-0">
+                              {prod.price || (prod.priceNum ? `₹${Number(prod.priceNum).toLocaleString('en-IN')}` : '')}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="p-2.5 bg-stone-50 border-t border-stone-100 text-center">
+                      <button
+                        type="button"
+                        onClick={handleSearchSubmit}
+                        className="w-full py-1.5 rounded-lg bg-[#145E33] hover:bg-[#0D4423] text-white text-xs font-semibold cursor-pointer transition border-none shadow-xs flex items-center justify-center gap-1.5"
+                      >
+                        Search for "{internalSearch}" <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-5 text-center">
+                    <p className="text-xs font-semibold text-stone-700 m-0">No gifts found for "{internalSearch}"</p>
+                    <p className="text-[11px] text-stone-500 mt-1 mb-3">Try searching for keywords like "carry bags", "diwali", "hampers"</p>
+                    <button
+                      type="button"
+                      onClick={handleSearchSubmit}
+                      className="px-4 py-1.5 rounded-full bg-[#145E33] text-white text-xs font-semibold border-none cursor-pointer hover:bg-[#0D4423]"
+                    >
+                      Browse All Categories
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Right: City Selector & Contact Buttons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            
-            {/* Location Pill */}
-            <div className="relative">
-              <button
-                onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-xs sm:text-sm text-gray-700 transition cursor-pointer"
-              >
-                <MapPin className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                <span className="font-medium">{selectedCity}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
-              </button>
-
-              {isCityDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
-                  <div className="px-3 py-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Select City
-                  </div>
-                  {cities.map((city) => (
-                    <button
-                      key={city}
-                      onClick={() => {
-                        setSelectedCity(city);
-                        setIsCityDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-50 transition cursor-pointer border-none bg-transparent ${
-                        selectedCity === city ? 'font-semibold text-black bg-gray-50' : 'text-gray-700'
-                      }`}
-                    >
-                      {city}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Bulk / Corporate Enquiry Button */}
-            <a
-              href={`https://wa.me/${storeSettings.bulk_enquiry_phone || '917506210892'}?text=Hi,%20I%20am%20interested%20in%20Bulk%20Corporate%20Gifting`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center justify-center text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all duration-300 shadow-sm whitespace-nowrap no-underline cursor-pointer"
-              style={{
-                backgroundColor: '#C62828',
-                color: '#FFFFFF'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#1B7A43';
-                e.currentTarget.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#C62828';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link
+              to="/contact"
+              className={`inline-flex items-center justify-center text-xs sm:text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200 no-underline cursor-pointer border ${
+                isContactActive
+                  ? 'bg-[#1B7A43] text-white border-[#1B7A43] shadow-xs'
+                  : 'bg-[#EAF2EC] hover:bg-[#D6E6D8] text-[#145E33] border-[#BACBBD] hover:border-[#1B7A43] shadow-2xs'
+              }`}
             >
-              Bulk/Corporate Enquiry
-            </a>
+              Contact Us
+            </Link>
 
-            {/* Social Icons: Facebook, Instagram & WhatsApp */}
             <a
               href={storeSettings.facebook_url || 'https://facebook.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#1877F2] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#1877F2] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="Facebook"
             >
               <i className="fa-brands fa-facebook-f text-base"></i>
@@ -253,7 +369,7 @@ const Header = ({
               href={storeSettings.instagram_url || 'https://instagram.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#E1306C] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#E1306C] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="Instagram"
             >
               <i className="fa-brands fa-instagram text-lg"></i>
@@ -263,7 +379,7 @@ const Header = ({
               href={storeSettings.whatsapp_url || 'https://wa.me/917506210892'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-gray-50 hover:bg-gray-100 border border-gray-200 text-[#25D366] flex items-center justify-center transition no-underline shadow-xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#EAF2EC] hover:bg-white border border-[#BACBBD] text-[#25D366] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
               aria-label="WhatsApp"
             >
               <i className="fa-brands fa-whatsapp text-lg"></i>
@@ -271,50 +387,63 @@ const Header = ({
           </div>
         </div>
 
-        {/* Mobile Search Bar */}
         <div className="md:hidden px-4 pb-3">
-          <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
-            <Search className="w-4 h-4 text-gray-400 mr-2 shrink-0" />
+          <form onSubmit={handleSearchSubmit} className="flex items-center bg-[#EAF2EC] border border-[#BACBBD] rounded-full px-4 py-2">
+            <button
+              type="submit"
+              aria-label="Submit search"
+              className="bg-transparent border-none p-0 cursor-pointer text-stone-500 hover:text-[#145E33] mr-2 shrink-0 flex items-center"
+            >
+              <Search className="w-4 h-4" />
+            </button>
             <input
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
-              placeholder="Search Gifts"
-              className="w-full bg-transparent text-sm text-gray-800 placeholder-gray-400 focus:outline-none"
+              value={internalSearch}
+              onChange={(e) => {
+                const val = e.target.value;
+                setInternalSearch(val);
+                if (setSearchQuery) setSearchQuery(val);
+              }}
+              placeholder="Search Gifts, Hampers, Occasions..."
+              className="w-full bg-transparent text-sm text-stone-900 placeholder-stone-500 focus:outline-none"
             />
-            {searchQuery && (
+            {internalSearch && (
               <button
-                onClick={() => setSearchQuery && setSearchQuery('')}
-                className="text-gray-400 hover:text-black ml-1 bg-transparent border-none cursor-pointer"
+                type="button"
+                onClick={() => {
+                  setInternalSearch('');
+                  if (setSearchQuery) setSearchQuery('');
+                  setSuggestions([]);
+                }}
+                className="text-stone-400 hover:text-black ml-1 bg-transparent border-none cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
-          </div>
+          </form>
         </div>
       </div>
 
-      {/* 3. Semantic Top Navbar (Desktop) */}
       <nav
         aria-label="Main Navigation"
         className="hidden lg:block relative min-h-[44px]"
-        style={{ backgroundColor: '#FDFBF7', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}
+        style={{ backgroundColor: '#F2ECE1', borderBottom: '1px solid #E2D8C9' }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isCategoriesLoading && navbarCategories.length === 0 ? (
             /* Fixed-height Skeleton loader matching exact navbar row dimensions */
             <div className="flex items-center justify-center gap-3 py-2 h-[44px]">
-              <div className="w-24 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-28 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-20 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-32 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-24 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-28 h-6 bg-stone-200/70 rounded-full animate-pulse" />
-              <div className="w-20 h-6 bg-stone-200/70 rounded-full animate-pulse" />
+              <div className="w-24 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-28 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-20 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-32 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-24 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-28 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
+              <div className="w-20 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
             </div>
           ) : (
             /* Primary Row: First 6 categories + optional "View All" */
-            <ul className="flex items-center justify-center gap-2 xl:gap-3 text-xs xl:text-sm font-medium text-gray-700 list-none m-0 py-1.5 flex-wrap min-h-[44px]">
+            <ul className="flex items-center justify-center gap-2 xl:gap-3 text-xs xl:text-sm font-medium text-stone-800 list-none m-0 py-1.5 flex-wrap min-h-[44px]">
               {primaryRow.map((cat) => {
                 const subcats = subcategoriesByParent[cat.id] || [];
                 const hasSubcats = subcats.length > 0;
@@ -334,10 +463,10 @@ const Header = ({
                         setActiveDropdown(null);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium capitalize transition-all duration-200 cursor-pointer no-underline border border-transparent ${
+                      className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium capitalize transition-all duration-200 cursor-pointer no-underline border ${
                         isActive
-                          ? 'active text-[#C62828] font-semibold bg-red-50/70 border-red-200/50 shadow-xs'
-                          : 'text-stone-700 hover:text-[#C62828] hover:bg-red-50/40 hover:border-red-100'
+                          ? 'active text-[#145E33] font-bold bg-[#C4D9C8] border-[#A2C2A8] shadow-xs'
+                          : 'text-stone-800 hover:text-[#145E33] hover:bg-[#CEE0D2]/70 hover:border-[#BACBBD] border-transparent'
                       }`}
                     >
                       <span className="relative">
@@ -347,28 +476,25 @@ const Header = ({
                       {hasSubcats && (
                         <ChevronDown
                           className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                            isOpen ? 'rotate-180 text-[#145E33]' : 'text-stone-500 group-hover:rotate-180 group-hover:text-[#145E33]'
                           }`}
                         />
                       )}
                     </Link>
 
-                    {/* Dropdown Menu for Subcategories */}
                     {hasSubcats && isOpen && (
-                      <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
-                        {/* Parent category 'View All' link */}
+                      <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#BACBBD] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                         <Link
                           to={`/category/${cat.slug || cat.id}`}
                           onClick={() => {
                             setActiveDropdown(null);
                             setIsMobileMenuOpen(false);
                           }}
-                          className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline border-b border-[#E8DFD3]/60 capitalize"
+                          className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline border-b border-[#BACBBD]/60 capitalize"
                         >
                           All in {cat.name}
                         </Link>
 
-                        {/* Subcategory items */}
                         {subcats.map((subcat) => (
                           <Link
                             key={subcat.id}
@@ -377,7 +503,7 @@ const Header = ({
                               setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline capitalize"
+                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline capitalize"
                           >
                             {subcat.name}
                           </Link>
@@ -388,7 +514,6 @@ const Header = ({
                 );
               })}
 
-              {/* "View All" / "Close" toggle button when more than 6 categories are active */}
               {hasOverflow && (
                 <li>
                   <button
@@ -397,7 +522,7 @@ const Header = ({
                     className={`inline-flex items-center gap-1.5 text-xs tracking-wider font-semibold uppercase px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer border ${
                       isExpanded
                         ? 'bg-[#C62828] text-white border-[#C62828] shadow-xs'
-                        : 'bg-[#FAF7F2] text-stone-800 hover:text-[#C62828] hover:bg-white border-[#E8DFD3] hover:border-[#C62828]'
+                        : 'bg-[#E4EDE5] text-[#145E33] hover:text-[#145E33] hover:bg-white border-[#BACBBD] hover:border-[#145E33]'
                     }`}
                   >
                     <span>{isExpanded ? 'Close' : 'View All'}</span>
@@ -409,36 +534,18 @@ const Header = ({
                   </button>
                 </li>
               )}
-
-              {/* Contact Us Navigation Link */}
-              <li className="relative">
-                <Link
-                  to="/contact"
-                  className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium transition-all duration-200 no-underline cursor-pointer border border-transparent ${
-                    isContactActive
-                      ? 'active text-[#C62828] font-semibold bg-red-50/70 border-red-200/50 shadow-xs'
-                      : 'text-stone-700 hover:text-[#C62828] hover:bg-red-50/40 hover:border-red-100'
-                  }`}
-                >
-                  <span className="relative">
-                    Contact Us
-                    <span className="category-underline" />
-                  </span>
-                </Link>
-              </li>
             </ul>
           )}
         </div>
 
-        {/* Expandable Category Drawer for categories 7+ (Absolute Overlay) */}
         {hasOverflow && (
           <div
-            className={`absolute top-full left-0 w-full z-40 border-b border-[#E8DFD3] shadow-xl transition-all duration-300 ease-in-out ${
+            className={`absolute top-full left-0 w-full z-40 border-b border-[#BACBBD] shadow-xl transition-all duration-300 ease-in-out ${
               isExpanded
                 ? 'opacity-100 translate-y-0 pointer-events-auto visible'
                 : 'opacity-0 -translate-y-2 pointer-events-none invisible'
             }`}
-            style={{ backgroundColor: '#FDFBF7' }}
+            style={{ backgroundColor: '#DBE6DC' }}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
               <div className="flex items-center justify-between mb-2.5">
@@ -472,7 +579,7 @@ const Header = ({
                         className={`nav-category-link inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide capitalize transition-all duration-200 cursor-pointer no-underline border ${
                           isActive
                             ? 'bg-[#C62828] text-white border-[#C62828] shadow-sm font-semibold'
-                            : 'bg-white text-stone-800 border-[#E8DFD3] hover:border-[#C62828] hover:text-[#C62828] hover:shadow-xs'
+                            : 'bg-white text-stone-800 border-[#BACBBD] hover:border-[#145E33] hover:text-[#145E33] hover:shadow-xs'
                         }`}
                       >
                         <span className="font-medium relative">
@@ -482,22 +589,21 @@ const Header = ({
                         {hasSubcats && (
                           <ChevronDown
                             className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                              isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                              isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#145E33]'
                             }`}
                           />
                         )}
                       </Link>
 
-                      {/* Dropdown for Subcategories in overflow row */}
                       {hasSubcats && isOpen && (
-                        <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                        <div className="absolute top-full left-0 mt-1 min-w-48 bg-white border border-[#BACBBD] shadow-xl rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                           <Link
                             to={`/category/${cat.slug || cat.id}`}
                             onClick={() => {
                               setActiveDropdown(null);
                               setIsMobileMenuOpen(false);
                             }}
-                            className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline border-b border-[#E8DFD3]/60 capitalize"
+                            className="block w-full text-left px-4 py-2 text-xs font-bold text-stone-900 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline border-b border-[#BACBBD]/60 capitalize"
                           >
                             All in {cat.name}
                           </Link>
@@ -509,7 +615,7 @@ const Header = ({
                                 setActiveDropdown(null);
                                 setIsMobileMenuOpen(false);
                               }}
-                              className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline capitalize"
+                              className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline capitalize"
                             >
                               {subcat.name}
                             </Link>
@@ -525,21 +631,8 @@ const Header = ({
         )}
       </nav>
 
-      {/* 4. Mobile Drawer Navigation */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden border-b border-[#E8DFD3] px-4 py-4 space-y-3 max-h-[75vh] overflow-y-auto" style={{ backgroundColor: '#FDFBF7' }}>
-          <div className="pb-2 border-b border-[#E8DFD3]">
-            <a
-              href="https://wa.me/917506210892?text=Hi,%20I%20am%20interested%20in%20Bulk%20Corporate%20Gifting"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full text-center text-white text-sm font-semibold py-2.5 rounded-full no-underline transition-colors shadow-sm"
-              style={{ backgroundColor: '#C62828' }}
-            >
-              Bulk / Corporate Enquiry
-            </a>
-          </div>
-
+        <div className="lg:hidden border-b border-[#BACBBD] px-4 py-4 space-y-3 max-h-[75vh] overflow-y-auto" style={{ backgroundColor: '#DBE6DC' }}>
           <div className="space-y-1 text-sm font-medium text-gray-800">
             {navbarCategories.map((cat) => {
               const subcats = subcategoriesByParent[cat.id] || [];
@@ -587,7 +680,6 @@ const Header = ({
               );
             })}
 
-            {/* Mobile Contact Us */}
             <div className="pt-2 border-t border-gray-100">
               <Link
                 to="/contact"

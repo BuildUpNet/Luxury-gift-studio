@@ -32,7 +32,6 @@ export async function apiClient(endpoint, options = {}) {
     headers
   });
 
-  // Handle Unauthorized (401)
   if (response.status === 401) {
     if (url.includes('/api/admin') && !url.includes('/login')) {
       localStorage.removeItem('giftstudio_admin_token');
@@ -58,13 +57,13 @@ export async function apiClient(endpoint, options = {}) {
   return data;
 }
 
-// Full API endpoints map
 export const API_ENDPOINTS = {
   // Categories
   CATEGORIES: '/api/categories',
   CATEGORIES_BY_ID: (id) => `/api/categories/${id}`,
   CATEGORIES_PRODUCTS: (id) => `/api/categories/${id}/products`,
   CATEGORIES_UPLOAD_IMAGE: '/api/categories/upload-image',
+  CATEGORIES_REORDER: '/api/categories/reorder',
 
   // Products
   PRODUCTS: '/api/products',
@@ -108,7 +107,14 @@ export const API_ENDPOINTS = {
   // Occasions
   OCCASIONS: '/api/occasions',
   OCCASIONS_BY_ID: (id) => `/api/occasions/${id}`,
-  OCCASIONS_ASSIGN_PRODUCTS: (id) => `/api/occasions/${id}/assign-products`
+  OCCASIONS_ASSIGN_PRODUCTS: (id) => `/api/occasions/${id}/assign-products`,
+  OCCASIONS_REORDER: '/api/occasions/reorder',
+
+  // Feature Cards (Marquee / Trust Badges)
+  FEATURE_CARDS: '/api/feature-cards',
+  FEATURE_CARDS_ADMIN: '/api/feature-cards/admin/all',
+  FEATURE_CARDS_SETTINGS: '/api/feature-cards/admin/settings',
+  FEATURE_CARD_BY_ID: (id) => `/api/feature-cards/${id}`
 };
 
 // Convenient API service wrappers
@@ -196,10 +202,24 @@ export const apiService = {
   createCategory: (catData) => apiClient(API_ENDPOINTS.CATEGORIES, { method: 'POST', body: JSON.stringify(catData) }),
   updateCategory: (id, catData) => apiClient(API_ENDPOINTS.CATEGORIES_BY_ID(id), { method: 'PUT', body: JSON.stringify(catData) }),
   deleteCategory: (id) => apiClient(API_ENDPOINTS.CATEGORIES_BY_ID(id), { method: 'DELETE' }),
+  reorderCategories: (order) => apiClient(API_ENDPOINTS.CATEGORIES_REORDER, { method: 'POST', body: JSON.stringify({ order }) }),
   uploadCategoryImage: (formData) => apiClient(API_ENDPOINTS.CATEGORIES_UPLOAD_IMAGE, { method: 'POST', body: formData }),
 
   // Products
-  getProducts: (category) => apiClient(category ? `${API_ENDPOINTS.PRODUCTS}?category=${encodeURIComponent(category)}` : API_ENDPOINTS.PRODUCTS),
+  getProducts: (params) => {
+    if (typeof params === 'string') {
+      return apiClient(params ? `${API_ENDPOINTS.PRODUCTS}?category=${encodeURIComponent(params)}` : API_ENDPOINTS.PRODUCTS);
+    }
+    if (params && typeof params === 'object') {
+      const sp = new URLSearchParams();
+      if (params.category) sp.append('category', params.category);
+      if (params.occasion) sp.append('occasion', params.occasion);
+      if (params.search) sp.append('search', params.search);
+      const qs = sp.toString();
+      return apiClient(`${API_ENDPOINTS.PRODUCTS}${qs ? `?${qs}` : ''}`);
+    }
+    return apiClient(API_ENDPOINTS.PRODUCTS);
+  },
   getProductById: (id) => apiClient(API_ENDPOINTS.PRODUCTS_BY_ID(id)),
   createProduct: (productData) => apiClient(API_ENDPOINTS.PRODUCTS, { method: 'POST', body: JSON.stringify(productData) }),
   updateProduct: (id, productData) => apiClient(API_ENDPOINTS.PRODUCTS_BY_ID(id), { method: 'PUT', body: JSON.stringify(productData) }),
@@ -231,6 +251,29 @@ export const apiService = {
   assignProductsToOccasion: (id, product_ids) => apiClient(API_ENDPOINTS.OCCASIONS_ASSIGN_PRODUCTS(id), {
     method: 'POST',
     body: JSON.stringify({ product_ids })
+  }),
+  reorderOccasions: (order) => apiClient(API_ENDPOINTS.OCCASIONS_REORDER, {
+    method: 'POST',
+    body: JSON.stringify({ order })
+  }),
+
+  // Feature Cards (Marquee / Highlights)
+  getFeatureCards: () => apiClient(API_ENDPOINTS.FEATURE_CARDS),
+  getAdminFeatureCards: () => apiClient(API_ENDPOINTS.FEATURE_CARDS_ADMIN),
+  updateMarqueeSettings: (data) => apiClient(API_ENDPOINTS.FEATURE_CARDS_SETTINGS, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  }),
+  createFeatureCard: (data) => apiClient(API_ENDPOINTS.FEATURE_CARDS, {
+    method: 'POST',
+    body: data instanceof FormData ? data : JSON.stringify(data)
+  }),
+  updateFeatureCard: (id, data) => apiClient(API_ENDPOINTS.FEATURE_CARD_BY_ID(id), {
+    method: 'PUT',
+    body: data instanceof FormData ? data : JSON.stringify(data)
+  }),
+  deleteFeatureCard: (id) => apiClient(API_ENDPOINTS.FEATURE_CARD_BY_ID(id), {
+    method: 'DELETE'
   }),
 
   // Auth

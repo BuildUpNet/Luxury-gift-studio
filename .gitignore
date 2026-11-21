@@ -24,10 +24,11 @@ out/
 .env.*
 *.env
 *.env.*
+*.example
+*.example.*
 server/.env
 server/.env.*
-!.env.example
-!server/.env.example
+server/*.env*
 *.pem
 *.key
 *.cert
@@ -38,6 +39,7 @@ server/.env.*
 *.sql
 !server/schema.sql
 !server/migrations/*.sql
+server/scripts/
 
 # Editor & OS directories and files
 .vscode/

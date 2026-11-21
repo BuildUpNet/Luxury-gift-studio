@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
-import { Lock, Eye, EyeOff, AlertCircle, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Lock, Eye, EyeOff, AlertCircle, ArrowLeft, ShieldCheck } from '../../components/FaIcons';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -51,7 +51,6 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen w-full bg-[#07111E] flex flex-col justify-between items-center px-4 py-8 sm:py-12 select-none">
-      {/* Top Bar Link */}
       <div className="w-full max-w-md flex justify-between items-center text-xs text-gray-400">
         <Link
           to="/"
@@ -66,10 +65,8 @@ export default function AdminLogin() {
         </span>
       </div>
 
-      {/* Main Centered Minimalist Card */}
       <div className="w-full max-w-md my-auto">
         <div className="bg-[#0B1424] border border-white/10 rounded-2xl p-7 sm:p-9 shadow-2xl backdrop-blur-md">
-          {/* Brand Header */}
           <div className="text-center mb-7">
             <h1 className="font-serif text-2xl sm:text-3xl font-bold tracking-widest text-white m-0">
               THE GIFT STUDIO
@@ -84,7 +81,6 @@ export default function AdminLogin() {
             </p>
           </div>
 
-          {/* Inline Subtle Error State */}
           {error && (
             <div className="mb-5 p-3 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in">
               <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
@@ -92,7 +88,6 @@ export default function AdminLogin() {
             </div>
           )}
 
-          {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
@@ -150,7 +145,6 @@ export default function AdminLogin() {
               </div>
             </div>
 
-            {/* Dark Navy Styled Primary Button */}
             <div className="pt-2">
               <button
                 type="submit"
@@ -174,7 +168,6 @@ export default function AdminLogin() {
         </div>
       </div>
 
-      {/* Subtle Copyright */}
       <div className="text-center text-[11px] text-gray-500 py-2">
         <span>© {CURRENT_YEAR} The Gift Studio. Secure Management Portal.</span>
       </div>

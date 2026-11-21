@@ -5,7 +5,7 @@ import { uploadMiddleware } from '../middlewares/upload.js';
 
 const router = express.Router();
 
-// Auto-seed default hero slides if table empty
+// Ensure hero_slides table exists
 async function ensureHeroSlides() {
   try {
     await dbPool.query(`
@@ -24,21 +24,6 @@ async function ensureHeroSlides() {
         KEY idx_sort_order (sort_order)
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     `);
-
-    const [rows] = await dbPool.query('SELECT COUNT(*) as count FROM hero_slides');
-    if (rows[0].count === 0) {
-      const defaultSlides = [
-        ['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?q=80&w=2070&auto=format&fit=crop', 'THE ART OF LUXURY GIFTING', 'Curated Hampers For Every Celebration', 'Discover exquisite gift hampers crafted with artisanal treats, fine confectionery, and memorable keepsakes.', 'GIFT NOW', '#shop-now', 1],
-        ['https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070&auto=format&fit=crop', 'CELEBRATE SPECIAL MILESTONES', 'Thoughtful Presents, Unforgettable Smiles', 'Handcrafted with warmth and presented in signature designer packaging delivered directly to their doorstep.', 'UNWRAP JOY', '#shop-now', 2],
-        ['https://images.unsplash.com/photo-1513885535751-8b9238bd345a?q=80&w=2070&auto=format&fit=crop', 'CORPORATE & BESPOKE GIFTING', 'Elevate Business Relationships with Signature Gifts', 'Custom-branded boxes, premium gourmet selections, and seamless multi-address Pan-India shipping.', 'BUILD YOUR HAMPER', '#build-hamper-section', 3]
-      ];
-      for (const s of defaultSlides) {
-        await dbPool.query(
-          'INSERT INTO hero_slides (image_url, tag_text, heading, subtext, button_text, button_link, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          s
-        );
-      }
-    }
   } catch (err) {
     console.error('Failed to ensure hero_slides:', err.message);
   }

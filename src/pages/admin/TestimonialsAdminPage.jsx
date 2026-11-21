@@ -15,9 +15,10 @@ import {
   MapPin,
   Calendar,
   Image as ImageIcon
-} from 'lucide-react';
+} from '../../components/FaIcons';
 import { apiService } from '../../services/api';
 import resolveImageUrl from '../../utils/image';
+import { clearCache, CACHE_KEYS } from '../../utils/cache';
 
 const INITIAL_FORM = {
   customer_name: '',
@@ -169,6 +170,7 @@ export default function TestimonialsAdminPage({ onShowToast }) {
       if (editingId) {
         const res = await apiService.updateTestimonial(editingId, formData);
         if (res?.success) {
+          clearCache(CACHE_KEYS.TESTIMONIALS);
           if (onShowToast) onShowToast('Testimonial updated successfully');
           setIsModalOpen(false);
           fetchTestimonials();
@@ -178,6 +180,7 @@ export default function TestimonialsAdminPage({ onShowToast }) {
       } else {
         const res = await apiService.createTestimonial(formData);
         if (res?.success) {
+          clearCache(CACHE_KEYS.TESTIMONIALS);
           if (onShowToast) onShowToast('Testimonial created successfully');
           setIsModalOpen(false);
           fetchTestimonials();
@@ -200,6 +203,7 @@ export default function TestimonialsAdminPage({ onShowToast }) {
     try {
       const res = await apiService.deleteTestimonial(deleteModalItem.id);
       if (res?.success) {
+        clearCache(CACHE_KEYS.TESTIMONIALS);
         if (onShowToast) onShowToast('Testimonial deleted successfully');
         setDeleteModalItem(null);
         fetchTestimonials();
@@ -216,7 +220,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
 
   return (
     <div className="space-y-6">
-      {/* 1. Header Bar with Stats & Add Button */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -242,7 +245,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
         </div>
       </div>
 
-      {/* 2. Filter & Search Controls */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -276,7 +278,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
         </div>
       </div>
 
-      {/* 3. Testimonials Cards / Table Grid */}
       {isLoading ? (
         <div className="py-20 text-center bg-white rounded-xl border border-[#E5E7EB]">
           <Loader2 className="w-8 h-8 animate-spin text-[#8B2635] mx-auto mb-2" />
@@ -313,7 +314,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                 className="bg-white rounded-xl border border-[#E5E7EB] p-4 flex flex-col justify-between shadow-2xs hover:shadow-xs transition relative group"
               >
                 <div>
-                  {/* Card Header: Avatar + Name + Rating */}
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-2.5 min-w-0">
                       {item.avatar_url ? (
@@ -353,7 +353,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                       </div>
                     </div>
 
-                    {/* Star Rating Badge */}
                     <div className="flex items-center gap-0.5 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 shrink-0">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                       <span className="text-[11px] font-bold text-amber-800">
@@ -362,7 +361,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                     </div>
                   </div>
 
-                  {/* Review Text */}
                   <div className="relative mb-3">
                     <Quote className="w-3.5 h-3.5 text-stone-300 absolute -top-1 -left-1 opacity-50" />
                     <p className="text-xs text-gray-700 italic pl-3 leading-relaxed line-clamp-4">
@@ -370,7 +368,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                     </p>
                   </div>
 
-                  {/* Optional Product Showcase Image */}
                   {item.product_image_url && (
                     <div className="mb-3 rounded-lg overflow-hidden border border-stone-200 bg-stone-50 flex items-center gap-2 p-1.5">
                       <img
@@ -389,7 +386,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                   )}
                 </div>
 
-                {/* Card Footer: Date & Actions */}
                 <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between text-[11px] text-gray-400 mt-2">
                   <span className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
@@ -425,11 +421,9 @@ export default function TestimonialsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* ── CREATE / EDIT MODAL ─────────────────────────────────────────── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl relative border border-gray-200 max-h-[92vh] overflow-y-auto">
-            {/* Close Button */}
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
@@ -438,7 +432,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
               <X className="w-5 h-5" />
             </button>
 
-            {/* Modal Header */}
             <div className="mb-4">
               <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B2635]">
                 {editingId ? 'Modify Record' : 'New Entry'}
@@ -458,7 +451,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              {/* Row 1: Customer Name + Rating */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-gray-700 font-bold mb-1">
@@ -494,7 +486,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Row 2: Occasion + City */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-gray-700 font-semibold mb-1">
@@ -525,7 +516,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Row 3: Review Text */}
               <div>
                 <label className="block text-gray-700 font-bold mb-1">
                   Customer Review Quote *
@@ -541,9 +531,7 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                 />
               </div>
 
-              {/* Row 4: Image Uploads (Avatar & Product Image) */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1 border-t border-gray-100">
-                {/* 1. Avatar Image */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-1">
                     Client Avatar Photo
@@ -607,7 +595,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                   />
                 </div>
 
-                {/* 2. Product Image */}
                 <div>
                   <label className="block text-gray-700 font-semibold mb-1">
                     Hamper / Product Photo
@@ -672,7 +659,6 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                 </div>
               </div>
 
-              {/* Form Buttons */}
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-gray-100">
                 <button
                   type="button"
@@ -695,9 +681,8 @@ export default function TestimonialsAdminPage({ onShowToast }) {
         </div>
       )}
 
-      {/* ── DELETE CONFIRMATION MODAL ─────────────────────────────────────── */}
       {deleteModalItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative border border-gray-200 text-center">
             <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
               <Trash2 className="w-6 h-6" />

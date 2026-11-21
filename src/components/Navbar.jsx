@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown } from './FaIcons';
 import { apiService } from '../services/api';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
@@ -82,7 +82,7 @@ export default function Navbar({
     <nav
       aria-label="Main Store Navigation"
       className="relative z-40"
-      style={{ backgroundColor: '#FDFBF7', borderTop: '1px solid rgba(198, 40, 40, 0.14)', borderBottom: '1px solid rgba(198, 40, 40, 0.14)' }}
+      style={{ backgroundColor: '#DBE6DC', borderTop: '1px solid rgba(27, 122, 67, 0.22)', borderBottom: '1px solid rgba(27, 122, 67, 0.22)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {isLoading ? (
@@ -93,7 +93,6 @@ export default function Navbar({
           </div>
         ) : (
           <>
-            {/* Primary Row: First 6 categories */}
             <ul className="flex items-center justify-center gap-6 xl:gap-8 text-xs xl:text-sm font-medium text-stone-700 list-none m-0 p-0 flex-wrap">
               {primaryRow.map((cat) => {
                 const subcats = subcategoriesByParent[cat.id] || [];
@@ -110,7 +109,7 @@ export default function Navbar({
                   >
                     <Link
                       to={`/category/${cat.slug || cat.id}`}
-                      onClick={() => setActiveDropdown(null)}
+                      onClick={() => handleCategoryClick(cat.slug || cat.id)}
                       className={`nav-category-link inline-flex items-center gap-1.5 text-inherit font-inherit p-0 tracking-wide no-underline ${
                         isActive ? 'active' : ''
                       }`}
@@ -122,19 +121,18 @@ export default function Navbar({
                       {hasSubcats && (
                         <ChevronDown
                           className={`w-3.5 h-3.5 transition-transform duration-250 ${
-                            isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                            isOpen ? 'rotate-180 text-[#145E33]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#145E33]'
                           }`}
                         />
                       )}
                     </Link>
 
-                    {/* Subcategory Dropdown */}
                     {hasSubcats && isOpen && (
-                      <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                      <div className="absolute top-full left-0 min-w-48 bg-white border border-[#BACBBD] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                         <Link
                           to={`/category/${cat.slug || cat.id}`}
                           onClick={() => setActiveDropdown(null)}
-                          className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-b border-[#E8DFD3]/60 no-underline"
+                          className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#C4D9C8] hover:text-[#145E33] transition border-b border-[#BACBBD]/60 no-underline"
                         >
                           All in {cat.name}
                         </Link>
@@ -143,7 +141,7 @@ export default function Navbar({
                             key={subcat.id}
                             to={`/category/${subcat.slug || subcat.id}`}
                             onClick={() => setActiveDropdown(null)}
-                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline"
+                            className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline"
                           >
                             {subcat.name}
                           </Link>
@@ -154,7 +152,6 @@ export default function Navbar({
                 );
               })}
 
-              {/* View All / Show Less Button */}
               {hasOverflow && (
                 <li className="py-3">
                   <button
@@ -162,8 +159,8 @@ export default function Navbar({
                     onClick={() => setIsExpanded(!isExpanded)}
                     className={`inline-flex items-center gap-1.5 text-xs font-bold uppercase px-3 py-1.5 rounded-full transition cursor-pointer border ${
                       isExpanded
-                        ? 'bg-[#C62828] text-white border-[#C62828]'
-                        : 'bg-[#FAF7F2] text-stone-800 hover:text-[#C62828] border-[#E8DFD3] hover:border-[#C62828]'
+                        ? 'bg-[#145E33] text-white border-[#145E33]'
+                        : 'bg-[#FAF7F2] text-stone-800 hover:text-[#C62828] border-[#BACBBD] hover:border-[#C62828]'
                     }`}
                   >
                     <span>{isExpanded ? 'Show Less' : 'View All'}</span>
@@ -176,7 +173,6 @@ export default function Navbar({
                 </li>
               )}
 
-              {/* Contact Us Link */}
               <li className="relative py-3">
                 <Link
                   to="/contact"
@@ -192,11 +188,10 @@ export default function Navbar({
               </li>
             </ul>
 
-            {/* Expandable Row for categories 7 to 10 */}
             {hasOverflow && isExpanded && (
               <div
-                className="border-t border-[#E8DFD3] py-3 animate-in fade-in slide-in-from-top-1 duration-150"
-                style={{ backgroundColor: '#FDFBF7' }}
+                className="border-t border-[#BACBBD] py-3 animate-in fade-in slide-in-from-top-1 duration-150"
+                style={{ backgroundColor: '#DBE6DC' }}
               >
                 <ul className="flex items-center justify-center gap-8 text-xs xl:text-sm font-medium text-stone-700 list-none m-0 p-0 flex-wrap">
                   {overflowRow.map((cat) => {
@@ -226,18 +221,18 @@ export default function Navbar({
                           {hasSubcats && (
                             <ChevronDown
                               className={`w-3.5 h-3.5 transition-transform duration-250 ${
-                                isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#C62828]'
+                                isOpen ? 'rotate-180 text-[#145E33]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#145E33]'
                               }`}
                             />
                           )}
                         </Link>
 
                         {hasSubcats && isOpen && (
-                          <div className="absolute top-full left-0 min-w-48 bg-white border border-[#E8DFD3] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
+                          <div className="absolute top-full left-0 min-w-48 bg-white border border-[#BACBBD] shadow-xl rounded-b-lg py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-150">
                             <Link
                               to={`/category/${cat.slug || cat.id}`}
                               onClick={() => setActiveDropdown(null)}
-                              className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#FAF7F2] hover:text-[#C62828] transition border-b border-[#E8DFD3]/60 no-underline"
+                              className="block w-full text-left px-4 py-2 text-xs font-semibold text-stone-900 hover:bg-[#C4D9C8] hover:text-[#145E33] transition border-b border-[#BACBBD]/60 no-underline"
                             >
                               All in {cat.name}
                             </Link>
@@ -246,7 +241,7 @@ export default function Navbar({
                                 key={subcat.id}
                                 to={`/category/${subcat.slug || subcat.id}`}
                                 onClick={() => setActiveDropdown(null)}
-                                className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#FAF7F2] hover:text-[#C62828] transition no-underline"
+                                className="block w-full text-left px-4 py-2 text-xs text-stone-700 hover:bg-[#C4D9C8] hover:text-[#145E33] transition no-underline"
                               >
                                 {subcat.name}
                               </Link>

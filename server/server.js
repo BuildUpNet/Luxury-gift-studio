@@ -12,8 +12,9 @@ import giftingBannerRoutes from './routes/giftingBanner.js';
 import testimonialsRoutes from './routes/testimonials.js';
 import settingsRoutes from './routes/settings.js';
 import heroSlidesRoutes from './routes/heroSlides.js';
-import subscribeRoutes from './routes/subscribe.js';
+// import subscribeRoutes from './routes/subscribe.js';
 import occasionsRoutes from './routes/occasions.js';
+import featureCardsRoutes from './routes/featureCards.js';
 
 import { uploadMiddleware } from './middlewares/upload.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -108,8 +109,9 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/testimonials', testimonialsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/hero-slides', heroSlidesRoutes);
-app.use('/api/subscribe', subscribeRoutes);
+// app.use('/api/subscribe', subscribeRoutes);
 app.use('/api/occasions', occasionsRoutes);
+app.use('/api/feature-cards', featureCardsRoutes);
 app.use('/api', giftingBannerRoutes);
 
 // Image upload endpoint
