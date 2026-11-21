@@ -105,10 +105,20 @@ DirectoryIndex index.html index.htm index.php
     # --------------------------------------------------------------------------
     # 3. Single Page Application (SPA / React) Fallback
     # Resolves 403 Forbidden / 404 on page refresh and direct URL access
+    # EXCLUDE /api so API endpoints are NOT rewritten to index.html
     # --------------------------------------------------------------------------
+    RewriteCond %{REQUEST_URI} !^/api [NC]
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.html [L]
+
+    # --------------------------------------------------------------------------
+    # 4. Reverse Proxy API requests to Node.js backend (port 5002)
+    # --------------------------------------------------------------------------
+    <IfModule mod_proxy.c>
+        RewriteCond %{REQUEST_URI} ^/api [NC]
+        RewriteRule ^api/(.*) http://127.0.0.1:5002/api/$1 [P,L]
+    </IfModule>
 </IfModule>
 
 # ------------------------------------------------------------------------------

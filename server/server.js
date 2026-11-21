@@ -45,12 +45,14 @@ const defaultLocalOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:5173',
   'http://127.0.0.1:5174',
-  'http://127.0.0.1:3000'
+  'http://127.0.0.1:3000',
+  'https://www.modient93.com',
+  'https://modient93.com'
 ];
 
 const allowedOriginsSet = new Set([
   ...configuredOrigins,
-  ...(process.env.NODE_ENV !== 'production' ? defaultLocalOrigins : [])
+  ...defaultLocalOrigins
 ]);
 
 const allowAllCors =
