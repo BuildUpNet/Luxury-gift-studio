@@ -54,14 +54,17 @@ console.log(
   `Booting: node ${process.version}, cwd=${process.cwd()}, PORT=${process.env.PORT ?? '(not set)'}, NODE_ENV=${process.env.NODE_ENV ?? '(not set)'}`
 );
 
-try {
-  await import('./server/server.js');
-  console.log('server/server.js loaded successfully');
-} catch (err) {
-  globalThis.__bootInfo.startupError = err?.stack || String(err);
-  console.error('FAILED to load server/server.js:', err);
-  startFallbackServer();
-}
+// No top-level await here: Hostinger's LiteSpeed runner (lsnode.js) loads this
+// file with require(), which fails with ERR_REQUIRE_ASYNC_MODULE on top-level await.
+import('./server/server.js')
+  .then(() => {
+    console.log('server/server.js loaded successfully');
+  })
+  .catch((err) => {
+    globalThis.__bootInfo.startupError = err?.stack || String(err);
+    console.error('FAILED to load server/server.js:', err);
+    startFallbackServer();
+  });
 
 // Minimal dependency-free server used only when the real app fails to load.
 function startFallbackServer() {
