@@ -35,10 +35,8 @@ server/*.env*
 *.pfx
 
 # Database dumps / SQL scripts that may contain sensitive data
-# schema.sql is the canonical database definition file
+# SQL files must never be committed or deployed
 *.sql
-!server/schema.sql
-!server/migrations/*.sql
 server/scripts/
 
 # Editor & OS directories and files
