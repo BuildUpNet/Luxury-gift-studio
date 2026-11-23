@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -18,8 +18,11 @@ export default function Testimonials() {
   });
   const [totalCount, setTotalCount] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
   const [hoveredCardIdx, setHoveredCardIdx] = useState(null);
+
+  const touchStartXRef = useRef(null);
+  const touchEndXRef = useRef(null);
+  const autoPlayTimerRef = useRef(null);
 
   // Load Featured Testimonials from Backend API
   useEffect(() => {
@@ -56,14 +59,45 @@ export default function Testimonials() {
     setActiveIndex((prev) => (prev - 1 + total) % total);
   }, [total]);
 
-  // Autoplay slider every 5 seconds (pauses on hover)
+  // Timely Continuous Auto-play Slider (slides every 3.5 seconds, pauses ONLY when directly hovering a card)
   useEffect(() => {
-    if (total <= 1 || isHovered) return;
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [total, isHovered, nextSlide]);
+    if (total <= 1) return;
+    if (hoveredCardIdx !== null) {
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+      return;
+    }
+
+    autoPlayTimerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % total);
+    }, 3500);
+
+    return () => {
+      if (autoPlayTimerRef.current) clearInterval(autoPlayTimerRef.current);
+    };
+  }, [total, hoveredCardIdx]);
+
+  // Touch Swipe handlers for mobile devices
+  const handleTouchStart = (e) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStartXRef.current || !touchEndXRef.current) return;
+    const diff = touchStartXRef.current - touchEndXRef.current;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    touchStartXRef.current = null;
+    touchEndXRef.current = null;
+  };
 
   if (total === 0) return null;
 
@@ -99,11 +133,6 @@ export default function Testimonials() {
         borderTop: '1px solid #2D4737',
         borderBottom: '1px solid #2D4737'
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setHoveredCardIdx(null);
-      }}
     >
       {/* Luxury ambient glows */}
       <div className="absolute inset-0 bg-radial from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
@@ -130,9 +159,14 @@ export default function Testimonials() {
         </div>
 
         {/* Carousel Slider with 3 Behance-style Zero-Gap Overlapping Cards */}
-        <div className="relative max-w-5xl mx-auto px-2 sm:px-10">
+        <div
+          className="relative max-w-5xl mx-auto px-2 sm:px-10"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           
-          {/* Navigation Controls: Left Arrow */}
+          {/* Navigation Controls: Left Arrow (Manual Slide) */}
           <button
             type="button"
             onClick={prevSlide}
@@ -142,7 +176,7 @@ export default function Testimonials() {
             <ChevronLeft className="w-5 h-5" />
           </button>
 
-          {/* Navigation Controls: Right Arrow */}
+          {/* Navigation Controls: Right Arrow (Manual Slide) */}
           <button
             type="button"
             onClick={nextSlide}
@@ -184,7 +218,7 @@ export default function Testimonials() {
                     bg-white rounded-xl sm:rounded-2xl
                     p-6 sm:p-7
                     flex flex-col justify-between
-                    transition-all duration-400 ease-out
+                    transition-all duration-500 ease-out
                     cursor-pointer relative
                     ${zIndexClass}
                     ${
@@ -267,7 +301,7 @@ export default function Testimonials() {
             })}
           </div>
 
-          {/* Dot Indicators */}
+          {/* Dot Indicators (Manual Click to Jump) */}
           {total > 1 && (
             <div className="flex items-center justify-center gap-2 mt-4 sm:mt-5">
               {testimonials.map((_, idx) => (
