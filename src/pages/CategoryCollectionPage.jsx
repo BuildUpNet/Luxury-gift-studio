@@ -504,7 +504,7 @@ export default function CategoryCollectionPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#15241B' }}>
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -518,27 +518,27 @@ export default function CategoryCollectionPage() {
         }}
       />
 
-      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
+      <div className="border-b border-[#2D4737] bg-[#182C20]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
-            <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
+          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-400 overflow-x-auto">
+            <Link to="/" className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap">
               Home
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
             <Link
               to="/category"
-              className={`hover:text-[#C62828] transition font-medium whitespace-nowrap ${
-                isAllCategories ? 'text-stone-900 font-semibold' : 'text-stone-500'
+              className={`hover:text-[#D4AF37] transition font-medium whitespace-nowrap ${
+                isAllCategories ? 'text-[#D4AF37] font-semibold' : 'text-stone-400'
               }`}
             >
               Categories
             </Link>
             {!isAllCategories && category?.parent_id && (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
                 <Link
                   to={`/category/${allCategories.find((c) => String(c.id) === String(category.parent_id))?.slug || category.parent_id}`}
-                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap text-stone-500 capitalize"
+                  className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap text-stone-400 capitalize"
                 >
                   {allCategories.find((c) => String(c.id) === String(category.parent_id))?.name || 'Parent Category'}
                 </Link>
@@ -546,8 +546,8 @@ export default function CategoryCollectionPage() {
             )}
             {!isAllCategories && (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                <span className="text-stone-900 font-semibold capitalize whitespace-nowrap">
+                <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                <span className="text-[#D4AF37] font-semibold capitalize whitespace-nowrap">
                   {category?.name || slug}
                 </span>
               </>
@@ -556,18 +556,18 @@ export default function CategoryCollectionPage() {
         </div>
       </div>
 
-      <section className="py-8 sm:py-10 border-b border-[#BACBBD]" style={{ backgroundColor: '#DBE6DC' }}>
+      <section className="py-8 sm:py-10 border-b border-[#2D4737]" style={{ backgroundColor: '#1C3024' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 border border-[#E8DFD3] text-[#C62828] text-[11px] font-bold tracking-widest uppercase mb-2.5">
-                <Sparkles className="w-3 h-3" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#223B2D] border border-[#2D4737] text-[#D4AF37] text-[11px] font-bold tracking-widest uppercase mb-2.5 shadow-2xs">
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
                 <span>Curated Luxury Gifting</span>
               </div>
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-950 capitalize">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white capitalize">
                 {isAllCategories ? 'All Categories' : (category?.name || slug)}
               </h1>
-              <p className="mt-2 text-stone-600 text-sm sm:text-base max-w-2xl leading-relaxed">
+              <p className="mt-2 text-stone-300 text-sm sm:text-base max-w-2xl leading-relaxed">
                 {isAllCategories
                   ? 'Explore our complete collection of gift categories, crafted to elevate every celebration.'
                   : `Discover our signature collection of handcrafted ${category?.name || 'luxury gifts'}, specially selected to elevate every celebration.`}
@@ -576,7 +576,7 @@ export default function CategoryCollectionPage() {
 
             {!isLoading && (
               <div className="shrink-0 flex items-center gap-2">
-                <span className="px-4 py-2 rounded-full bg-white border border-[#E8DFD3] text-stone-800 text-xs sm:text-sm font-semibold shadow-xs">
+                <span className="px-4 py-2 rounded-full bg-[#223B2D] border border-[#2D4737] text-white text-xs sm:text-sm font-semibold shadow-xs">
                   {isAllCategories
                     ? `${filterableCategories.length} ${filterableCategories.length === 1 ? 'Category' : 'Categories'}`
                     : `${filteredProducts.length} ${filteredProducts.length === 1 ? 'Gift' : 'Gifts'} Available`}

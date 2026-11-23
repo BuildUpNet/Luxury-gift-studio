@@ -19,11 +19,13 @@ export default function HomeCarousels({
   });
 
   const [canScrollCategoryLeft, setCanScrollCategoryLeft] = useState(false);
-  const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(true);
+  const [canScrollCategoryRight, setCanScrollCategoryRight] = useState(false);
+  const [hasCategoryOverflow, setHasCategoryOverflow] = useState(false);
   const [categoryScrollRatio, setCategoryScrollRatio] = useState(0);
 
   const [canScrollOccasionLeft, setCanScrollOccasionLeft] = useState(false);
-  const [canScrollOccasionRight, setCanScrollOccasionRight] = useState(true);
+  const [canScrollOccasionRight, setCanScrollOccasionRight] = useState(false);
+  const [hasOccasionOverflow, setHasOccasionOverflow] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -54,8 +56,10 @@ export default function HomeCarousels({
   const handleCategoryScroll = () => {
     if (categoryScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = categoryScrollRef.current;
+      const isOverflowing = scrollWidth > clientWidth + 10;
+      setHasCategoryOverflow(isOverflowing);
       setCanScrollCategoryLeft(scrollLeft > 15);
-      setCanScrollCategoryRight(scrollLeft < scrollWidth - clientWidth - 15);
+      setCanScrollCategoryRight(isOverflowing && scrollLeft < scrollWidth - clientWidth - 15);
       const maxScroll = scrollWidth - clientWidth;
       if (maxScroll > 0) {
         setCategoryScrollRatio(Math.min(1, Math.max(0, scrollLeft / maxScroll)));
@@ -66,17 +70,22 @@ export default function HomeCarousels({
   const handleOccasionScroll = () => {
     if (occasionScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = occasionScrollRef.current;
+      const isOverflowing = scrollWidth > clientWidth + 10;
+      setHasOccasionOverflow(isOverflowing);
       setCanScrollOccasionLeft(scrollLeft > 15);
-      setCanScrollOccasionRight(scrollLeft < scrollWidth - clientWidth - 15);
+      setCanScrollOccasionRight(isOverflowing && scrollLeft < scrollWidth - clientWidth - 15);
     }
   };
 
   useEffect(() => {
-    handleCategoryScroll();
-    handleOccasionScroll();
+    const timer = setTimeout(() => {
+      handleCategoryScroll();
+      handleOccasionScroll();
+    }, 150);
     window.addEventListener('resize', handleCategoryScroll);
     window.addEventListener('resize', handleOccasionScroll);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('resize', handleCategoryScroll);
       window.removeEventListener('resize', handleOccasionScroll);
     };
@@ -134,21 +143,22 @@ export default function HomeCarousels({
             <div
               className="w-full h-full flex flex-col items-center justify-between p-6 relative select-none"
               style={{
-                background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
+                background: 'linear-gradient(145deg, #1C3024 0%, #15241B 100%)',
+                border: '1px solid #2D4737'
               }}
             >
               <div
                 className="absolute inset-3 rounded-lg border pointer-events-none"
-                style={{ borderColor: 'rgba(27, 122, 67, 0.25)' }}
+                style={{ borderColor: 'rgba(212, 175, 55, 0.25)' }}
               />
               <div
                 className="absolute inset-4 rounded-md border pointer-events-none"
-                style={{ borderColor: 'rgba(229, 168, 35, 0.25)' }}
+                style={{ borderColor: 'rgba(45, 71, 55, 0.5)' }}
               />
 
               <span
                 className="text-[10px] uppercase font-bold tracking-widest pt-2 z-10"
-                style={{ color: '#C59D5F' }}
+                style={{ color: '#D4AF37' }}
               >
                 Celebration Collection
               </span>
@@ -157,21 +167,21 @@ export default function HomeCarousels({
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center font-serif text-xl font-bold tracking-widest shadow-xs transition-transform duration-500 group-hover:scale-110"
                   style={{
-                    background: '#FFFFFF',
-                    color: '#C62828',
-                    border: '1.5px solid rgba(27, 122, 67, 0.35)'
+                    background: '#223B2D',
+                    color: '#D4AF37',
+                    border: '1.5px solid rgba(212, 175, 55, 0.5)'
                   }}
                 >
                   {occasion.name ? occasion.name.substring(0, 2).toUpperCase() : 'OC'}
                 </div>
-                <span className="font-serif italic text-xs text-stone-600 mt-2.5 tracking-wider">
+                <span className="font-serif italic text-xs text-stone-300 mt-2.5 tracking-wider">
                   The Gift Studio
                 </span>
               </div>
 
               <span
                 className="text-[11px] font-semibold tracking-wider uppercase pb-1 z-10 transition-colors group-hover:underline"
-                style={{ color: '#8B2635' }}
+                style={{ color: '#D4AF37' }}
               >
                 Explore Occasion
               </span>
@@ -198,9 +208,8 @@ export default function HomeCarousels({
           <span className="text-[11px] text-stone-400 font-medium tracking-wider uppercase mt-0.5">
             VIEW COLLECTION
           </span>
+          <span className="editorial-card-hover-line" />
         </div>
-
-        <span className="editorial-card-accent-bar" />
       </Link>
     );
   };
@@ -235,21 +244,22 @@ export default function HomeCarousels({
             <div
               className="w-full h-full flex flex-col items-center justify-between p-6 relative select-none"
               style={{
-                background: 'linear-gradient(145deg, #F4FAF5 0%, #DBE6DC 100%)'
+                background: 'linear-gradient(145deg, #1C3024 0%, #15241B 100%)',
+                border: '1px solid #2D4737'
               }}
             >
               <div
                 className="absolute inset-3 rounded-lg border pointer-events-none"
-                style={{ borderColor: 'rgba(27, 122, 67, 0.25)' }}
+                style={{ borderColor: 'rgba(212, 175, 55, 0.25)' }}
               />
               <div
                 className="absolute inset-4 rounded-md border pointer-events-none"
-                style={{ borderColor: 'rgba(229, 168, 35, 0.25)' }}
+                style={{ borderColor: 'rgba(45, 71, 55, 0.5)' }}
               />
 
               <span
                 className="text-[10px] uppercase font-bold tracking-widest pt-2 z-10"
-                style={{ color: '#C59D5F' }}
+                style={{ color: '#D4AF37' }}
               >
                 Signature Collection
               </span>
@@ -258,21 +268,21 @@ export default function HomeCarousels({
                 <div
                   className="w-16 h-16 rounded-full flex items-center justify-center font-serif text-xl font-bold tracking-widest shadow-xs transition-transform duration-500 group-hover:scale-110"
                   style={{
-                    background: '#FFFFFF',
-                    color: '#C62828',
-                    border: '1.5px solid rgba(27, 122, 67, 0.35)'
+                    background: '#223B2D',
+                    color: '#D4AF37',
+                    border: '1.5px solid rgba(212, 175, 55, 0.5)'
                   }}
                 >
                   {category.name ? category.name.substring(0, 2).toUpperCase() : 'TG'}
                 </div>
-                <span className="font-serif italic text-xs text-stone-600 mt-2.5 tracking-wider">
+                <span className="font-serif italic text-xs text-stone-300 mt-2.5 tracking-wider">
                   The Gift Studio
                 </span>
               </div>
 
               <span
                 className="text-[11px] font-semibold tracking-wider uppercase pb-1 z-10 transition-colors group-hover:underline"
-                style={{ color: '#8B2635' }}
+                style={{ color: '#D4AF37' }}
               >
                 Explore Collection
               </span>
@@ -301,9 +311,8 @@ export default function HomeCarousels({
           <span className="text-[11px] text-stone-400 font-medium tracking-wider uppercase mt-0.5">
             View Collection
           </span>
+          <span className="editorial-card-hover-line" />
         </div>
-
-        <span className="editorial-card-accent-bar" />
       </Link>
     );
   };
@@ -320,27 +329,41 @@ export default function HomeCarousels({
           }}
         >
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-5">
-              <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#D4AF37' }}>
-                Curated Hampers
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
-                Shop by Category
-              </h2>
+            <div className="flex items-end justify-between mb-5">
+              <div>
+                <span className="text-[11px] font-bold tracking-widest uppercase block mb-1" style={{ color: '#D4AF37' }}>
+                  Curated Hampers
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  Shop by Category
+                </h2>
+              </div>
+
+              {hasCategoryOverflow && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryScrollRef, 'left')}
+                    disabled={!canScrollCategoryLeft}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#2D4737] bg-[#1C3024] hover:bg-[#D4AF37] hover:border-[#D4AF37] text-white hover:text-stone-950 flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none hover:scale-105"
+                    aria-label="Previous categories"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scroll(categoryScrollRef, 'right')}
+                    disabled={!canScrollCategoryRight}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#2D4737] bg-[#1C3024] hover:bg-[#D4AF37] hover:border-[#D4AF37] text-white hover:text-stone-950 flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none hover:scale-105"
+                    aria-label="Next categories"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="relative group/category-carousel">
-              {canScrollCategoryLeft && (
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryScrollRef, 'left')}
-                  className="category-floating-arrow -left-3 sm:-left-4 lg:-left-5"
-                  aria-label="Previous categories"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              )}
-
               <div
                 ref={categoryScrollRef}
                 onScroll={handleCategoryScroll}
@@ -354,17 +377,23 @@ export default function HomeCarousels({
                   to="/category"
                   className="editorial-category-card group no-underline text-inherit"
                 >
-                  <div className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none bg-gradient-to-br from-[#E6F0E8] via-[#DAE7DC] to-[#CCDDCF]">
-                    <div className="w-16 h-16 rounded-full bg-white border border-[#C59D5F]/30 flex items-center justify-center text-[#8B2635] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#8B2635] group-hover:text-white transition-all duration-300">
+                  <div
+                    className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none"
+                    style={{
+                      background: 'linear-gradient(145deg, #1C3024 0%, #122018 100%)',
+                      border: '1px solid #2D4737'
+                    }}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-[#223B2D] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#D4AF37] group-hover:text-stone-900 transition-all duration-300">
                       <Grid className="w-7 h-7" />
                     </div>
-                    <span className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#8B2635] transition-colors">
+                    <span className="font-serif text-lg font-bold text-white group-hover:text-[#D4AF37] transition-colors">
                       View All
                     </span>
-                    <span className="text-xs text-stone-500 mt-1">
+                    <span className="text-xs text-stone-300 mt-1">
                       Explore All Categories
                     </span>
-                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#8B2635] text-white text-xs font-semibold shadow-xs group-hover:bg-[#C59D5F] transition-colors">
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#C59D5F] text-stone-950 text-xs font-bold shadow-xs hover:opacity-90 transition-all">
                       <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
@@ -377,22 +406,10 @@ export default function HomeCarousels({
                     <span className="text-[11px] text-[#8B2635] font-bold tracking-wider uppercase mt-0.5 group-hover:underline">
                       See Everything →
                     </span>
+                    <span className="editorial-card-hover-line" />
                   </div>
-
-                  <span className="editorial-card-accent-bar" />
                 </Link>
               </div>
-
-              {canScrollCategoryRight && (
-                <button
-                  type="button"
-                  onClick={() => scroll(categoryScrollRef, 'right')}
-                  className="category-floating-arrow -right-3 sm:-right-4 lg:-right-5"
-                  aria-label="Next categories"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              )}
             </div>
 
             {shopByCategories.length > 4 && (
@@ -441,40 +458,31 @@ export default function HomeCarousels({
                 </h2>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => scroll(occasionScrollRef, 'left')}
-                  className="w-9 h-9 rounded-full border border-[#2D4737] bg-white hover:bg-[#D4AF37] hover:text-white text-gray-800 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
-                  disabled={!canScrollOccasionLeft}
-                  aria-label="Scroll occasions left"
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scroll(occasionScrollRef, 'right')}
-                  className="w-9 h-9 rounded-full border border-[#2D4737] bg-white hover:bg-[#D4AF37] hover:text-white text-gray-800 flex items-center justify-center transition shadow-xs cursor-pointer active:scale-95 disabled:opacity-40"
-                  disabled={!canScrollOccasionRight}
-                  aria-label="Scroll occasions right"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              {hasOccasionOverflow && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => scroll(occasionScrollRef, 'left')}
+                    disabled={!canScrollOccasionLeft}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#2D4737] bg-[#1C3024] hover:bg-[#D4AF37] hover:border-[#D4AF37] text-white hover:text-stone-950 flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none hover:scale-105"
+                    aria-label="Scroll occasions left"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => scroll(occasionScrollRef, 'right')}
+                    disabled={!canScrollOccasionRight}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#2D4737] bg-[#1C3024] hover:bg-[#D4AF37] hover:border-[#D4AF37] text-white hover:text-stone-950 flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer active:scale-95 disabled:opacity-30 disabled:pointer-events-none hover:scale-105"
+                    aria-label="Scroll occasions right"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="relative group/occasion-carousel">
-              {canScrollOccasionLeft && (
-                <button
-                  type="button"
-                  onClick={() => scroll(occasionScrollRef, 'left')}
-                  className="category-floating-arrow -left-3 sm:-left-4 lg:-left-5"
-                  aria-label="Previous occasions"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              )}
-
               <div
                 ref={occasionScrollRef}
                 onScroll={handleOccasionScroll}
@@ -488,17 +496,23 @@ export default function HomeCarousels({
                   to="/occasion"
                   className="editorial-category-card group no-underline text-inherit"
                 >
-                  <div className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none bg-gradient-to-br from-[#E6F0E8] via-[#DAE7DC] to-[#CCDDCF]">
-                    <div className="w-16 h-16 rounded-full bg-white border border-[#C59D5F]/25 flex items-center justify-center text-[#C59D5F] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#C59D5F] group-hover:text-white transition-all duration-300">
+                  <div
+                    className="editorial-card-image-wrap flex flex-col items-center justify-center p-6 text-center select-none"
+                    style={{
+                      background: 'linear-gradient(145deg, #1C3024 0%, #122018 100%)',
+                      border: '1px solid #2D4737'
+                    }}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-[#223B2D] border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] mb-3 shadow-sm group-hover:scale-110 group-hover:bg-[#D4AF37] group-hover:text-stone-900 transition-all duration-300">
                       <CalendarHeart className="w-7 h-7" />
                     </div>
-                    <span className="font-serif text-lg font-bold text-stone-900 group-hover:text-[#C59D5F] transition-colors">
+                    <span className="font-serif text-lg font-bold text-white group-hover:text-[#D4AF37] transition-colors">
                       View All
                     </span>
-                    <span className="text-xs text-stone-500 mt-1">
+                    <span className="text-xs text-stone-300 mt-1">
                       Explore All Occasions
                     </span>
-                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C59D5F] text-white text-xs font-semibold shadow-xs group-hover:bg-[#8B2635] transition-colors">
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-[#D4AF37] to-[#C59D5F] text-stone-950 text-xs font-bold shadow-xs hover:opacity-90 transition-all">
                       <span>Explore</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </div>
@@ -508,25 +522,13 @@ export default function HomeCarousels({
                     <h3 className="editorial-category-title font-serif text-[1.05rem] font-semibold tracking-wide capitalize transition-colors duration-250 leading-snug line-clamp-1 text-stone-900">
                       All Occasions
                     </h3>
-                    <span className="text-[11px] text-[#C59D5F] font-bold tracking-wider uppercase mt-0.5 group-hover:underline">
+                    <span className="text-[11px] text-[#8B2635] font-bold tracking-wider uppercase mt-0.5 group-hover:underline">
                       See Everything →
                     </span>
+                    <span className="editorial-card-hover-line" />
                   </div>
-
-                  <span className="editorial-card-accent-bar" style={{ background: '#C59D5F' }} />
                 </Link>
               </div>
-
-              {canScrollOccasionRight && (
-                <button
-                  type="button"
-                  onClick={() => scroll(occasionScrollRef, 'right')}
-                  className="category-floating-arrow -right-3 sm:-right-4 lg:-right-5"
-                  aria-label="Next occasions"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              )}
             </div>
           </div>
         </section>

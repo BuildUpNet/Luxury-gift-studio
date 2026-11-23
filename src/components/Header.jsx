@@ -206,21 +206,15 @@ const Header = ({
                 if (setSearchQuery) setSearchQuery('');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="flex items-center gap-3 text-left bg-transparent border-none cursor-pointer p-0 no-underline text-inherit group"
+              className="flex items-center text-left bg-transparent border-none cursor-pointer p-0 no-underline text-inherit group"
             >
-              <img
-                src="/images/gift_logo.jpeg"
-                alt="The Gift Studio Logo"
-                className="transition-transform duration-300 group-hover:scale-[1.02]"
-                style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
-              />
-              <span className="hidden sm:inline-block h-6 w-px" style={{ background: 'rgba(212, 175, 55, 0.35)' }} />
-              <span
-                className="hidden sm:inline-block font-serif text-xs sm:text-sm font-bold tracking-wide italic"
-                style={{ color: '#D4AF37', letterSpacing: '0.04em' }}
-              >
-                Premium Gifting Solutions
-              </span>
+              <div className="p-1 sm:p-1.5 bg-white rounded-xl shadow-md border-2 border-[#D4AF37]/80 group-hover:border-[#D4AF37] group-hover:shadow-[0_0_16px_rgba(212,175,55,0.4)] transition-all duration-300 flex items-center justify-center">
+                <img
+                  src="/images/gift_logo.jpeg"
+                  alt="The Gift Studio Logo"
+                  className="h-10 sm:h-12 md:h-13 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
             </Link>
           </div>
 
@@ -360,7 +354,7 @@ const Header = ({
               href={storeSettings.facebook_url || 'https://facebook.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#1877F2] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
               aria-label="Facebook"
             >
               <i className="fa-brands fa-facebook-f text-base"></i>
@@ -370,7 +364,7 @@ const Header = ({
               href={storeSettings.instagram_url || 'https://instagram.com/thegiftstudio'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#E1306C] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
               aria-label="Instagram"
             >
               <i className="fa-brands fa-instagram text-lg"></i>
@@ -380,7 +374,7 @@ const Header = ({
               href={storeSettings.whatsapp_url || 'https://wa.me/917506210892'}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-white border border-[#2D4737] text-white hover:text-[#25D366] flex items-center justify-center transition no-underline shadow-2xs hover:scale-105"
+              className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
               aria-label="WhatsApp"
             >
               <i className="fa-brands fa-whatsapp text-lg"></i>
@@ -427,13 +421,17 @@ const Header = ({
 
       <nav
         aria-label="Main Navigation"
-        className="hidden lg:block relative min-h-[44px]"
-        style={{ backgroundColor: '#F2ECE1', borderBottom: '1px solid #E2D8C9' }}
+        className="hidden lg:block relative min-h-[48px] shadow-xs select-none"
+        style={{
+          background: 'linear-gradient(180deg, #FAF6EE 0%, #EFE7D8 50%, #E6DCB8 100%)',
+          borderTop: '1px solid rgba(212, 175, 55, 0.4)',
+          borderBottom: '2px solid rgba(212, 175, 55, 0.55)'
+        }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {isCategoriesLoading && navbarCategories.length === 0 ? (
             /* Fixed-height Skeleton loader matching exact navbar row dimensions */
-            <div className="flex items-center justify-center gap-3 py-2 h-[44px]">
+            <div className="flex items-center justify-center gap-3 py-2 h-[48px]">
               <div className="w-24 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
               <div className="w-28 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
               <div className="w-20 h-6 bg-[#C8DACB]/60 rounded-full animate-pulse" />
@@ -444,7 +442,7 @@ const Header = ({
             </div>
           ) : (
             /* Primary Row: First 6 categories + optional "View All" */
-            <ul className="flex items-center justify-center gap-2 xl:gap-3 text-xs xl:text-sm font-medium text-stone-800 list-none m-0 py-1.5 flex-wrap min-h-[44px]">
+            <ul className="flex items-center justify-center gap-2 xl:gap-3 text-sm font-bold text-[#15241B] list-none m-0 py-1.5 flex-wrap min-h-[48px]">
               {primaryRow.map((cat) => {
                 const subcats = subcategoriesByParent[cat.id] || [];
                 const hasSubcats = subcats.length > 0;
@@ -464,10 +462,10 @@ const Header = ({
                         setActiveDropdown(null);
                         setIsMobileMenuOpen(false);
                       }}
-                      className={`nav-category-link inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs xl:text-[13px] tracking-wide font-medium capitalize transition-all duration-200 cursor-pointer no-underline border ${
+                      className={`nav-category-link inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs sm:text-[13px] xl:text-[14px] tracking-wide font-bold capitalize transition-all duration-300 cursor-pointer no-underline border ${
                         isActive
-                          ? 'active text-stone-900 font-bold bg-[#D4AF37] border-[#D4AF37] shadow-xs'
-                          : 'text-[#E4EFE7] hover:text-[#D4AF37] hover:bg-[#223B2D] hover:border-[#2D4737] border-transparent'
+                          ? 'active text-[#15241B] font-extrabold bg-[#D4AF37] border-[#D4AF37] shadow-sm'
+                          : 'text-[#15241B] hover:text-[#15241B] hover:bg-[#D4AF37] hover:border-[#D4AF37] border-transparent font-bold'
                       }`}
                     >
                       <span className="relative">
@@ -477,7 +475,7 @@ const Header = ({
                       {hasSubcats && (
                         <ChevronDown
                           className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                            isOpen ? 'rotate-180 text-[#D4AF37]' : 'text-[#8EA696] group-hover:rotate-180 group-hover:text-[#D4AF37]'
+                            isOpen ? 'rotate-180 text-[#15241B]' : 'text-[#15241B] group-hover:rotate-180'
                           }`}
                         />
                       )}
@@ -522,14 +520,14 @@ const Header = ({
                     onClick={() => setIsExpanded(!isExpanded)}
                     className={`inline-flex items-center gap-1.5 text-xs tracking-wider font-semibold uppercase px-3.5 py-1.5 rounded-full transition-all duration-200 cursor-pointer border ${
                       isExpanded
-                        ? 'bg-[#C62828] text-white border-[#C62828] shadow-xs'
-                        : 'bg-[#223B2D] text-[#E4EFE7] hover:text-stone-900 hover:bg-[#D4AF37] border-[#2D4737] hover:border-[#D4AF37]'
+                        ? 'bg-[#D4AF37] text-stone-900 border-[#D4AF37] shadow-xs'
+                        : 'bg-stone-200/70 text-stone-800 hover:text-stone-900 hover:bg-[#D4AF37] border-stone-300 hover:border-[#D4AF37]'
                     }`}
                   >
                     <span>{isExpanded ? 'Close' : 'View All'}</span>
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                        isExpanded ? 'rotate-180 text-white' : 'text-[#8EA696]'
+                        isExpanded ? 'rotate-180 text-stone-900' : 'text-stone-600'
                       }`}
                     />
                   </button>
@@ -550,10 +548,10 @@ const Header = ({
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-[11px] font-bold tracking-wider text-[#C62828] uppercase">
+                <span className="text-[11px] font-bold tracking-wider text-[#D4AF37] uppercase">
                   More Categories
                 </span>
-                <span className="text-[11px] text-stone-500">
+                <span className="text-[11px] text-stone-400">
                   {overflowRow.length} additional curated collections
                 </span>
               </div>
@@ -579,18 +577,17 @@ const Header = ({
                         }}
                         className={`nav-category-link inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium tracking-wide capitalize transition-all duration-200 cursor-pointer no-underline border ${
                           isActive
-                            ? 'bg-[#C62828] text-white border-[#C62828] shadow-sm font-semibold'
-                            : 'bg-white text-stone-800 border-[#BACBBD] hover:border-[#145E33] hover:text-[#145E33] hover:shadow-xs'
+                            ? 'bg-[#D4AF37] text-stone-900 border-[#D4AF37] shadow-sm font-semibold'
+                            : 'bg-[#223B2D] text-white border-[#2D4737] hover:border-[#D4AF37] hover:bg-[#D4AF37] hover:text-stone-900 hover:shadow-xs'
                         }`}
                       >
                         <span className="font-medium relative">
                           {cat.name}
-                          {!isActive && <span className="category-underline" />}
                         </span>
                         {hasSubcats && (
                           <ChevronDown
                             className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                              isOpen ? 'rotate-180 text-[#C62828]' : 'text-stone-400 group-hover:rotate-180 group-hover:text-[#145E33]'
+                              isOpen ? 'rotate-180 text-stone-900' : 'text-[#8EA696] group-hover:rotate-180 group-hover:text-stone-900'
                             }`}
                           />
                         )}
@@ -645,7 +642,7 @@ const Header = ({
                     key={cat.id}
                     to={`/category/${cat.slug || cat.id}`}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="block w-full text-left py-2 hover:text-black font-medium text-gray-800 capitalize no-underline"
+                    className="block w-full text-left py-2 hover:text-[#D4AF37] font-medium text-[#E4EFE7] capitalize no-underline transition"
                   >
                     {cat.name}
                   </Link>
@@ -654,15 +651,15 @@ const Header = ({
 
               return (
                 <details key={cat.id} className="group">
-                  <summary className="flex items-center justify-between py-2 cursor-pointer list-none font-medium text-gray-800 capitalize">
+                  <summary className="flex items-center justify-between py-2 cursor-pointer list-none font-medium text-[#E4EFE7] hover:text-[#D4AF37] capitalize transition">
                     <span>{cat.name}</span>
-                    <ChevronDown className="w-4 h-4 text-gray-400 group-open:rotate-180 transition-transform" />
+                    <ChevronDown className="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform" />
                   </summary>
-                  <div className="pl-4 pb-2 space-y-1.5 text-xs text-gray-600">
+                  <div className="pl-4 pb-2 space-y-1.5 text-xs text-stone-300">
                     <Link
                       to={`/category/${cat.slug || cat.id}`}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="block w-full text-left py-1 font-semibold text-gray-900 capitalize no-underline"
+                      className="block w-full text-left py-1 font-semibold text-[#D4AF37] hover:text-white capitalize no-underline"
                     >
                       All in {cat.name}
                     </Link>
@@ -671,7 +668,7 @@ const Header = ({
                         key={subcat.id}
                         to={`/category/${subcat.slug || subcat.id}`}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className="block w-full text-left py-1 hover:text-black text-gray-600 capitalize no-underline"
+                        className="block w-full text-left py-1 hover:text-[#D4AF37] text-stone-300 capitalize no-underline"
                       >
                         {subcat.name}
                       </Link>
@@ -681,11 +678,11 @@ const Header = ({
               );
             })}
 
-            <div className="pt-2 border-t border-gray-100">
+            <div className="pt-2 border-t border-[#2D4737]">
               <Link
                 to="/contact"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block w-full text-left py-2 hover:text-black font-medium no-underline text-gray-800"
+                className="block w-full text-left py-2 hover:text-[#D4AF37] font-semibold no-underline text-[#E4EFE7]"
               >
                 Contact Us
               </Link>

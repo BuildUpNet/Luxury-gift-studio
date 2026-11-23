@@ -129,13 +129,13 @@ export default function ContactPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#145E33] bg-[#D4E2D6] border border-[#BACBBD] px-3.5 py-1 rounded-full inline-block mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#D4AF37] bg-[#223B2D] border border-[#2D4737] px-3.5 py-1 rounded-full inline-block mb-3 shadow-2xs">
               Get in Touch
             </span>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-950 tracking-tight mb-4">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight mb-4">
               Contact Us
             </h1>
-            <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+            <p className="text-sm sm:text-base text-stone-300 leading-relaxed">
               Have a question about our bespoke hampers, gifting solutions or order delivery? We are here to help you craft unforgettable experiences.
             </p>
           </div>
@@ -144,61 +144,61 @@ export default function ContactPage() {
             
             <div className="lg:col-span-5 space-y-6">
               
-              <div className="bg-[#DBE6DC] rounded-2xl border border-[#BACBBD] p-6 sm:p-8 shadow-sm">
-                <h2 className="font-serif text-xl font-bold text-gray-900 mb-6">
+              <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-8 shadow-xl">
+                <h2 className="font-serif text-2xl font-bold text-stone-900 mb-6">
                   Customer Concierge
                 </h2>
 
                 <div className="space-y-3.5">
                   
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#145E33]/40 hover:bg-[#D4E2D6] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
-                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
-                      <Phone className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-stone-100 hover:border-[#D4AF37]/50 hover:bg-[#FAF7F2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-12 h-12 rounded-xl bg-[#15241B] text-[#D4AF37] flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:text-white group-hover:scale-110 shadow-sm">
+                      <Phone className="w-5 h-5 transition-colors duration-300" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                         Call or WhatsApp
                       </h3>
                       <a
                         href={`https://wa.me/91${STORE_INFO.phone}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-base font-semibold text-gray-900 hover:text-[#8B2635] transition-colors no-underline block"
+                        className="text-base font-bold text-stone-900 hover:text-[#8B2635] transition-colors no-underline block"
                       >
                         +91 {STORE_INFO.phone}
                       </a>
-                      <p className="text-xs text-gray-500 mt-0.5">Mon - Sat, 9:30 AM to 7:00 PM</p>
+                      <p className="text-xs text-stone-500 mt-0.5 m-0">Mon - Sat, 9:30 AM to 7:00 PM</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#D4AF37]/40 hover:bg-[#EFEAE2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
-                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
-                      <Mail className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-stone-100 hover:border-[#D4AF37]/50 hover:bg-[#FAF7F2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-12 h-12 rounded-xl bg-[#15241B] text-[#D4AF37] flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:text-white group-hover:scale-110 shadow-sm">
+                      <Mail className="w-5 h-5 transition-colors duration-300" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                         Email Support
                       </h3>
                       <a
                         href={`mailto:${STORE_INFO.email}`}
-                        className="text-base font-semibold text-gray-900 hover:text-[#8B2635] transition-colors no-underline block"
+                        className="text-base font-bold text-stone-900 hover:text-[#8B2635] transition-colors no-underline block"
                       >
                         {STORE_INFO.email}
                       </a>
-                      <p className="text-xs text-gray-500 mt-0.5">We typically respond within 24 hours</p>
+                      <p className="text-xs text-stone-500 mt-0.5 m-0">We typically respond within 24 hours</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-4 p-4 rounded-xl border border-transparent hover:border-[#D4AF37]/40 hover:bg-[#EFEAE2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
-                    <div className="w-11 h-11 rounded-xl bg-[#07111E] text-white flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:scale-110 shadow-sm">
-                      <MapPin className="w-5 h-5 text-amber-300 transition-colors duration-300 group-hover:text-white" />
+                  <div className="flex items-start gap-4 p-4 rounded-xl border border-stone-100 hover:border-[#D4AF37]/50 hover:bg-[#FAF7F2] hover:shadow-md transition-all duration-300 hover:translate-x-1.5 group cursor-pointer">
+                    <div className="w-12 h-12 rounded-xl bg-[#15241B] text-[#D4AF37] flex items-center justify-center shrink-0 transition-all duration-300 group-hover:bg-[#8B2635] group-hover:text-white group-hover:scale-110 shadow-sm">
+                      <MapPin className="w-5 h-5 transition-colors duration-300" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                      <h3 className="text-[11px] font-bold uppercase tracking-wider text-stone-500 mb-1">
                         Gifting Studio
                       </h3>
-                      <p className="text-base font-semibold text-gray-900 m-0">
-                        Premium Gift Solutions
+                      <p className="text-sm font-semibold text-stone-800 m-0">
+                        Aggarwal Street, Lehragaga, Punjab 148031
                       </p>
                     </div>
                   </div>
@@ -206,7 +206,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="bg-[#0B1528] text-white rounded-2xl p-6 sm:p-7 shadow-lg border border-white/10 transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/30">
+              <div className="bg-gradient-to-br from-[#1C3024] to-[#122018] text-white rounded-2xl p-6 sm:p-7 shadow-lg border border-[#2D4737] transition-all duration-300 hover:shadow-2xl hover:border-emerald-500/40">
                 <div className="flex items-center gap-2 mb-2.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
@@ -216,14 +216,14 @@ export default function ContactPage() {
                 <h3 className="font-serif text-lg font-bold text-white mb-2 tracking-wide">
                   Need an instant response?
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mb-5">
+                <p className="text-xs text-stone-300 leading-relaxed mb-5">
                   Chat directly with our gifting experts on WhatsApp for fast hamper recommendations, personalized curation and tracking updates.
                 </p>
                 <a
                   href={`https://wa.me/91${STORE_INFO.phone}?text=Hi,%20I%20have%20an%20enquiry%20regarding%20The%20Gift%20Studio`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20ba5a] hover:to-[#0f7a6e] text-white text-sm font-bold py-3 px-5 rounded-xl transition-all duration-300 no-underline shadow-md hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
+                  className="w-full inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-[#25D366] to-[#128C7E] hover:from-[#20ba5a] hover:to-[#0f7a6e] text-white text-sm font-bold py-3.5 px-5 rounded-xl transition-all duration-300 no-underline shadow-md hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] border border-white/10"
                 >
                   <i className="fa-brands fa-whatsapp text-lg shrink-0"></i>
                   <span>Chat on WhatsApp</span>
@@ -233,28 +233,28 @@ export default function ContactPage() {
             </div>
 
             <div className="lg:col-span-7">
-              <div className="bg-[#DBE6DC] rounded-2xl border border-[#BACBBD] p-6 sm:p-10 shadow-sm">
-                <h2 className="font-serif text-2xl font-bold text-gray-900 mb-2">
+              <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-10 shadow-2xl">
+                <h2 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 mb-2">
                   Send us a Message
                 </h2>
-                <p className="text-xs sm:text-sm text-gray-600 mb-8">
+                <p className="text-xs sm:text-sm text-stone-500 mb-8">
                   Fill in the details below and our team will get back to you shortly.
                 </p>
 
                 {status.success && (
-                  <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg flex items-start gap-3 text-emerald-900">
+                  <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3 text-emerald-900 shadow-sm animate-in fade-in">
                     <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-bold">Thank you for reaching out!</p>
                       <p className="mt-0.5 text-xs text-emerald-800">
-                        Your message has been received. A confirmation has been sent to your email, and our concierge team will respond shortly.
+                        Your message has been received. A notification has been delivered directly to modient93@gmail.com, and our concierge team will respond shortly.
                       </p>
                     </div>
                   </div>
                 )}
 
                 {status.error && (
-                  <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3 text-rose-900">
+                  <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-900 shadow-sm animate-in fade-in">
                     <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
                     <div className="text-sm">
                       <p className="font-bold">Unable to send message</p>
@@ -266,8 +266,8 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} noValidate autoComplete="off" className="space-y-5">
                   
                   <div>
-                    <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Full Name <span className="text-rose-600">*</span>
+                    <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Full Name <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -278,20 +278,20 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. Ananya Sharma"
-                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
+                      className={`w-full px-4 py-3 bg-[#F9FAFB] hover:bg-white focus:bg-white border rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#15241B] focus:ring-2 focus:ring-[#D4AF37]/30 transition shadow-2xs ${
                         formErrors.name
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-[#DDD5C7]'
+                          : 'border-stone-300'
                       }`}
                     />
                     {formErrors.name && (
-                      <p className="text-xs text-rose-600 mt-1">{formErrors.name}</p>
+                      <p className="text-xs text-rose-500 font-medium mt-1">{formErrors.name}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Email Address <span className="text-rose-600">*</span>
+                    <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Email Address <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -302,20 +302,20 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. ananya@example.com"
-                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
+                      className={`w-full px-4 py-3 bg-[#F9FAFB] hover:bg-white focus:bg-white border rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#15241B] focus:ring-2 focus:ring-[#D4AF37]/30 transition shadow-2xs ${
                         formErrors.email
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-[#DDD5C7]'
+                          : 'border-stone-300'
                       }`}
                     />
                     {formErrors.email && (
-                      <p className="text-xs text-rose-600 mt-1">{formErrors.email}</p>
+                      <p className="text-xs text-rose-500 font-medium mt-1">{formErrors.email}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="subject" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Subject <span className="text-rose-600">*</span>
+                    <label htmlFor="subject" className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Subject <span className="text-rose-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -326,20 +326,20 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="e.g. Inquiry about Custom Corporate Hamper"
-                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition ${
+                      className={`w-full px-4 py-3 bg-[#F9FAFB] hover:bg-white focus:bg-white border rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#15241B] focus:ring-2 focus:ring-[#D4AF37]/30 transition shadow-2xs ${
                         formErrors.subject
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-[#DDD5C7]'
+                          : 'border-stone-300'
                       }`}
                     />
                     {formErrors.subject && (
-                      <p className="text-xs text-rose-600 mt-1">{formErrors.subject}</p>
+                      <p className="text-xs text-rose-500 font-medium mt-1">{formErrors.subject}</p>
                     )}
                   </div>
 
                   <div>
-                    <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
-                      Message / Query <span className="text-rose-600">*</span>
+                    <label htmlFor="message" className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-1.5">
+                      Message / Query <span className="text-rose-500">*</span>
                     </label>
                     <textarea
                       id="message"
@@ -349,14 +349,14 @@ export default function ContactPage() {
                       onChange={handleChange}
                       disabled={status.submitting}
                       placeholder="Please share details about your requirement, destination city, delivery dates, or specific questions..."
-                      className={`w-full px-4 py-3 bg-[#EFEAE2] border rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:bg-white focus:border-[#07111E] transition resize-y ${
+                      className={`w-full px-4 py-3 bg-[#F9FAFB] hover:bg-white focus:bg-white border rounded-xl text-sm text-stone-900 placeholder-stone-400 focus:outline-none focus:border-[#15241B] focus:ring-2 focus:ring-[#D4AF37]/30 transition resize-y shadow-2xs ${
                         formErrors.message
                           ? 'border-rose-400 focus:border-rose-500'
-                          : 'border-[#DDD5C7]'
+                          : 'border-stone-300'
                       }`}
                     />
                     {formErrors.message && (
-                      <p className="text-xs text-rose-600 mt-1">{formErrors.message}</p>
+                      <p className="text-xs text-rose-500 font-medium mt-1">{formErrors.message}</p>
                     )}
                   </div>
 
@@ -364,16 +364,16 @@ export default function ContactPage() {
                     <button
                       type="submit"
                       disabled={status.submitting}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#020919] hover:bg-[#8B2635] text-white text-xs sm:text-sm font-semibold uppercase tracking-wider px-8 py-3.5 rounded-lg transition duration-300 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#8B2635] hover:bg-[#721F2B] text-white text-xs sm:text-sm font-bold uppercase tracking-wider px-8 py-3.5 rounded-xl transition-all duration-300 shadow-md hover:shadow-xl hover:scale-102 active:scale-98 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer border-none"
                     >
                       {status.submitting ? (
                         <>
-                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                           <span>Sending Message...</span>
                         </>
                       ) : (
                         <>
-                          <Send className="w-4 h-4" />
+                          <Send className="w-4 h-4 text-white" />
                           <span>Send Message</span>
                         </>
                       )}

@@ -321,8 +321,8 @@ export default function GiftingBannerSection() {
                       <span style={{ color: '#FFFFFF' }}>Quote Request Received</span>
                     </h3>
                     <p className="text-slate-300 text-xs sm:text-sm max-w-md mx-auto mt-2 leading-relaxed">
-                      Our gifting concierge will reach out within 24 hours & we've sent a confirmation to{' '}
-                      <span className="text-[#FFE082] font-semibold">{submittedData.email}</span>.
+                      All your custom quote details have been sent directly to{' '}
+                      <span className="text-[#FFE082] font-semibold">modient93@gmail.com</span>. Our concierge team will review and connect with you shortly.
                     </p>
                   </div>
 

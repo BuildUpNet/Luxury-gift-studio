@@ -150,6 +150,7 @@ export const apiService = {
     const searchParams = new URLSearchParams();
     if (params.limit) searchParams.append('limit', params.limit);
     if (params.minRating) searchParams.append('minRating', params.minRating);
+    if (params.featured !== undefined) searchParams.append('featured', params.featured);
     const queryString = searchParams.toString();
     return apiClient(`${API_ENDPOINTS.TESTIMONIALS}${queryString ? `?${queryString}` : ''}`);
   },
@@ -164,6 +165,11 @@ export const apiService = {
   }),
   deleteTestimonial: (id) => apiClient(API_ENDPOINTS.TESTIMONIALS_BY_ID(id), {
     method: 'DELETE'
+  }),
+  getTestimonialsSettings: () => apiClient('/api/testimonials/settings/all'),
+  updateTestimonialsSettings: (data) => apiClient('/api/testimonials/settings/all', {
+    method: 'PUT',
+    body: JSON.stringify(data)
   }),
 
   // Gifting Banner

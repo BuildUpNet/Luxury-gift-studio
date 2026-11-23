@@ -1018,7 +1018,7 @@ export default function ProductsPage({ onShowToast }) {
                             key={`${imgUrl}-${index}`}
                             className={`relative group rounded-lg overflow-hidden border-2 bg-white flex flex-col transition shadow-xs ${
                               isPrimary
-                                ? 'border-[#C62828] ring-2 ring-[#C62828]/20'
+                                ? 'border-[#D4AF37] ring-2 ring-[#D4AF37]/25'
                                 : 'border-gray-200 hover:border-gray-400'
                             }`}
                           >
@@ -1033,7 +1033,7 @@ export default function ProductsPage({ onShowToast }) {
                               />
 
                               {isPrimary && (
-                                <div className="absolute top-1 left-1 bg-[#C62828] text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10">
+                                <div className="absolute top-1 left-1 bg-[#182C20] text-[#D4AF37] border border-[#D4AF37]/40 text-[9px] font-bold px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 z-10">
                                   <Star className="w-2.5 h-2.5 fill-current" />
                                   <span>Cover</span>
                                 </div>
@@ -1055,14 +1055,14 @@ export default function ProductsPage({ onShowToast }) {
 
                             <div className="p-1 bg-gray-50 border-t border-gray-100 text-center">
                               {isPrimary ? (
-                                <span className="text-[10px] font-bold text-[#C62828] flex items-center justify-center gap-1 py-0.5">
+                                <span className="text-[10px] font-bold text-[#D4AF37] flex items-center justify-center gap-1 py-0.5">
                                   <Check className="w-3 h-3" /> Primary
                                 </span>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => handleSetPrimary(index)}
-                                  className="text-[10px] font-medium text-gray-700 hover:text-[#C62828] hover:bg-red-50 p-1 rounded transition border border-gray-200 cursor-pointer w-full flex items-center justify-center gap-1 bg-white"
+                                  className="text-[10px] font-medium text-gray-700 hover:text-stone-900 hover:bg-amber-50 p-1 rounded transition border border-gray-200 cursor-pointer w-full flex items-center justify-center gap-1 bg-white"
                                   title="Make this image the primary cover (images[0])"
                                 >
                                   <Star className="w-2.5 h-2.5" /> Make Cover

@@ -92,37 +92,41 @@ export default function AdminDashboard() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#07111E] text-white flex flex-col justify-between transition-transform duration-200 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 text-white flex flex-col justify-between transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 shrink-0 ${
           isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
+        style={{ backgroundColor: '#15241B', borderRight: '1px solid #2D4737' }}
       >
-        <div>
-          <div className="h-16 flex items-center justify-between px-6 border-b border-white/10">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+          <div
+            className="h-16 flex items-center justify-between px-6 border-b border-[#2D4737] shrink-0 sticky top-0 z-10"
+            style={{ backgroundColor: '#15241B' }}
+          >
             <div className="flex flex-col">
               <span className="font-serif text-lg font-bold tracking-wider text-white">
                 THE GIFT STUDIO
               </span>
-              <span className="text-[10px] tracking-widest uppercase font-semibold text-amber-400">
+              <span className="text-[10px] tracking-widest uppercase font-semibold text-[#D4AF37]">
                 Admin Panel
               </span>
             </div>
 
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="lg:hidden text-gray-400 hover:text-white"
+              className="lg:hidden text-stone-400 hover:text-white"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <nav className="p-4 space-y-1.5">
+          <nav className="p-4 space-y-1.5 flex-1">
             {[
               { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
               { id: 'hero-banners', label: 'Hero Banners', icon: Sparkles },
               { id: 'products', label: 'Products', icon: Package },
               { id: 'categories', label: 'Categories', icon: FolderTree },
               { id: 'occasions', label: 'Occasions', icon: CalendarHeart },
-              { id: 'highlights', label: 'Marquee Highlights', icon: Sparkles },
+              { id: 'highlights', label: 'Brand Logos & Marquee', icon: Sparkles },
               { id: 'testimonials', label: 'Testimonials', icon: Quote },
               { id: 'festive-banner', label: 'Festive Banner & Leads', icon: Sparkles },
               { id: 'settings', label: 'Settings', icon: Settings }
@@ -136,17 +140,17 @@ export default function AdminDashboard() {
                   onClick={() => handleTabChange(item.id)}
                   className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer border-none text-left ${
                     isActive
-                      ? 'bg-white/10 text-white font-semibold'
-                      : 'text-gray-300 hover:bg-white/5 hover:text-white bg-transparent'
+                      ? 'bg-[#223B2D] text-[#D4AF37] font-semibold shadow-xs'
+                      : 'text-stone-300 hover:bg-[#1C3024] hover:text-white bg-transparent'
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-gray-400'}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#D4AF37]' : 'text-stone-400'}`} />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
-                    <span className="bg-amber-400 text-gray-950 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                    <span className="bg-[#D4AF37] text-stone-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                       {item.badge}
                     </span>
                   )}
@@ -156,20 +160,23 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        <div className="p-4 border-t border-white/10 space-y-2">
+        <div
+          className="p-4 border-t border-[#2D4737] space-y-2 shrink-0"
+          style={{ backgroundColor: '#15241B' }}
+        >
           <Link
             to="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-gray-300 hover:text-white rounded-lg hover:bg-white/5 transition no-underline"
+            className="flex items-center gap-2.5 px-3.5 py-2 text-xs text-stone-300 hover:text-[#D4AF37] rounded-lg hover:bg-[#1C3024] transition no-underline"
           >
-            <ExternalLink className="w-4 h-4 text-gray-400" />
+            <ExternalLink className="w-4 h-4 text-stone-400" />
             <span>View Public Store</span>
           </Link>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-400 hover:text-rose-300 rounded-lg hover:bg-rose-950/20 transition cursor-pointer border-none bg-transparent text-left"
+            className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs text-rose-300 hover:text-rose-200 rounded-lg hover:bg-rose-950/30 transition cursor-pointer border-none bg-transparent text-left"
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>

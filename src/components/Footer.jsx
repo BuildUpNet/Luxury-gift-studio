@@ -43,7 +43,7 @@ export default function Footer() {
   const igUrl = storeSettings.instagram_url || 'https://instagram.com';
 
   return (
-    <footer className="w-full bg-[#202020] text-[#a0a0a0] font-sans text-sm border-t border-[#2e2e2e]">
+    <footer className="w-full bg-[#111D16] text-stone-300 font-sans text-sm border-t border-[#2D4737]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12">
           
@@ -121,27 +121,27 @@ export default function Footer() {
 
             <div className="space-y-3.5 text-sm">
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-[#00bcd4] shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
                 <span className="text-[#b0b0b0] leading-snug">
                   Aggarwal Street, Lehragaga, Punjab 148031
                 </span>
               </div>
 
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-[#00bcd4] shrink-0" />
+                <Mail className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <a
                   href={`mailto:${emailAddr}`}
-                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
+                  className="text-[#b0b0b0] hover:text-[#D4AF37] transition-colors duration-200 no-underline"
                 >
                   {emailAddr}
                 </a>
               </div>
 
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-[#00bcd4] shrink-0" />
+                <Phone className="w-4 h-4 text-[#D4AF37] shrink-0" />
                 <a
                   href={`tel:+91${phoneNum}`}
-                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
+                  className="text-[#b0b0b0] hover:text-[#D4AF37] transition-colors duration-200 no-underline"
                 >
                   +91 {phoneNum}
                 </a>
@@ -158,7 +158,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Facebook"
-              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-white hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+              className="w-8 h-8 rounded-full bg-[#1C3024] border border-[#2D4737] text-gray-300 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#223B2D] flex items-center justify-center transition-all duration-200 no-underline shadow-xs hover:scale-105"
             >
               <i className="fa-brands fa-facebook-f text-sm"></i>
             </a>
@@ -169,7 +169,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Instagram"
-              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-white hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+              className="w-8 h-8 rounded-full bg-[#1C3024] border border-[#2D4737] text-gray-300 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#223B2D] flex items-center justify-center transition-all duration-200 no-underline shadow-xs hover:scale-105"
             >
               <i className="fa-brands fa-instagram text-sm"></i>
             </a>
@@ -180,7 +180,7 @@ export default function Footer() {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
-              className="w-8 h-8 rounded-full bg-[#2b2b2b] text-gray-400 hover:text-emerald-400 hover:bg-[#3a3a3a] flex items-center justify-center transition-all duration-200 no-underline"
+              className="w-8 h-8 rounded-full bg-[#1C3024] border border-[#2D4737] text-gray-300 hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#223B2D] flex items-center justify-center transition-all duration-200 no-underline shadow-xs hover:scale-105"
             >
               <i className="fa-brands fa-whatsapp text-sm"></i>
             </a>

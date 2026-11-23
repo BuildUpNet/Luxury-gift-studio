@@ -187,25 +187,25 @@ export default function ProductDetailPage() {
     (product?.category ? product.category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '');
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#15241B' }}>
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
       <Header />
 
-      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
+      <div className="border-b border-[#2D4737] bg-[#182C20]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
-            <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
+          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-400 overflow-x-auto">
+            <Link to="/" className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap">
               Home
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            <Link to="/category" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
+            <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+            <Link to="/category" className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap">
               Categories
             </Link>
             {parentCategory && (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
                 <Link
                   to={`/category/${parentCategory.slug || parentCategory.id}`}
-                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap capitalize text-stone-500"
+                  className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap capitalize text-stone-400"
                 >
                   {parentCategory.name}
                 </Link>
@@ -213,22 +213,22 @@ export default function ProductDetailPage() {
             )}
             {directCategory ? (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
+                <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
                 <Link
                   to={`/category/${directCategory.slug || directCategory.id}`}
-                  className="hover:text-[#C62828] transition font-medium whitespace-nowrap capitalize text-stone-500"
+                  className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap capitalize text-stone-400"
                 >
                   {directCategory.name}
                 </Link>
               </>
             ) : product?.category ? (
               <>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                <span className="text-stone-500 capitalize">{product.category}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+                <span className="text-stone-400 capitalize">{product.category}</span>
               </>
             ) : null}
-            <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            <span className="text-stone-900 font-semibold truncate max-w-xs sm:max-w-md">
+            <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+            <span className="text-[#D4AF37] font-semibold truncate max-w-xs sm:max-w-md">
               {product?.title || 'Product'}
             </span>
           </nav>
@@ -296,8 +296,8 @@ export default function ProductDetailPage() {
                         }}
                         className={`relative aspect-square w-14 h-14 rounded-lg overflow-hidden border-2 bg-[#F8F5F0] cursor-pointer transition-all duration-200 shrink-0 p-0 ${
                           isActive
-                            ? 'border-[#C62828] ring-1 ring-[#C62828]/40 shadow-xs'
-                            : 'border-[#E8DFD3] hover:border-stone-400 opacity-80 hover:opacity-100'
+                            ? 'border-[#D4AF37] ring-1 ring-[#D4AF37]/50 shadow-xs'
+                            : 'border-[#2D4737] hover:border-[#D4AF37] opacity-80 hover:opacity-100'
                         }`}
                         title={`View photo ${idx + 1}`}
                       >
@@ -395,12 +395,12 @@ export default function ProductDetailPage() {
               
               <div>
                 {product.brand && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B2635] mb-1 block">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] mb-1 block">
                     {product.brand}
                   </span>
                 )}
                 
-                <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-stone-950 tracking-tight leading-snug">
+                <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
                   {product.title}
                 </h1>
 
@@ -408,18 +408,18 @@ export default function ProductDetailPage() {
                   <div className="mt-2">
                     <Link
                       to={categorySlug ? `/category/${categorySlug}` : '/'}
-                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-stone-100 hover:bg-stone-200 text-stone-800 transition no-underline border border-stone-200/60"
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#223B2D] hover:bg-[#284635] text-stone-200 hover:text-white transition no-underline border border-[#2D4737]"
                     >
-                      <Sparkles className="w-3 h-3 text-[#C62828]" />
+                      <Sparkles className="w-3 h-3 text-[#D4AF37]" />
                       <span className="capitalize">{product.category}</span>
                     </Link>
                   </div>
                 )}
               </div>
 
-              <div className="py-3 px-4 rounded-xl bg-white border border-[#E8DFD3] shadow-2xs">
+              <div className="py-3.5 px-4 rounded-xl bg-[#182C20] border border-[#2D4737] shadow-sm">
                 <div className="flex items-baseline gap-2.5 flex-wrap">
-                  <span className="font-serif text-2xl sm:text-3xl font-bold text-stone-950">
+                  <span className="font-serif text-2xl sm:text-3xl font-bold text-white">
                     ₹{priceNumeric.toLocaleString('en-IN')}
                   </span>
                   
@@ -437,19 +437,18 @@ export default function ProductDetailPage() {
                     </>
                   )}
                 </div>
-                <p className="text-[10px] text-stone-500 mt-1">
-                  Inclusive of all taxes · Handcrafted premium packaging included
+                <p className="text-[11px] text-stone-300 mt-1.5">
+                  Inclusive of all taxes · Handcrafted luxury packaging included
                 </p>
               </div>
 
-              <div className="space-y-2.5 pt-0.5">
+              <div className="space-y-3 pt-1">
                 <button
                   type="button"
                   onClick={handleOpenInquire}
-                  className="w-full py-2.5 px-5 rounded-lg text-white font-semibold text-sm shadow-2xs flex items-center justify-center gap-2 cursor-pointer transition hover:opacity-95 active:scale-99 border-none"
-                  style={{ backgroundColor: '#C62828' }}
+                  className="w-full py-3 px-6 rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 cursor-pointer transition hover:scale-[1.01] active:scale-99 border-none bg-gradient-to-r from-[#D4AF37] to-[#C59D5F] hover:from-[#DFBD4B] hover:to-[#D4AF37] text-stone-950"
                 >
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-4 h-4 text-stone-900" />
                   <span>Inquire About This Gift</span>
                 </button>
 
@@ -459,20 +458,19 @@ export default function ProductDetailPage() {
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full py-2.5 px-5 rounded-lg text-white font-semibold text-sm flex items-center justify-center gap-2 no-underline shadow-2xs hover:opacity-95 transition"
-                  style={{ backgroundColor: '#25D366' }}
+                  className="w-full py-3 px-6 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 no-underline shadow-xs hover:border-[#25D366] transition bg-[#1C3024] hover:bg-[#233D2E] border border-[#2D4737]"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
+                  <MessageCircle className="w-4 h-4 text-[#25D366]" />
                   <span>Chat on WhatsApp</span>
                 </a>
               </div>
 
               {product.description && (
-                <div className="pt-3 border-t border-[#E8DFD3]/80">
-                  <h3 className="font-serif text-sm font-bold text-stone-900 mb-1.5">
+                <div className="pt-4 border-t border-[#2D4737]">
+                  <h3 className="font-serif text-sm font-bold text-white mb-2">
                     Product Details & Craftsmanship
                   </h3>
-                  <div className="text-xs sm:text-sm text-stone-600 leading-relaxed whitespace-pre-line space-y-1.5">
+                  <div className="text-xs sm:text-sm text-stone-300 leading-relaxed whitespace-pre-line space-y-1.5">
                     {product.description}
                   </div>
                 </div>

@@ -79,35 +79,35 @@ export default function TestimonialsPage() {
       : '5.0';
 
   return (
-    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#15241B' }}>
+    <div className="min-h-screen flex flex-col font-sans text-stone-900" style={{ backgroundColor: '#FAF7F2' }}>
       <Header />
 
-      <div className="border-b border-[#BACBBD]/80 bg-[#DBE6DC]">
+      <div className="border-b border-[#2D4737] bg-[#182C20]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 overflow-x-auto">
-            <Link to="/" className="hover:text-[#C62828] transition font-medium whitespace-nowrap">
+          <nav className="flex items-center gap-2 text-xs sm:text-sm text-stone-400 overflow-x-auto">
+            <Link to="/" className="hover:text-[#D4AF37] transition font-medium whitespace-nowrap">
               Home
             </Link>
-            <ChevronRight className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-            <span className="text-stone-900 font-semibold whitespace-nowrap">
+            <ChevronRight className="w-3.5 h-3.5 text-stone-500 shrink-0" />
+            <span className="text-[#D4AF37] font-semibold whitespace-nowrap">
               Customer Reviews
             </span>
           </nav>
         </div>
       </div>
 
-      <section className="py-10 sm:py-12 border-b border-[#BACBBD]/70" style={{ backgroundColor: '#DBE6DC' }}>
+      <section className="py-10 sm:py-12 border-b border-[#2D4737]" style={{ backgroundColor: '#1C3024' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-[#E8DFD3] text-[#C62828] text-[11px] font-bold tracking-widest uppercase mb-3 shadow-2xs">
-                <Sparkles className="w-3 h-3" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#223B2D] border border-[#2D4737] text-[#D4AF37] text-[11px] font-bold tracking-widest uppercase mb-3 shadow-2xs">
+                <Sparkles className="w-3 h-3 text-[#D4AF37]" />
                 <span>Verified Client Acclaim</span>
               </div>
-              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-stone-950">
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white">
                 Words of Acclaim & Reviews
               </h1>
-              <p className="mt-2.5 text-stone-600 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
+              <p className="mt-2.5 text-stone-300 text-xs sm:text-sm md:text-base max-w-2xl leading-relaxed">
                 Discover authentic testimonials and heartfelt feedback from clients across India who trusted The Gift Studio with their festive celebrations, weddings, and bespoke corporate gifting.
               </p>
             </div>

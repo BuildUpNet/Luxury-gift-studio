@@ -27,7 +27,11 @@ const INITIAL_FORM = {
   rating: 5,
   review_text: '',
   occasion: '',
-  city: ''
+  city: '',
+  company_name: '',
+  designation: '',
+  is_featured: 1,
+  sort_order: 0
 };
 
 export default function TestimonialsAdminPage({ onShowToast }) {
@@ -35,6 +39,8 @@ export default function TestimonialsAdminPage({ onShowToast }) {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRating, setFilterRating] = useState('all');
+  const [sliderLimit, setSliderLimit] = useState(10);
+  const [isSavingLimit, setIsSavingLimit] = useState(false);
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -53,19 +59,57 @@ export default function TestimonialsAdminPage({ onShowToast }) {
   const avatarInputRef = useRef(null);
   const productImgInputRef = useRef(null);
 
-  // Load Testimonials
+  // Load Testimonials & Settings
   const fetchTestimonials = async () => {
     setIsLoading(true);
     try {
-      const res = await apiService.getTestimonials();
-      if (res?.success && Array.isArray(res.testimonials)) {
-        setTestimonials(res.testimonials);
+      const [res, settingsRes] = await Promise.allSettled([
+        apiService.getTestimonials(),
+        apiService.getTestimonialsSettings()
+      ]);
+      if (res.status === 'fulfilled' && res.value?.success && Array.isArray(res.value.testimonials)) {
+        setTestimonials(res.value.testimonials);
+      }
+      if (settingsRes.status === 'fulfilled' && settingsRes.value?.success && settingsRes.value?.settings) {
+        setSliderLimit(settingsRes.value.settings.home_slider_limit || 10);
       }
     } catch (err) {
       console.error('Failed to fetch testimonials:', err);
       if (onShowToast) onShowToast('Failed to load testimonials');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSaveSliderLimit = async () => {
+    setIsSavingLimit(true);
+    try {
+      const res = await apiService.updateTestimonialsSettings({ home_slider_limit: sliderLimit });
+      if (res?.success) {
+        clearCache(CACHE_KEYS.TESTIMONIALS);
+        if (onShowToast) onShowToast(`Homepage slider set to show top ${sliderLimit} reviews`);
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to update slider limit');
+    } finally {
+      setIsSavingLimit(false);
+    }
+  };
+
+  const handleToggleFeatured = async (item) => {
+    try {
+      const newStatus = item.is_featured ? 0 : 1;
+      const res = await apiService.updateTestimonial(item.id, {
+        ...item,
+        is_featured: newStatus
+      });
+      if (res?.success) {
+        clearCache(CACHE_KEYS.TESTIMONIALS);
+        fetchTestimonials();
+        if (onShowToast) onShowToast(newStatus ? 'Review added to Homepage slider' : 'Review removed from Homepage slider (visible on All Reviews page)');
+      }
+    } catch (err) {
+      alert(err.message || 'Failed to update feature status');
     }
   };
 
@@ -80,7 +124,9 @@ export default function TestimonialsAdminPage({ onShowToast }) {
       t.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.review_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.occasion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.city?.toLowerCase().includes(searchTerm.toLowerCase());
+      t.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.company_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.designation?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesRating =
       filterRating === 'all' || Math.round(Number(t.rating)) === Number(filterRating);
@@ -106,7 +152,11 @@ export default function TestimonialsAdminPage({ onShowToast }) {
       rating: Number(item.rating) || 5,
       review_text: item.review_text || '',
       occasion: item.occasion || '',
-      city: item.city || ''
+      city: item.city || '',
+      company_name: item.company_name || '',
+      designation: item.designation || '',
+      is_featured: item.is_featured !== undefined ? (Number(item.is_featured) ? 1 : 0) : 1,
+      sort_order: item.sort_order || 0
     });
     setErrorMessage('');
     setIsModalOpen(true);
@@ -245,6 +295,42 @@ export default function TestimonialsAdminPage({ onShowToast }) {
         </div>
       </div>
 
+      {/* Homepage Slider Settings Bar */}
+      <div className="bg-gradient-to-r from-[#182C20] to-[#223B2D] rounded-xl p-4 text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 border border-[#2D4737]">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-[#D4AF37]/20 border border-[#D4AF37]/40 flex items-center justify-center text-[#D4AF37] shrink-0 font-bold">
+            ★
+          </div>
+          <div>
+            <h4 className="text-xs sm:text-sm font-bold text-white">
+              Homepage Slider Review Limit
+            </h4>
+            <p className="text-[11px] text-stone-300 mt-0.5">
+              Specify how many featured reviews appear in the homepage slider (e.g. 10). Remaining reviews will show on the "Show All Reviews" page.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <input
+            type="number"
+            min="1"
+            max="100"
+            value={sliderLimit}
+            onChange={(e) => setSliderLimit(Math.max(1, Number(e.target.value) || 1))}
+            className="w-20 px-3 py-1.5 bg-white text-stone-900 rounded-lg text-xs font-bold text-center border-none focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={handleSaveSliderLimit}
+            disabled={isSavingLimit}
+            className="px-4 py-1.5 rounded-lg bg-[#D4AF37] hover:bg-[#bfa035] text-stone-950 font-bold text-xs transition cursor-pointer border-none shadow-xs"
+          >
+            {isSavingLimit ? 'Saving...' : 'Save Limit'}
+          </button>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl border border-[#E5E7EB] p-4 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -331,10 +417,22 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                         </div>
                       )}
                       <div className="min-w-0">
-                        <h4 className="text-xs font-bold text-gray-900 truncate">
-                          {item.customer_name}
-                        </h4>
-                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="text-xs font-bold text-gray-900 truncate">
+                            {item.customer_name}
+                          </h4>
+                          {item.company_name && (
+                            <span className="text-[10px] font-semibold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200 truncate">
+                              {item.company_name}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-0.5 flex-wrap">
+                          {item.designation && (
+                            <span className="text-stone-600 font-medium truncate">
+                              {item.designation}
+                            </span>
+                          )}
                           {item.city && (
                             <span className="flex items-center gap-0.5 truncate">
                               <MapPin className="w-2.5 h-2.5" />
@@ -353,11 +451,25 @@ export default function TestimonialsAdminPage({ onShowToast }) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-0.5 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60 shrink-0">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span className="text-[11px] font-bold text-amber-800">
-                        {Number(item.rating).toFixed(1)}
-                      </span>
+                    <div className="flex flex-col items-end gap-1.5 shrink-0">
+                      <div className="flex items-center gap-0.5 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200/60">
+                        <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        <span className="text-[11px] font-bold text-amber-800">
+                          {Number(item.rating).toFixed(1)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(item)}
+                        className={`text-[9px] font-bold px-2 py-0.5 rounded-full border transition cursor-pointer ${
+                          item.is_featured
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                            : 'bg-stone-100 text-stone-500 border-stone-200 hover:bg-stone-200'
+                        }`}
+                        title="Click to toggle Homepage slider visibility"
+                      >
+                        {item.is_featured ? '★ In Slider' : 'All Reviews Only'}
+                      </button>
                     </div>
                   </div>
 
@@ -451,6 +563,66 @@ export default function TestimonialsAdminPage({ onShowToast }) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">
+                    Client Company / Brand Logo Name
+                  </label>
+                  <input
+                    type="text"
+                    name="company_name"
+                    value={formData.company_name}
+                    onChange={handleChange}
+                    placeholder="e.g. Walmart, Google, TCS, etc. (shown at top)"
+                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">
+                    Designation / Role
+                  </label>
+                  <input
+                    type="text"
+                    name="designation"
+                    value={formData.designation}
+                    onChange={handleChange}
+                    placeholder="e.g. Senior Designer, Corporate Buyer"
+                    className="w-full px-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635]"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-stone-50 rounded-xl border border-stone-200">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="is_featured_cb"
+                    checked={Boolean(formData.is_featured)}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, is_featured: e.target.checked ? 1 : 0 }))}
+                    className="w-4 h-4 text-[#8B2635] rounded focus:ring-[#8B2635] cursor-pointer"
+                  />
+                  <label htmlFor="is_featured_cb" className="text-gray-900 font-bold text-xs cursor-pointer select-none">
+                    Feature on Homepage Slider
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 font-semibold mb-1">
+                    Slider Sequence # (Priority)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    name="sort_order"
+                    value={formData.sort_order}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, sort_order: Number(e.target.value) || 0 }))}
+                    placeholder="0 = Default, 1 = First"
+                    className="w-full px-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-white"
+                  />
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-gray-700 font-bold mb-1">

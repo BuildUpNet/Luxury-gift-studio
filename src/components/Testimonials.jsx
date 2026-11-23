@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Star,
-  Quote,
-  MapPin,
-  Sparkles,
+  ChevronLeft,
+  ChevronRight,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2
 } from './FaIcons';
 import { apiService } from '../services/api';
 import resolveImageUrl from '../utils/image';
-import { formatTimeAgo } from '../utils/date';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
 export default function Testimonials() {
@@ -20,158 +16,297 @@ export default function Testimonials() {
     if (Array.isArray(cached) && cached.length > 0) return cached;
     return [];
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [totalCount, setTotalCount] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoveredCardIdx, setHoveredCardIdx] = useState(null);
 
+  // Load Featured Testimonials from Backend API
   useEffect(() => {
     let isMounted = true;
-
     async function loadTestimonials() {
       try {
-        const res = await apiService.getTestimonials({ limit: 6 });
-        if (res?.success && Array.isArray(res.testimonials)) {
-          if (isMounted) {
-            setTestimonials(res.testimonials);
-            setCachedData(CACHE_KEYS.TESTIMONIALS, res.testimonials);
+        const res = await apiService.getTestimonials({ featured: 1 });
+        if (res?.success && Array.isArray(res.testimonials) && isMounted) {
+          setTestimonials(res.testimonials);
+          if (res.total_count !== undefined) {
+            setTotalCount(res.total_count);
           }
+          setCachedData(CACHE_KEYS.TESTIMONIALS, res.testimonials);
         }
       } catch (err) {
-        console.error('Failed to load testimonials for frontend:', err);
+        console.error('Failed to load testimonials:', err);
       }
     }
-
     loadTestimonials();
-
     return () => {
       isMounted = false;
     };
   }, []);
 
-  const displayList = testimonials.slice(0, 3);
-  if (displayList.length === 0) return null;
+  const total = testimonials.length;
+
+  const nextSlide = useCallback(() => {
+    if (total <= 1) return;
+    setActiveIndex((prev) => (prev + 1) % total);
+  }, [total]);
+
+  const prevSlide = useCallback(() => {
+    if (total <= 1) return;
+    setActiveIndex((prev) => (prev - 1 + total) % total);
+  }, [total]);
+
+  // Autoplay slider every 5 seconds (pauses on hover)
+  useEffect(() => {
+    if (total <= 1 || isHovered) return;
+    const interval = setInterval(() => {
+      nextSlide();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [total, isHovered, nextSlide]);
+
+  if (total === 0) return null;
+
+  // Determine the 3 items to show centered: [left, center/active, right]
+  const getVisibleCards = () => {
+    if (total === 1) {
+      return [{ item: testimonials[0], position: 'center', index: 0 }];
+    }
+    if (total === 2) {
+      return [
+        { item: testimonials[activeIndex], position: 'center', index: activeIndex },
+        { item: testimonials[(activeIndex + 1) % 2], position: 'right', index: (activeIndex + 1) % 2 }
+      ];
+    }
+    const leftIdx = (activeIndex - 1 + total) % total;
+    const centerIdx = activeIndex;
+    const rightIdx = (activeIndex + 1) % total;
+
+    return [
+      { item: testimonials[leftIdx], position: 'left', index: leftIdx },
+      { item: testimonials[centerIdx], position: 'center', index: centerIdx },
+      { item: testimonials[rightIdx], position: 'right', index: rightIdx }
+    ];
+  };
+
+  const visibleCards = getVisibleCards();
 
   return (
     <section
-      className="w-full py-16 sm:py-20"
+      className="w-full py-14 sm:py-20 overflow-hidden relative select-none"
       style={{
         backgroundColor: '#15241B',
         borderTop: '1px solid #2D4737',
         borderBottom: '1px solid #2D4737'
       }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setHoveredCardIdx(null);
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10 sm:mb-12">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#1C3024] border border-[#2D4737] text-[#D4AF37] text-[11px] font-bold tracking-widest uppercase mb-2.5 shadow-2xs">
-            <Sparkles className="w-3 h-3" />
-            <span>Words Of Acclaim</span>
+      {/* Luxury ambient glows */}
+      <div className="absolute inset-0 bg-radial from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#182C20]/40 via-transparent to-[#111D16]/40 pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        {/* Header Section matching Behance Reference Image */}
+        <div className="text-center mb-10 sm:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1C3024] border border-[#2D4737] text-xs font-semibold tracking-wider uppercase mb-3 shadow-xs">
+            <span className="w-5 h-5 rounded-full bg-[#8B2635] text-white text-[10px] font-bold flex items-center justify-center">
+              ★
+            </span>
+            <span className="text-[#D4AF37] tracking-widest font-bold text-[11px]">THEY TRUSTED US</span>
           </div>
-          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
-            Celebrated Voices Echo Their Admiration
+
+          <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight max-w-3xl mx-auto">
+            We are very happy because we have happy customers.
           </h2>
-          <p className="mt-2 text-[#A2B5A7] text-xs sm:text-sm max-w-xl mx-auto leading-relaxed">
-            Read verified experiences from delighted clients who celebrated birthdays, Diwali, and grand milestones with our bespoke luxury hampers.
+
+          <p className="mt-2.5 text-stone-300 text-xs sm:text-sm md:text-base max-w-xl mx-auto leading-relaxed">
+            Discover verified testimonials and reviews from clients and corporate leaders who celebrated with our bespoke hampers.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayList.map((t, i) => {
-            const starsCount = Math.round(Number(t.rating || t.stars || 5));
-            const name = t.customer_name || t.author || 'Valued Client';
-            const location = t.city || t.location;
-            const quote = t.review_text || t.quote;
-            const avatar = t.avatar_url;
-            const timeAgo = formatTimeAgo(t.created_at);
+        {/* Carousel Slider with 3 Behance-style Zero-Gap Overlapping Cards */}
+        <div className="relative max-w-5xl mx-auto px-2 sm:px-10">
+          
+          {/* Navigation Controls: Left Arrow */}
+          <button
+            type="button"
+            onClick={prevSlide}
+            className="absolute -left-3 sm:-left-4 md:-left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#1C3024] border border-[#2D4737] hover:border-[#D4AF37] hover:bg-[#D4AF37] text-white hover:text-stone-950 shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95"
+            aria-label="Previous review"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
 
-            return (
-              <div
-                key={t.id || i}
-                className="bg-gradient-to-br from-[#FFFFFF] via-[#F8FCF9] to-[#EEF5F0] rounded-2xl border border-[#D0E0D4] p-5 sm:p-6 flex flex-col justify-between shadow-[0_4px_16px_-4px_rgba(20,50,30,0.06)] hover:shadow-[0_24px_48px_-12px_rgba(27,122,67,0.18),0_8px_20px_rgba(0,0,0,0.06)] hover:border-[#1B7A43]/70 hover:-translate-y-2 hover:scale-[1.015] transition-all duration-300 ease-out relative group overflow-hidden cursor-pointer"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-[#1B7A43] to-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Navigation Controls: Right Arrow */}
+          <button
+            type="button"
+            onClick={nextSlide}
+            className="absolute -right-3 sm:-right-4 md:-right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-[#1C3024] border border-[#2D4737] hover:border-[#D4AF37] hover:bg-[#D4AF37] text-white hover:text-stone-950 shadow-2xl flex items-center justify-center transition-all duration-300 cursor-pointer hover:scale-110 active:scale-95"
+            aria-label="Next review"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
 
-                <div>
-                  <div className="flex items-center justify-between gap-3 mb-4 pb-3.5 border-b border-[#E1ECE3]">
-                    <div className="flex items-center gap-3 min-w-0">
-                      {avatar ? (
+          {/* 3 Cards Container with Behance Overlap & Zero Unwanted Gap */}
+          <div className="pt-8 pb-4 flex items-center justify-center -space-x-3 sm:-space-x-6 md:-space-x-8 relative">
+            {visibleCards.map(({ item, position, index }) => {
+              const name = item.customer_name || 'Valued Client';
+              const company = item.company_name;
+              const role = item.designation || (item.occasion && item.city ? `${item.occasion} • ${item.city}` : item.occasion || item.city || 'Verified Buyer');
+              const quote = item.review_text || '';
+              const avatar = item.avatar_url ? resolveImageUrl(item.avatar_url) : null;
+              const brandLogo = item.product_image_url ? resolveImageUrl(item.product_image_url) : null;
+
+              // Center card is naturally elevated (as in Behance); on hover, any card lifts up prominently
+              const isCenter = position === 'center';
+              const isCardHovered = hoveredCardIdx === index;
+              const isElevated = isCardHovered || (isCenter && hoveredCardIdx === null);
+
+              // Responsive visibility & z-index stacking (center card is always on top in Behance)
+              const zIndexClass = isCardHovered ? 'z-30' : isCenter ? 'z-20' : 'z-10';
+
+              return (
+                <div
+                  key={`${item.id}-${position}`}
+                  onClick={() => {
+                    if (!isCenter) setActiveIndex(index);
+                  }}
+                  onMouseEnter={() => setHoveredCardIdx(index)}
+                  onMouseLeave={() => setHoveredCardIdx(null)}
+                  className={`
+                    w-full max-w-[310px] sm:max-w-[340px] md:max-w-[360px]
+                    min-h-[300px] sm:min-h-[330px]
+                    bg-white rounded-xl sm:rounded-2xl
+                    p-6 sm:p-7
+                    flex flex-col justify-between
+                    transition-all duration-400 ease-out
+                    cursor-pointer relative
+                    ${zIndexClass}
+                    ${
+                      isElevated
+                        ? '-translate-y-6 sm:-translate-y-8 shadow-[0_24px_50px_-12px_rgba(0,0,0,0.5)] border-2 border-[#D4AF37] scale-100 sm:scale-105'
+                        : 'translate-y-0 shadow-[0_8px_20px_rgba(0,0,0,0.18)] border border-stone-200/90 scale-95 opacity-90 sm:opacity-95 hover:opacity-100'
+                    }
+                    ${position !== 'center' ? 'hidden md:flex' : 'flex'}
+                  `}
+                >
+                  {/* Card Top: Brand / Company Logo or Stylized Name Centered (Matching Behance Walmart Style) */}
+                  <div>
+                    <div className="h-10 flex items-center justify-center mb-4">
+                      {brandLogo ? (
                         <img
-                          src={resolveImageUrl(avatar)}
-                          alt={name}
-                          className="w-11 h-11 rounded-full object-cover border-2 border-[#D0E0D4] group-hover:border-[#1B7A43] group-hover:scale-105 transition-all duration-300 shrink-0 shadow-2xs"
+                          src={brandLogo}
+                          alt={company || 'Brand'}
+                          className="max-h-9 max-w-[150px] w-auto object-contain transition-transform duration-300"
                           onError={(e) => {
-                            e.currentTarget.src = '/images/gift_logo.jpeg';
+                            e.currentTarget.style.display = 'none';
                           }}
                         />
+                      ) : company ? (
+                        <div className="flex items-center justify-center gap-1.5 font-sans font-black text-lg text-[#0071DC] tracking-tight uppercase">
+                          <span>{company}</span>
+                          <span className="text-[#FFC220] text-lg">✦</span>
+                        </div>
                       ) : (
-                        <div className="w-11 h-11 rounded-full bg-[#EAF3ED] border-2 border-[#D0E0D4] text-[#1B7A43] group-hover:border-[#1B7A43] group-hover:scale-105 transition-all duration-300 flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                          {name.substring(0, 2).toUpperCase()}
+                        <div className="flex items-center justify-center gap-1.5">
+                          <span className="font-serif font-black text-sm tracking-widest text-stone-900 uppercase">
+                            THE GIFT STUDIO
+                          </span>
+                          <span className="text-[#D4AF37] text-xs">✦</span>
                         </div>
                       )}
-
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-semibold text-xs sm:text-sm text-stone-900 group-hover:text-[#1B7A43] transition-colors truncate">
-                            {name}
-                          </h4>
-                          <CheckCircle2
-                            className="w-3.5 h-3.5 text-emerald-600 shrink-0"
-                            title="Verified Reviewer"
-                          />
-                        </div>
-                        <span className="text-[11px] text-stone-500 block font-normal">
-                          {timeAgo}
-                        </span>
-                      </div>
                     </div>
 
-                    <div className="flex items-center gap-1 bg-[#0A8754] text-white px-2 py-0.5 rounded text-[11px] font-bold shrink-0 shadow-2xs group-hover:scale-105 transition-transform duration-300">
-                      <span>{Number(t.rating || 5).toFixed(1)}</span>
-                      <Star className="w-3 h-3 fill-white text-white" />
+                    {/* Opening Double Quote Mark */}
+                    <div className="font-serif text-4xl sm:text-5xl font-black text-stone-800 leading-none mb-2 select-none">
+                      “
                     </div>
-                  </div>
 
-                  <div className="relative mb-5">
-                    <div className="w-7 h-7 rounded-full bg-[#EAF3ED] border border-[#D0E0D4] text-[#1B7A43] flex items-center justify-center mb-2.5 group-hover:bg-[#1B7A43] group-hover:text-white group-hover:rotate-6 group-hover:scale-110 transition-all duration-300 shadow-2xs">
-                      <Quote className="w-3.5 h-3.5 fill-current" />
-                    </div>
-                    <p className="text-xs sm:text-sm text-stone-800 italic leading-relaxed line-clamp-4 font-normal">
-                      "{quote}"
+                    {/* Review Body Text - Clean and Adapts Naturally to Content Length */}
+                    <p className="text-stone-600 text-xs sm:text-sm leading-relaxed font-normal text-left m-0 line-clamp-4">
+                      {quote}
                     </p>
                   </div>
-                </div>
 
-                <div className="pt-3.5 border-t border-[#E1ECE3] flex items-center justify-between gap-2 flex-wrap text-[11px]">
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    {t.occasion && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-semibold text-[#1B7A43] bg-[#EAF3ED] border border-[#D0E0D4] group-hover:border-[#1B7A43]/50 transition-colors">
-                        {t.occasion}
-                      </span>
+                  {/* Card Bottom: Customer Avatar, Name & Designation */}
+                  <div className="pt-4 border-t border-stone-100 flex items-center gap-3 mt-5">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={name}
+                        className="w-11 h-11 sm:w-12 sm:h-12 rounded-full object-cover border border-stone-200 shrink-0 shadow-xs"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#182C20] text-[#D4AF37] border border-[#D4AF37]/50 flex items-center justify-center font-serif font-bold text-xs shrink-0 shadow-xs">
+                        {name ? name.substring(0, 2).toUpperCase() : 'TG'}
+                      </div>
                     )}
-                    {location && (
-                      <span className="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full font-medium text-stone-700 bg-[#F4FAF5] border border-[#D8E6DC]">
-                        <MapPin className="w-2.5 h-2.5 text-stone-500" />
-                        <span>{location}</span>
-                      </span>
-                    )}
+
+                    <div className="min-w-0 flex-1 text-left">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-bold text-xs sm:text-sm text-stone-900 truncate leading-snug m-0">
+                          {name}
+                        </h4>
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" title="Verified Customer" />
+                      </div>
+                      <p className="text-[11px] text-stone-400 font-medium truncate mt-0.5 m-0">
+                        {role}
+                      </p>
+                    </div>
                   </div>
-
-                  <span className="text-[10px] text-stone-500 font-medium italic">
-                    Verified Buyer
-                  </span>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
+
+          {/* Dot Indicators */}
+          {total > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-4 sm:mt-5">
+              {testimonials.map((_, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveIndex(idx)}
+                  className="p-1 border-none bg-transparent cursor-pointer transition-all duration-300"
+                  aria-label={`Go to slide ${idx + 1}`}
+                >
+                  <span
+                    className="block rounded-full transition-all duration-300"
+                    style={{
+                      height: '6px',
+                      width: activeIndex === idx ? '24px' : '6px',
+                      backgroundColor: activeIndex === idx ? '#D4AF37' : '#2D4737'
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
         </div>
 
-        <div className="mt-10 sm:mt-12 text-center">
+        {/* Bottom Call To Action: "Show All Reviews ->" */}
+        <div className="mt-8 sm:mt-10 text-center">
           <Link
             to="/testimonials"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-white text-xs sm:text-sm font-semibold shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 no-underline group"
+            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-full text-white text-xs sm:text-sm font-bold shadow-md hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-300 no-underline group"
             style={{ backgroundColor: '#8B2635' }}
           >
-            <span>Show All Reviews</span>
+            <span>
+              Show All Reviews {totalCount > 0 && `(${totalCount})`}
+            </span>
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
+
       </div>
     </section>
   );

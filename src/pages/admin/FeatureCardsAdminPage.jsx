@@ -191,20 +191,19 @@ export default function FeatureCardsAdminPage() {
     }
   };
 
-  const activeCardsCount = cards.filter((c) => c.is_active).length;
-  const minRequired = settings.min_cards_required || 5;
-  const isSectionCurrentlyShowing = settings.is_enabled && activeCardsCount >= minRequired;
+  const activeCardsCount = cards.filter((c) => c.is_active && c.image_url).length;
+  const isSectionCurrentlyShowing = settings.is_enabled && activeCardsCount > 0;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-stone-200">
         <div>
           <h2 className="font-serif text-2xl font-bold text-stone-900 flex items-center gap-2">
-            <Sparkles className="w-6 h-6 text-[#C62828]" />
-            <span>Highlights &amp; Experience Carousel</span>
+            <Sparkles className="w-6 h-6 text-[#D4AF37]" />
+            <span>Brand Logos &amp; Marquee</span>
           </h2>
           <p className="text-xs text-stone-500 mt-1">
-            Infinite marquee cards displayed between Testimonials and the Footer.
+            Infinite marquee partner &amp; client logos displayed on the homepage.
           </p>
         </div>
 
@@ -226,10 +225,10 @@ export default function FeatureCardsAdminPage() {
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#C62828] text-white text-xs font-semibold rounded-xl hover:bg-[#1B7A43] transition shadow-xs cursor-pointer border-none"
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#182C20] text-white text-xs font-semibold rounded-xl hover:bg-[#D4AF37] hover:text-stone-900 transition shadow-xs cursor-pointer border-none"
           >
             <Plus className="w-4 h-4" />
-            <span>Add New Card</span>
+            <span>Add Brand Logo</span>
           </button>
         </div>
       </div>
@@ -253,9 +252,9 @@ export default function FeatureCardsAdminPage() {
               {isSectionCurrentlyShowing ? 'Visible & Active' : 'Hidden from Website'}
             </strong>
             <span className="text-[11px] opacity-80">
-              {activeCardsCount} of {minRequired} minimum active cards added.{' '}
+              {activeCardsCount} active brand logos with uploaded images.{' '}
               {!settings.is_enabled && '(Section is switched OFF by admin)'}
-              {settings.is_enabled && activeCardsCount < minRequired && `(Section will automatically appear once you add at least ${minRequired} cards)`}
+              {settings.is_enabled && activeCardsCount === 0 && '(Upload at least 1 brand logo image to activate the section on the website)'}
             </span>
           </div>
         </div>
@@ -276,22 +275,22 @@ export default function FeatureCardsAdminPage() {
 
       {isLoading ? (
         <div className="py-20 text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-[#C62828] mx-auto mb-2" />
-          <p className="text-xs text-stone-500">Loading highlight cards...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-[#D4AF37] mx-auto mb-2" />
+          <p className="text-xs text-stone-500">Loading brand logos...</p>
         </div>
       ) : cards.length === 0 ? (
         <div className="bg-white rounded-2xl border border-dashed border-stone-300 p-12 text-center">
           <Sparkles className="w-10 h-10 text-stone-300 mx-auto mb-2" />
-          <h3 className="text-sm font-semibold text-stone-700">No Cards Created Yet</h3>
+          <h3 className="text-sm font-semibold text-stone-700">No Brand Logos Created Yet</h3>
           <p className="text-xs text-stone-400 mt-1 mb-4">
-            Add at least 5 highlight/trust cards so they can start rotating in the infinite marquee.
+            Add at least 5 brand logos so they can rotate seamlessly in the homepage marquee.
           </p>
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="px-4 py-2 bg-[#C62828] text-white text-xs font-semibold rounded-lg hover:opacity-90"
+            className="px-4 py-2 bg-[#182C20] text-white text-xs font-semibold rounded-lg hover:bg-[#D4AF37] hover:text-stone-900 transition"
           >
-            Create Card
+            Create Brand Logo
           </button>
         </div>
       ) : (
@@ -306,39 +305,24 @@ export default function FeatureCardsAdminPage() {
                 }`}
               >
                 <div>
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-[#FAF7F2] border border-stone-200 overflow-hidden flex items-center justify-center shrink-0">
-                        {cardImg ? (
-                          <img src={cardImg} alt={card.title} className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="font-serif font-bold text-sm text-[#C62828]">
-                            {card.title.substring(0, 2).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                      <div>
-                        <h4 className="font-serif text-sm font-bold text-stone-900 leading-snug">
-                          {card.title}
-                        </h4>
-                        {card.subtitle && (
-                          <p className="text-[11px] font-medium text-stone-600 mt-0.5">{card.subtitle}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {card.badge_tag && (
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-red-50 text-[#C62828] border border-red-200 shrink-0">
-                        {card.badge_tag}
+                  <div className="w-full h-24 rounded-xl bg-stone-50 border border-stone-200 overflow-hidden flex items-center justify-center p-3 mb-3">
+                    {cardImg ? (
+                      <img src={cardImg} alt={card.title} className="max-h-full max-w-full object-contain" />
+                    ) : (
+                      <span className="font-serif font-bold text-base text-[#182C20]">
+                        {card.title}
                       </span>
                     )}
                   </div>
 
-                  {card.description && (
-                    <p className="text-xs text-stone-500 leading-relaxed line-clamp-3 mb-4">
-                      {card.description}
-                    </p>
-                  )}
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-serif text-sm font-bold text-stone-900 leading-snug">
+                      {card.title}
+                    </h4>
+                    <span className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                      Priority #{card.sort_order}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
@@ -355,7 +339,7 @@ export default function FeatureCardsAdminPage() {
                     <button
                       type="button"
                       onClick={() => handleOpenEdit(card)}
-                      className="p-1.5 text-stone-400 hover:text-[#C62828] rounded-md cursor-pointer border-none bg-transparent"
+                      className="p-1.5 text-stone-400 hover:text-[#D4AF37] rounded-md cursor-pointer border-none bg-transparent"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
@@ -378,75 +362,34 @@ export default function FeatureCardsAdminPage() {
         <div className="fixed inset-0 z-[100] !m-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <h3 className="font-serif text-lg font-bold text-stone-900 mb-4 pb-2 border-b border-stone-100">
-              {editingCard ? 'Edit Highlight Card' : 'Create New Highlight Card'}
+              {editingCard ? 'Edit Brand Logo' : 'Add New Brand Logo'}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-stone-700 mb-1">
-                    Title / Person Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="e.g. Fast Delivery or Client Name"
-                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#C62828]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-stone-700 mb-1">
-                    Badge Tag (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.badge_tag}
-                    onChange={(e) => setFormData({ ...formData, badge_tag: e.target.value })}
-                    placeholder="e.g. Express, VIP, Verified"
-                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#C62828]"
-                  />
-                </div>
-              </div>
-
               <div>
                 <label className="block font-semibold text-stone-700 mb-1">
-                  Subtitle / Role / City (Optional)
+                  Brand / Client Name <span className="text-red-500">*</span> <span className="text-stone-400 font-normal text-[11px]">(Internal reference only — not displayed on website UI)</span>
                 </label>
                 <input
                   type="text"
-                  value={formData.subtitle}
-                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                  placeholder="e.g. Across Pan-India or Fashion Designer, Mumbai"
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#C62828]"
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="e.g. Dazzle, Mittal Group, White Clouds..."
+                  className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
 
               <div>
                 <label className="block font-semibold text-stone-700 mb-1">
-                  Description / Highlight Text
-                </label>
-                <textarea
-                  rows={3}
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Enter details, delivery promise, or custom description..."
-                  className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#C62828]"
-                />
-              </div>
-
-              <div>
-                <label className="block font-semibold text-stone-700 mb-1">
-                  Circular Image / Avatar
+                  Brand Logo Image <span className="text-stone-400 font-normal">(Square or horizontal logo image)</span>
                 </label>
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full border border-stone-200 overflow-hidden bg-stone-50 flex items-center justify-center shrink-0">
+                  <div className="w-16 h-16 rounded-xl border border-stone-200 overflow-hidden bg-stone-50 p-1 flex items-center justify-center shrink-0 shadow-2xs">
                     {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-contain" />
                     ) : (
-                      <ImageIcon className="w-5 h-5 text-stone-300" />
+                      <ImageIcon className="w-6 h-6 text-stone-300" />
                     )}
                   </div>
                   <div className="flex-1 space-y-1.5">
@@ -458,13 +401,13 @@ export default function FeatureCardsAdminPage() {
                     />
                     <input
                       type="text"
-                      placeholder="Or enter image URL"
+                      placeholder="Or enter logo image URL"
                       value={formData.image_url}
                       onChange={(e) => {
                         setFormData({ ...formData, image_url: e.target.value });
                         if (!imageFile) setImagePreview(e.target.value);
                       }}
-                      className="w-full px-2.5 py-1.5 border border-stone-200 rounded text-xs focus:outline-none"
+                      className="w-full px-2.5 py-1.5 border border-stone-200 rounded text-xs focus:outline-none focus:border-[#D4AF37]"
                     />
                   </div>
                 </div>
@@ -481,7 +424,7 @@ export default function FeatureCardsAdminPage() {
                     value={formData.sort_order}
                     onChange={(e) => setFormData({ ...formData, sort_order: Number(e.target.value) })}
                     placeholder="1, 2, 3..."
-                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#C62828]"
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:border-[#D4AF37]"
                   />
                   <span className="text-[10px] text-stone-400 mt-0.5 block">Lower number appears first</span>
                 </div>
@@ -511,10 +454,10 @@ export default function FeatureCardsAdminPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 bg-[#C62828] text-white rounded-lg text-xs font-semibold hover:bg-[#1B7A43] transition flex items-center gap-1.5 disabled:opacity-50"
+                  className="px-5 py-2 bg-[#182C20] text-white rounded-lg text-xs font-semibold hover:bg-[#D4AF37] hover:text-stone-900 transition flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  <span>{editingCard ? 'Save Changes' : 'Create Card'}</span>
+                  <span>{editingCard ? 'Save Changes' : 'Create Brand Logo'}</span>
                 </button>
               </div>
             </form>

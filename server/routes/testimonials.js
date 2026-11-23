@@ -34,26 +34,53 @@ ensureTestimonialsTable();
 // -------------------------------------------------------------
 router.get('/', async (req, res, next) => {
   try {
-    const { limit, minRating } = req.query;
-    let query = 'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, created_at FROM testimonials';
+    const { limit, minRating, featured } = req.query;
+
+    const [settingsRows] = await dbPool.query('SELECT * FROM testimonial_settings WHERE id = 1 LIMIT 1');
+    const homeSliderLimit = settingsRows[0]?.home_slider_limit || 10;
+
+    let query = 'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, company_name, designation, is_featured, sort_order, created_at FROM testimonials';
+    const conditions = [];
     const params = [];
 
+    if (featured === '1' || featured === 'true') {
+      conditions.push('is_featured = 1');
+    }
+
     if (minRating) {
-      query += ' WHERE rating >= ?';
+      conditions.push('rating >= ?');
       params.push(Number(minRating));
     }
 
-    query += ' ORDER BY created_at DESC, id DESC';
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
 
+    if (featured === '1' || featured === 'true') {
+      query += ' ORDER BY sort_order ASC, created_at DESC, id DESC';
+    } else {
+      query += ' ORDER BY sort_order ASC, created_at DESC, id DESC';
+    }
+
+    let effectiveLimit = null;
     if (limit && !isNaN(Number(limit))) {
+      effectiveLimit = Number(limit);
+    } else if (featured === '1' || featured === 'true') {
+      effectiveLimit = homeSliderLimit;
+    }
+
+    if (effectiveLimit) {
       query += ' LIMIT ?';
-      params.push(Number(limit));
+      params.push(effectiveLimit);
     }
 
     const [rows] = await dbPool.query(query, params);
+    const [countRows] = await dbPool.query('SELECT COUNT(*) as total FROM testimonials');
 
     return res.status(200).json({
       success: true,
+      home_slider_limit: homeSliderLimit,
+      total_count: countRows[0]?.total || 0,
       testimonials: rows.map(r => ({
         ...r,
         rating: Number(r.rating)
@@ -61,6 +88,41 @@ router.get('/', async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// -------------------------------------------------------------
+// 1b. GET & PUT /api/testimonials/settings/all
+// -------------------------------------------------------------
+router.get('/settings/all', async (req, res) => {
+  try {
+    const [rows] = await dbPool.query('SELECT * FROM testimonial_settings WHERE id = 1 LIMIT 1');
+    res.json({
+      success: true,
+      settings: rows[0] || { id: 1, home_slider_limit: 10 }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to fetch settings' });
+  }
+});
+
+router.put('/settings/all', authenticateToken, async (req, res) => {
+  try {
+    const { home_slider_limit } = req.body;
+    const limitVal = Math.max(1, Number(home_slider_limit) || 10);
+    await dbPool.query(
+      `INSERT INTO testimonial_settings (id, home_slider_limit)
+       VALUES (1, ?)
+       ON DUPLICATE KEY UPDATE home_slider_limit = VALUES(home_slider_limit)`,
+      [limitVal]
+    );
+    res.json({
+      success: true,
+      message: 'Testimonial settings updated',
+      home_slider_limit: limitVal
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to update settings' });
   }
 });
 
@@ -106,7 +168,11 @@ router.post('/', authenticateToken, async (req, res, next) => {
       rating,
       review_text,
       occasion,
-      city
+      city,
+      company_name,
+      designation,
+      is_featured,
+      sort_order
     } = req.body;
 
     if (!customer_name || !customer_name.trim()) {
@@ -124,10 +190,12 @@ router.post('/', authenticateToken, async (req, res, next) => {
     }
 
     const numRating = rating !== undefined && rating !== null ? Math.min(5, Math.max(1, Number(rating))) : 5.0;
+    const featuredVal = is_featured !== undefined ? (Number(is_featured) ? 1 : 0) : 1;
+    const sortVal = sort_order !== undefined ? Number(sort_order) : 0;
 
     const [result] = await dbPool.query(
-      `INSERT INTO testimonials (customer_name, avatar_url, product_image_url, rating, review_text, occasion, city)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO testimonials (customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, company_name, designation, is_featured, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         customer_name.trim(),
         avatar_url ? avatar_url.trim() : null,
@@ -135,12 +203,16 @@ router.post('/', authenticateToken, async (req, res, next) => {
         numRating,
         review_text.trim(),
         occasion ? occasion.trim() : null,
-        city ? city.trim() : null
+        city ? city.trim() : null,
+        company_name ? company_name.trim() : null,
+        designation ? designation.trim() : null,
+        featuredVal,
+        sortVal
       ]
     );
 
     const [createdRows] = await dbPool.query(
-      'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, created_at FROM testimonials WHERE id = ?',
+      'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, company_name, designation, is_featured, sort_order, created_at FROM testimonials WHERE id = ?',
       [result.insertId]
     );
 
@@ -170,10 +242,14 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
       rating,
       review_text,
       occasion,
-      city
+      city,
+      company_name,
+      designation,
+      is_featured,
+      sort_order
     } = req.body;
 
-    const [existingRows] = await dbPool.query('SELECT id FROM testimonials WHERE id = ?', [id]);
+    const [existingRows] = await dbPool.query('SELECT * FROM testimonials WHERE id = ?', [id]);
     if (existingRows.length === 0) {
       return res.status(404).json({
         success: false,
@@ -181,21 +257,25 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
       });
     }
 
-    if (!customer_name || !customer_name.trim()) {
+    const existing = existingRows[0];
+
+    if (customer_name !== undefined && !customer_name.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Customer name is required'
+        message: 'Customer name cannot be empty'
       });
     }
 
-    if (!review_text || !review_text.trim()) {
+    if (review_text !== undefined && !review_text.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Review text is required'
+        message: 'Review text cannot be empty'
       });
     }
 
-    const numRating = rating !== undefined && rating !== null ? Math.min(5, Math.max(1, Number(rating))) : 5.0;
+    const numRating = rating !== undefined && rating !== null ? Math.min(5, Math.max(1, Number(rating))) : Number(existing.rating);
+    const featuredVal = is_featured !== undefined ? (Number(is_featured) ? 1 : 0) : existing.is_featured;
+    const sortVal = sort_order !== undefined ? Number(sort_order) : existing.sort_order;
 
     await dbPool.query(
       `UPDATE testimonials
@@ -205,22 +285,30 @@ router.put('/:id', authenticateToken, async (req, res, next) => {
            rating = ?,
            review_text = ?,
            occasion = ?,
-           city = ?
+           city = ?,
+           company_name = ?,
+           designation = ?,
+           is_featured = ?,
+           sort_order = ?
        WHERE id = ?`,
       [
-        customer_name.trim(),
-        avatar_url ? avatar_url.trim() : null,
-        product_image_url ? product_image_url.trim() : null,
+        customer_name !== undefined ? customer_name.trim() : existing.customer_name,
+        avatar_url !== undefined ? (avatar_url ? avatar_url.trim() : null) : existing.avatar_url,
+        product_image_url !== undefined ? (product_image_url ? product_image_url.trim() : null) : existing.product_image_url,
         numRating,
-        review_text.trim(),
-        occasion ? occasion.trim() : null,
-        city ? city.trim() : null,
+        review_text !== undefined ? review_text.trim() : existing.review_text,
+        occasion !== undefined ? (occasion ? occasion.trim() : null) : existing.occasion,
+        city !== undefined ? (city ? city.trim() : null) : existing.city,
+        company_name !== undefined ? (company_name ? company_name.trim() : null) : existing.company_name,
+        designation !== undefined ? (designation ? designation.trim() : null) : existing.designation,
+        featuredVal,
+        sortVal,
         id
       ]
     );
 
     const [updatedRows] = await dbPool.query(
-      'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, created_at FROM testimonials WHERE id = ?',
+      'SELECT id, customer_name, avatar_url, product_image_url, rating, review_text, occasion, city, company_name, designation, is_featured, sort_order, created_at FROM testimonials WHERE id = ?',
       [id]
     );
 

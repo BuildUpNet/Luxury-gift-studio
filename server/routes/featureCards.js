@@ -53,22 +53,20 @@ ensureFeatureCardsTable();
 router.get('/', async (req, res) => {
   try {
     const [settingsRows] = await dbPool.query('SELECT * FROM marquee_settings WHERE id = 1 LIMIT 1');
-    const settings = settingsRows[0] || { is_enabled: 1, min_cards_required: 5 };
+    const settings = settingsRows[0] || { is_enabled: 1, min_cards_required: 1 };
 
     const [cards] = await dbPool.query(
-      'SELECT * FROM feature_cards WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
+      'SELECT id, title, image_url, sort_order, is_active FROM feature_cards WHERE is_active = 1 ORDER BY sort_order ASC, id ASC'
     );
 
-    // Section is enabled if admin turned it ON AND there are at least min_cards_required cards
-    const minRequired = Number(settings.min_cards_required) || 5;
-    const isSectionVisible = Boolean(settings.is_enabled) && cards.length >= minRequired;
+    const isEnabled = Boolean(settings.is_enabled);
 
     res.json({
       success: true,
-      is_enabled: Boolean(settings.is_enabled),
-      min_cards_required: minRequired,
-      is_visible: isSectionVisible,
-      cards: isSectionVisible ? cards : []
+      is_enabled: isEnabled,
+      min_cards_required: Number(settings.min_cards_required) || 1,
+      is_visible: isEnabled && cards.length > 0,
+      cards: isEnabled ? cards : []
     });
   } catch (err) {
     console.error('Error fetching feature cards:', err);

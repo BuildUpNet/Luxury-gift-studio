@@ -1,12 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Sparkles } from './FaIcons';
 import { apiService } from '../services/api';
 import resolveImageUrl from '../utils/image';
 
+// Pure Brand Logo display - ONLY LOGO IMAGE, NO TEXT / BRAND NAMES ON UI
+function PureBrandLogo({ card }) {
+  const resolvedImg = card.image_url ? resolveImageUrl(card.image_url) : null;
+  const [imgError, setImgError] = useState(false);
+
+  if (!resolvedImg || imgError) {
+    return null;
+  }
+
+  return (
+    <div className="w-full h-full flex items-center justify-center overflow-hidden">
+      <img
+        src={resolvedImg}
+        alt=""
+        loading="lazy"
+        className="max-h-full max-w-full w-auto h-auto object-contain transition-transform duration-300 group-hover:scale-105 select-none pointer-events-none"
+        onError={() => setImgError(true)}
+      />
+    </div>
+  );
+}
+
 export default function InfiniteHighlightsMarquee() {
   const [cards, setCards] = useState([]);
-  const [isVisible, setIsVisible] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isEnabled, setIsEnabled] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -14,20 +34,17 @@ export default function InfiniteHighlightsMarquee() {
       try {
         const res = await apiService.getFeatureCards();
         if (res?.success && isMounted) {
-          // Check if section is enabled and meets minimum cards requirement (5+ cards)
-          if (res.is_visible && Array.isArray(res.cards) && res.cards.length >= (res.min_cards_required || 5)) {
-            setCards(res.cards);
-            setIsVisible(true);
-          } else {
-            setCards([]);
-            setIsVisible(false);
+          setIsEnabled(res.is_enabled !== false);
+          if (Array.isArray(res.cards)) {
+            // ONLY keep active cards that have an uploaded image from admin
+            const validImageCards = res.cards.filter(
+              (c) => c.is_active !== 0 && c.image_url && String(c.image_url).trim() !== ''
+            );
+            setCards(validImageCards);
           }
         }
       } catch (err) {
         console.error('Failed to load marquee cards:', err);
-        if (isMounted) setIsVisible(false);
-      } finally {
-        if (isMounted) setLoading(false);
       }
     };
     fetchCards();
@@ -36,94 +53,60 @@ export default function InfiniteHighlightsMarquee() {
     };
   }, []);
 
-  // If loading or section is not visible (less than 5 cards OR toggled OFF by admin), do not render
-  if (loading || !isVisible || cards.length < 5) {
+  // If section is turned off in admin or no dynamic logo images uploaded yet, do not render
+  if (!isEnabled || cards.length === 0) {
     return null;
   }
 
-  // Duplicate cards for seamless continuous infinite marquee
-  const duplicatedCards = [...cards, ...cards, ...cards, ...cards];
+  // Duplicate cards enough times to guarantee seamless infinite loop
+  const repeatCount = Math.max(3, Math.ceil(18 / cards.length));
+  const duplicatedCards = Array(repeatCount).fill(cards).flat();
 
   return (
     <section
-      className="w-full py-14 sm:py-18 overflow-hidden relative select-none"
+      className="w-full py-16 sm:py-20 overflow-hidden relative select-none"
       style={{
-        backgroundColor: '#EFE8DC',
-        borderTop: '1px solid #E5DED5',
-        borderBottom: '1px solid #E5DED5'
+        backgroundColor: '#15241B',
+        borderTop: '1px solid #2D4737',
+        borderBottom: '1px solid #2D4737'
       }}
     >
-      <div className="absolute inset-0 bg-radial from-emerald-600/10 via-transparent to-transparent pointer-events-none" />
+      {/* Luxury ambient glows */}
+      <div className="absolute inset-0 bg-radial from-[#D4AF37]/5 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#182C20]/40 via-transparent to-[#111D16]/40 pointer-events-none" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 text-center relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFFFFF] border border-[#D5E4D8] text-[#1B7A43] text-[11px] font-bold tracking-widest uppercase mb-2 shadow-2xs">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>The Gift Studio Experience</span>
+      {/* Header section matching Image 1 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center relative z-10">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1C3024] border border-[#2D4737] text-xs font-semibold tracking-wider uppercase mb-3 shadow-xs">
+          <span className="w-5 h-5 rounded-full bg-[#8B2635] text-white text-[10px] font-bold flex items-center justify-center">
+            01
+          </span>
+          <span className="text-[#D4AF37] tracking-widest font-bold text-[11px]">TRUST</span>
         </div>
-        <h2 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 tracking-tight">
-          Exceptional Craftsmanship &amp; Trust
+
+        <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
+          Brands we've worked with. <span className="text-[#D4AF37]">(40+)</span>
         </h2>
+
+        <p className="mt-3 text-stone-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+          A selection of the 40+ brands we've worked with, across retail, food, education, faith, events and technology.
+        </p>
       </div>
 
+      {/* Continuous Infinite Logo Marquee */}
       <div className="relative w-full overflow-hidden marquee-container group/marquee">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-20 sm:w-36 bg-gradient-to-r from-[#EFE8DC] to-transparent z-10" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-20 sm:w-36 bg-gradient-to-l from-[#EFE8DC] to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 sm:w-44 bg-gradient-to-r from-[#15241B] via-[#15241B]/80 to-transparent z-10" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 sm:w-44 bg-gradient-to-l from-[#15241B] via-[#15241B]/80 to-transparent z-10" />
 
-        <div className="marquee-track flex items-stretch gap-6 py-3">
-          {duplicatedCards.map((card, idx) => {
-            const resolvedImg = card.image_url ? resolveImageUrl(card.image_url) : null;
-            return (
-              <div
-                key={`${card.id}-${idx}`}
-                className="highlight-card shrink-0 w-[290px] sm:w-[330px] bg-gradient-to-br from-[#FFFFFF] via-[#F8FCF9] to-[#EEF5F0] rounded-2xl border border-[#D0E0D4] p-5 shadow-[0_4px_16px_-4px_rgba(20,50,30,0.06)] hover:shadow-[0_22px_45px_-10px_rgba(27,122,67,0.2),0_8px_20px_rgba(0,0,0,0.06)] hover:-translate-y-2 hover:scale-[1.03] hover:border-[#1B7A43] flex items-start gap-4 cursor-pointer relative overflow-hidden group/card"
-              >
-                <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-400 via-[#1B7A43] to-emerald-400 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
-
-                <div className="shrink-0 w-14 h-14 rounded-full bg-[#EAF3ED] border-2 border-[#CFE1D3] p-1 overflow-hidden shadow-2xs group-hover/card:scale-110 group-hover/card:rotate-3 group-hover/card:border-[#1B7A43] group-hover/card:shadow-md transition-all duration-300 flex items-center justify-center">
-                  {resolvedImg ? (
-                    <img
-                      src={resolvedImg}
-                      alt={card.title}
-                      loading="lazy"
-                      className="w-full h-full object-cover rounded-full"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-[#EAF3ED] text-[#1B7A43] font-serif font-bold text-base flex items-center justify-center">
-                      {card.title ? card.title.substring(0, 2).toUpperCase() : 'TG'}
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 min-w-0 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="font-serif text-sm sm:text-base font-bold text-stone-900 group-hover/card:text-[#1B7A43] transition-colors truncate">
-                      {card.title}
-                    </h3>
-                    {card.badge_tag && (
-                      <span className="shrink-0 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-100/70 text-[#1B7A43] border border-emerald-300/80 group-hover/card:bg-[#1B7A43] group-hover/card:text-white transition-all duration-300">
-                        {card.badge_tag}
-                      </span>
-                    )}
-                  </div>
-
-                  {card.subtitle && (
-                    <p className="text-xs font-semibold text-stone-700 truncate mb-1">
-                      {card.subtitle}
-                    </p>
-                  )}
-
-                  {card.description && (
-                    <p className="text-[12px] text-stone-600 leading-relaxed line-clamp-2 m-0 font-normal">
-                      {card.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="marquee-track flex items-center gap-4 sm:gap-5 py-2">
+          {duplicatedCards.map((card, idx) => (
+            <div
+              key={`${card.id || idx}-${idx}`}
+              className="shrink-0 w-32 sm:w-36 h-20 sm:h-22 bg-gradient-to-b from-[#F7F3EC] to-[#EAE2D3] rounded-xl sm:rounded-2xl border border-[#D8CEBC] shadow-[0_4px_16px_rgba(0,0,0,0.18)] hover:border-[#8B2635] hover:shadow-[0_10px_24px_rgba(139,38,53,0.22)] hover:-translate-y-0.5 hover:scale-[1.03] transition-all duration-300 flex items-center justify-center p-2.5 sm:p-3 cursor-pointer group"
+            >
+              <PureBrandLogo card={card} />
+            </div>
+          ))}
         </div>
       </div>
     </section>

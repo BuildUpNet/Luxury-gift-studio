@@ -261,10 +261,7 @@ export const getClientOrigin = (req = null) => {
 // Admin notification for custom gifting inquiry
 export const sendGiftingInquiryAdminNotification = async (inquiryData, req = null) => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    if (!adminEmail) {
-      throw new Error("ADMIN_EMAIL is not configured.");
-    }
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.SMTP_USER || 'modient93@gmail.com';
 
     const mailer = getTransporter();
     const name = escapeHtml(inquiryData.name);
