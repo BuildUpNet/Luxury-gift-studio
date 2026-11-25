@@ -3,10 +3,11 @@
 export const STORE_INFO = {
   name: "The Gift Studio",
   tagline: "Buy Premium Gifts & Luxury Hampers Online",
-  whatsapp: "+91 7506210892",
-  phone: "7506210892",
+  whatsapp: "+91 9855840007",
+  phone: "9855840007",
   email: "modient93@gmail.com",
-  announcement: "FOR QUERIES PLEASE CALL OR WHATSAPP- 7506210892",
+  address: "Focal Point Industrial Area, Block E46, New Modi Enterprises, Patiala, Punjab 147001",
+  announcement: "FOR QUERIES PLEASE CALL OR WHATSAPP- 9855840007",
 };
 
 export const ORIGINAL_NAV_LINKS = [

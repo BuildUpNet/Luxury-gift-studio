@@ -395,12 +395,12 @@ export default function ProductDetailPage() {
               
               <div>
                 {product.brand && (
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#D4AF37] mb-1 block">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#8B2635] mb-1 block">
                     {product.brand}
                   </span>
                 )}
                 
-                <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-white tracking-tight leading-snug">
+                <h1 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-stone-900 tracking-tight leading-snug">
                   {product.title}
                 </h1>
 
@@ -453,7 +453,7 @@ export default function ProductDetailPage() {
                 </button>
 
                 <a
-                  href={`https://wa.me/917506210892?text=${encodeURIComponent(
+                  href={`https://wa.me/919855840007?text=${encodeURIComponent(
                     `Hi, I am interested in inquiring about "${product.title}" (₹${priceNumeric.toLocaleString('en-IN')}) from The Gift Studio.`
                   )}`}
                   target="_blank"
@@ -466,11 +466,11 @@ export default function ProductDetailPage() {
               </div>
 
               {product.description && (
-                <div className="pt-4 border-t border-[#2D4737]">
-                  <h3 className="font-serif text-sm font-bold text-white mb-2">
+                <div className="pt-4 border-t border-[#E8DFD3]">
+                  <h3 className="font-serif text-sm font-bold text-stone-900 mb-2">
                     Product Details & Craftsmanship
                   </h3>
-                  <div className="text-xs sm:text-sm text-stone-300 leading-relaxed whitespace-pre-line space-y-1.5">
+                  <div className="text-xs sm:text-sm text-stone-700 leading-relaxed whitespace-pre-line space-y-1.5">
                     {product.description}
                   </div>
                 </div>
@@ -647,7 +647,7 @@ export default function ProductDetailPage() {
                   </button>
 
                   <a
-                    href={`https://wa.me/917506210892?text=${encodeURIComponent(
+                    href={`https://wa.me/919855840007?text=${encodeURIComponent(
                       `Hi, I am inquiring about "${product.title}" (₹${priceNumeric.toLocaleString('en-IN')}) from The Gift Studio.`
                     )}`}
                     target="_blank"

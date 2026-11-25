@@ -20,6 +20,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import resolveImageUrl, { parseGalleryImages } from '../utils/image';
 import { apiService } from '../services/api';
+import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 
 /**
  * Auto-generates 5 to 7 clean, human-friendly price brackets
@@ -182,9 +183,20 @@ export default function CategoryCollectionPage() {
   const isAllCategories = !slug || slug === 'all';
 
   // State
-  const [category, setCategory] = useState(null);
+  const [allCategories, setAllCategories] = useState(() => {
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    return Array.isArray(cached) ? cached : [];
+  });
+  const [category, setCategory] = useState(() => {
+    if (!slug || slug === 'all') return { name: 'All Categories', slug: 'all' };
+    const cached = getCachedData(CACHE_KEYS.CATEGORIES, null);
+    if (Array.isArray(cached)) {
+      const match = cached.find((c) => c.slug === slug || String(c.id) === String(slug));
+      if (match) return match;
+    }
+    return null;
+  });
   const [products, setProducts] = useState([]);
-  const [allCategories, setAllCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -589,10 +601,36 @@ export default function CategoryCollectionPage() {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-12 h-12 border-3 border-[#C62828] border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="font-serif text-lg text-stone-800 font-medium">Curating collection...</p>
-            <p className="text-stone-500 text-xs mt-1">Fetching the finest gift hampers</p>
+          <div className="animate-in fade-in duration-150">
+            <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#E8DFD3]/80">
+              <div className="w-40 h-5 bg-stone-200/80 rounded animate-pulse" />
+              <div className="w-28 h-8 bg-stone-200/80 rounded-lg animate-pulse" />
+            </div>
+
+            <div className="flex flex-col lg:flex-row items-start gap-6">
+              <aside className="hidden lg:block w-60 shrink-0 space-y-3">
+                <div className="border border-[#E8DFD3] rounded-xl bg-white p-4 h-48 animate-pulse">
+                  <div className="w-24 h-4 bg-stone-200 rounded mb-3" />
+                  <div className="space-y-2">
+                    <div className="w-full h-3 bg-stone-100 rounded" />
+                    <div className="w-full h-3 bg-stone-100 rounded" />
+                    <div className="w-full h-3 bg-stone-100 rounded" />
+                  </div>
+                </div>
+              </aside>
+
+              <div className="flex-1 w-full">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+                  {[...Array(8)].map((_, idx) => (
+                    <div key={idx} className="bg-white rounded-xl border border-[#E8DFD3] p-3 space-y-3 animate-pulse">
+                      <div className="w-full aspect-square bg-stone-200/70 rounded-lg" />
+                      <div className="w-3/4 h-4 bg-stone-200/80 rounded" />
+                      <div className="w-1/3 h-4 bg-stone-200/60 rounded" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -845,7 +883,7 @@ export default function CategoryCollectionPage() {
             </div>
 
             <div className="flex flex-col lg:flex-row items-start gap-6">
-              <aside className="hidden lg:block w-60 shrink-0 self-start sticky top-24 space-y-3">
+              <aside className="hidden lg:block w-60 shrink-0 space-y-3">
                 <div className="border border-[#E8DFD3] rounded-xl bg-white shadow-2xs overflow-hidden">
                   <button
                     type="button"
@@ -1391,7 +1429,7 @@ export default function CategoryCollectionPage() {
                     </button>
 
                     <a
-                      href={`https://wa.me/917506210892?text=${encodeURIComponent(
+                      href={`https://wa.me/919855840007?text=${encodeURIComponent(
                         `Hi, I am inquiring about "${inquireModalProduct.title}" (₹${Number(
                           inquireModalProduct.priceNum || 0
                         ).toLocaleString('en-IN')}) from the ${category?.name || slug} collection.`

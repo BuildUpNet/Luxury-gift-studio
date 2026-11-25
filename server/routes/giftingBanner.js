@@ -250,12 +250,17 @@ router.post('/gifting-inquiries', async (req, res) => {
       createdAt: new Date()
     };
 
-    // Send notifications asynchronously (failures will not break inquiry response)
-    Promise.allSettled([
-      sendGiftingInquiryAdminNotification(inquiryData, req),
-      sendGiftingInquiryCustomerConfirmation(inquiryData)
-    ]).catch((err) => {
-      console.warn('Notification email error:', err);
+    // Send admin notification
+    try {
+      const emailRes = await sendGiftingInquiryAdminNotification(inquiryData, req);
+      console.log(`[Gifting Inquiry #${result.insertId}] Admin notification sent to modient93@gmail.com:`, emailRes);
+    } catch (err) {
+      console.error(`[Gifting Inquiry #${result.insertId}] Admin notification failed:`, err);
+    }
+
+    // Send customer confirmation email asynchronously
+    sendGiftingInquiryCustomerConfirmation(inquiryData).catch((err) => {
+      console.warn(`[Gifting Inquiry #${result.insertId}] Customer confirmation email error:`, err);
     });
 
     return res.status(201).json({

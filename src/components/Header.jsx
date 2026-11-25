@@ -14,10 +14,10 @@ import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
 import resolveImageUrl from '../utils/image';
 
 const DEFAULT_SETTINGS = {
-  facebook_url: 'https://facebook.com/thegiftstudio',
-  whatsapp_url: 'https://wa.me/917506210892',
-  instagram_url: 'https://instagram.com/thegiftstudio',
-  bulk_enquiry_phone: '917506210892'
+  facebook_url: 'https://www.facebook.com/share/1JdovZsxve/?mibextid=wwXIfr',
+  whatsapp_url: 'https://wa.me/919855840007',
+  instagram_url: 'https://www.instagram.com/new_modi_enterprises?avpt=MTUzYXFrbTQxZmhscA%3D%3D&utm_source=qr',
+  bulk_enquiry_phone: '9855840007'
 };
 
 const Header = ({
@@ -210,9 +210,12 @@ const Header = ({
             >
               <div className="p-1 sm:p-1.5 bg-white rounded-xl shadow-md border-2 border-[#D4AF37]/80 group-hover:border-[#D4AF37] group-hover:shadow-[0_0_16px_rgba(212,175,55,0.4)] transition-all duration-300 flex items-center justify-center">
                 <img
-                  src="/images/gift_logo.jpeg"
+                  src="/images/modi_logo_transparent.png"
                   alt="The Gift Studio Logo"
                   className="h-10 sm:h-12 md:h-13 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/gift_logo.jpeg';
+                  }}
                 />
               </div>
             </Link>
@@ -351,7 +354,7 @@ const Header = ({
             </Link>
 
             <a
-              href={storeSettings.facebook_url || 'https://facebook.com/thegiftstudio'}
+              href={storeSettings.facebook_url || 'https://www.facebook.com/share/1JdovZsxve/?mibextid=wwXIfr'}
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
@@ -361,7 +364,7 @@ const Header = ({
             </a>
 
             <a
-              href={storeSettings.instagram_url || 'https://instagram.com/thegiftstudio'}
+              href={storeSettings.instagram_url || 'https://www.instagram.com/new_modi_enterprises?avpt=MTUzYXFrbTQxZmhscA%3D%3D&utm_source=qr'}
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
@@ -371,7 +374,7 @@ const Header = ({
             </a>
 
             <a
-              href={storeSettings.whatsapp_url || 'https://wa.me/917506210892'}
+              href={storeSettings.whatsapp_url || 'https://wa.me/919855840007'}
               target="_blank"
               rel="noopener noreferrer"
               className="w-9 h-9 rounded-full bg-[#223B2D] hover:bg-[#D4AF37] border border-[#2D4737] hover:border-[#D4AF37] text-[#E4EFE7] hover:text-stone-900 flex items-center justify-center transition-all duration-200 no-underline shadow-2xs hover:scale-105 cursor-pointer"
@@ -678,7 +681,14 @@ const Header = ({
               );
             })}
 
-            <div className="pt-2 border-t border-[#2D4737]">
+            <div className="pt-2 border-t border-[#2D4737] space-y-1">
+              <Link
+                to="/about"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="block w-full text-left py-2 hover:text-[#D4AF37] font-semibold no-underline text-[#E4EFE7]"
+              >
+                About Us
+              </Link>
               <Link
                 to="/contact"
                 onClick={() => setIsMobileMenuOpen(false)}

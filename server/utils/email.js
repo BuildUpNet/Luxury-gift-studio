@@ -282,7 +282,7 @@ export const sendGiftingInquiryAdminNotification = async (inquiryData, req = nul
         name: inquiryData.name,
         address: inquiryData.email,
       },
-      subject: `🎁 New Custom Gift Hamper Inquiry from ${inquiryData.name}`,
+      subject: `🎁 [Inquiry #${inquiryData.id || 'New'}] Custom Gift Hamper Request - ${inquiryData.name} (${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })})`,
       text: `
 New Custom Gift Hamper Inquiry Received!
 Inquiry ID: #${inquiryData.id ?? 'N/A'}

@@ -198,7 +198,7 @@ export default function ContactPage() {
                         Gifting Studio
                       </h3>
                       <p className="text-sm font-semibold text-stone-800 m-0">
-                        Aggarwal Street, Lehragaga, Punjab 148031
+                        Focal Point Industrial Area, Block E46, New Modi Enterprises, Patiala, Punjab 147001
                       </p>
                     </div>
                   </div>

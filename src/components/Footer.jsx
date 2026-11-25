@@ -6,10 +6,10 @@ import { apiService } from '../services/api';
 import { getCachedData, CACHE_KEYS } from '../utils/cache';
 
 const DEFAULT_SETTINGS = {
-  facebook_url: 'https://facebook.com/thegiftstudio',
-  whatsapp_url: 'https://wa.me/917506210892',
-  instagram_url: 'https://instagram.com/thegiftstudio',
-  bulk_enquiry_phone: '917506210892',
+  facebook_url: 'https://www.facebook.com/share/1JdovZsxve/?mibextid=wwXIfr',
+  whatsapp_url: 'https://wa.me/919855840007',
+  instagram_url: 'https://www.instagram.com/new_modi_enterprises?avpt=MTUzYXFrbTQxZmhscA%3D%3D&utm_source=qr',
+  bulk_enquiry_phone: '9855840007',
   support_email: 'modient93@gmail.com'
 };
 
@@ -61,9 +61,14 @@ export default function Footer() {
               </div>
             </Link>
 
-            <h3 className="text-white text-base font-semibold tracking-wide pt-1">
-              About us
-            </h3>
+            <div className="flex items-center gap-2 pt-1">
+              <h3 className="text-white text-base font-semibold tracking-wide m-0">
+                About us
+              </h3>
+              <Link to="/about" className="text-xs text-[#D4AF37] hover:underline font-medium no-underline">
+                (Read More →)
+              </Link>
+            </div>
 
             <p className="text-[#9e9e9e] text-sm leading-relaxed max-w-md m-0">
               {STORE_INFO.name} brings you bespoke luxury hampers, curated gourmet celebration boxes, and unforgettable artisanal gifts crafted with excellence for every special occasion.
@@ -82,6 +87,15 @@ export default function Footer() {
                   className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
                 >
                   Home
+                </Link>
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-xs text-gray-500">○</span>
+                <Link
+                  to="/about"
+                  className="text-[#b0b0b0] hover:text-white transition-colors duration-200 no-underline"
+                >
+                  About Us
                 </Link>
               </li>
               <li className="flex items-center gap-2">
@@ -123,7 +137,7 @@ export default function Footer() {
               <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 text-[#D4AF37] shrink-0 mt-0.5" />
                 <span className="text-[#b0b0b0] leading-snug">
-                  Aggarwal Street, Lehragaga, Punjab 148031
+                  Focal Point Industrial Area, Block E46, New Modi Enterprises, Patiala, Punjab 147001
                 </span>
               </div>
 

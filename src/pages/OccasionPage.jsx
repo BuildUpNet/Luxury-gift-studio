@@ -433,16 +433,16 @@ export default function OccasionPage() {
             </section>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-              <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-[#2D4737] gap-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between pb-6 mb-6 border-b border-[#E8DFD3] gap-4">
                 <div>
-                  <span className="text-[11px] font-bold tracking-widest text-[#D4AF37] uppercase block mb-1">
+                  <span className="text-[11px] font-bold tracking-widest text-[#8B2635] uppercase block mb-1">
                     Handcrafted Hampers
                   </span>
-                  <h2 className="font-serif text-2xl font-bold text-white">
+                  <h2 className="font-serif text-2xl font-bold text-stone-900">
                     Gifts for {occasion?.name || 'this Occasion'}
                   </h2>
-                  <p className="text-xs text-stone-300 mt-0.5">
-                    Showing <strong className="text-white">{filteredAndSortedProducts.length}</strong> of {products.length} gifts
+                  <p className="text-xs text-stone-600 mt-0.5">
+                    Showing <strong className="text-stone-900">{filteredAndSortedProducts.length}</strong> of {products.length} gifts
                   </p>
                 </div>
 
@@ -450,15 +450,15 @@ export default function OccasionPage() {
                   <div className="flex flex-wrap items-center gap-3">
                     {priceBrackets.length > 0 && (
                       <div className="flex items-center gap-2">
-                        <SlidersHorizontal className="w-3.5 h-3.5 text-stone-400" />
-                        <label htmlFor="price-select" className="text-xs font-semibold text-stone-300">
+                        <SlidersHorizontal className="w-3.5 h-3.5 text-stone-600" />
+                        <label htmlFor="price-select" className="text-xs font-semibold text-stone-700">
                           Price:
                         </label>
                         <select
                           id="price-select"
                           value={selectedPriceBracket}
                           onChange={(e) => setSelectedPriceBracket(e.target.value)}
-                          className="bg-[#182C20] border border-[#2D4737] rounded-lg px-3 py-1.5 text-xs text-white font-medium focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                          className="bg-white border border-[#E8DFD3] rounded-lg px-3 py-1.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-[#8B2635] cursor-pointer shadow-2xs"
                         >
                           <option value="all">All Prices</option>
                           {priceBrackets.map((b) => (
@@ -471,14 +471,14 @@ export default function OccasionPage() {
                     )}
 
                     <div className="flex items-center gap-2">
-                      <label htmlFor="sort-select" className="text-xs font-semibold text-stone-300">
+                      <label htmlFor="sort-select" className="text-xs font-semibold text-stone-700">
                         Sort by:
                       </label>
                       <select
                         id="sort-select"
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="bg-[#182C20] border border-[#2D4737] rounded-lg px-3 py-1.5 text-xs text-white font-medium focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+                        className="bg-white border border-[#E8DFD3] rounded-lg px-3 py-1.5 text-xs text-stone-800 font-medium focus:outline-none focus:border-[#8B2635] cursor-pointer shadow-2xs"
                       >
                         <option value="featured">Featured Curations</option>
                         <option value="price-low">Price: Low to High</option>
@@ -532,14 +532,14 @@ export default function OccasionPage() {
                   </div>
                 </div>
               ) : filteredAndSortedProducts.length === 0 ? (
-                <div className="bg-[#182C20] rounded-xl border border-[#2D4737] p-8 text-center max-w-md mx-auto">
+                <div className="bg-white rounded-xl border border-[#E8DFD3] p-8 text-center max-w-md mx-auto shadow-xs">
                   <PackageX className="w-10 h-10 text-stone-400 mx-auto mb-2" />
                   <h3 className="text-sm font-bold text-stone-900 mb-1">No Gifts in this Price Range</h3>
                   <p className="text-xs text-stone-500 mb-4">Try clearing the price filter to see all gifts for this occasion.</p>
                   <button
                     type="button"
                     onClick={() => setSelectedPriceBracket('all')}
-                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#C62828] rounded-lg hover:bg-black transition cursor-pointer border-none"
+                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#8B2635] rounded-lg hover:bg-black transition cursor-pointer border-none shadow-xs"
                   >
                     Reset Price Filter
                   </button>

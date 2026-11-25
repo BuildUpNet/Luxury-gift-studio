@@ -6,10 +6,10 @@ const router = express.Router();
 
 const DEFAULT_SETTINGS = {
   id: 1,
-  facebook_url: 'https://facebook.com/thegiftstudio',
-  whatsapp_url: 'https://wa.me/917506210892',
-  instagram_url: 'https://instagram.com/thegiftstudio',
-  bulk_enquiry_phone: '917506210892',
+  facebook_url: 'https://www.facebook.com/share/1JdovZsxve/?mibextid=wwXIfr',
+  whatsapp_url: 'https://wa.me/919855840007',
+  instagram_url: 'https://www.instagram.com/new_modi_enterprises?avpt=MTUzYXFrbTQxZmhscA%3D%3D&utm_source=qr',
+  bulk_enquiry_phone: '9855840007',
   support_email: 'modient93@gmail.com'
 };
 
@@ -19,10 +19,10 @@ async function ensureSettingsTable() {
     await dbPool.query(`
       CREATE TABLE IF NOT EXISTS store_settings (
         id int unsigned NOT NULL AUTO_INCREMENT,
-        facebook_url varchar(255) DEFAULT 'https://facebook.com/thegiftstudio',
-        whatsapp_url varchar(255) DEFAULT 'https://wa.me/917506210892',
-        instagram_url varchar(255) DEFAULT 'https://instagram.com/thegiftstudio',
-        bulk_enquiry_phone varchar(50) DEFAULT '917506210892',
+        facebook_url varchar(255) DEFAULT 'https://www.facebook.com/share/1JdovZsxve/?mibextid=wwXIfr',
+        whatsapp_url varchar(255) DEFAULT 'https://wa.me/919855840007',
+        instagram_url varchar(255) DEFAULT 'https://www.instagram.com/new_modi_enterprises?avpt=MTUzYXFrbTQxZmhscA%3D%3D&utm_source=qr',
+        bulk_enquiry_phone varchar(50) DEFAULT '9855840007',
         support_email varchar(150) DEFAULT 'modient93@gmail.com',
         updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         PRIMARY KEY (id)

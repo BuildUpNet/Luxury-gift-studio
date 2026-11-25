@@ -163,7 +163,7 @@ export default function SettingsAdminPage({ onShowToast }) {
                 required
                 value={formData.instagram_url}
                 onChange={handleChange}
-                placeholder="https://instagram.com/thegiftstudio"
+                placeholder="https://www.instagram.com/new_modi_enterprises"
                 className="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-gray-50/40"
               />
               <p className="text-[10px] text-gray-400 mt-1">
@@ -194,7 +194,7 @@ export default function SettingsAdminPage({ onShowToast }) {
                 name="facebook_url"
                 value={formData.facebook_url}
                 onChange={handleChange}
-                placeholder="https://facebook.com/thegiftstudio"
+                placeholder="https://www.facebook.com/share/..."
                 className="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-gray-50/40"
               />
             </div>
@@ -222,7 +222,7 @@ export default function SettingsAdminPage({ onShowToast }) {
                 name="whatsapp_url"
                 value={formData.whatsapp_url}
                 onChange={handleChange}
-                placeholder="https://wa.me/917506210892"
+                placeholder="https://wa.me/919855840007"
                 className="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-gray-50/40"
               />
             </div>
@@ -252,7 +252,7 @@ export default function SettingsAdminPage({ onShowToast }) {
                 name="bulk_enquiry_phone"
                 value={formData.bulk_enquiry_phone}
                 onChange={handleChange}
-                placeholder="917506210892"
+                placeholder="9855840007"
                 className="w-full px-3.5 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#8B2635] bg-gray-50/40"
               />
             </div>

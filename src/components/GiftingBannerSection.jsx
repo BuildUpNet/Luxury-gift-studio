@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, CheckCircle2, AlertCircle, MessageCircle, Gift, Loader2 } from './FaIcons';
+import { Sparkles, ArrowRight, CheckCircle2, AlertCircle, MessageCircle, Gift, Loader2, X } from './FaIcons';
 import { apiService } from '../services/api';
 import { resolveImageUrl } from '../utils/image';
 import { getCachedData, setCachedData, CACHE_KEYS } from '../utils/cache';
@@ -30,6 +30,7 @@ export default function GiftingBannerSection() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [isHovered, setIsHovered] = useState(false);
 
@@ -106,6 +107,7 @@ export default function GiftingBannerSection() {
           ...formData,
           inquiryId: res.inquiryId || res.inquiry?.id
         });
+        setShowSuccessModal(true);
         setFormData({
           name: '',
           email: '',
@@ -478,8 +480,8 @@ export default function GiftingBannerSection() {
                   <div className="pt-2 border-t border-white/10 flex justify-end">
                     <button
                       type="submit"
-                      disabled={isSubmitting || !formData.agreedToTerms}
-                      className="group relative overflow-hidden inline-flex items-center justify-center gap-2.5 px-7 py-3 rounded-full text-xs sm:text-sm font-bold text-[#111111] bg-[#F4C95D] hover:bg-[#ffcf66] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_22px_rgba(244,201,93,0.4)] hover:shadow-[0_8px_32px_rgba(244,201,93,0.6)] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none cursor-pointer border-none"
+                      disabled={isSubmitting}
+                      className="group relative overflow-hidden inline-flex items-center justify-center gap-2.5 px-7 py-3 rounded-full text-xs sm:text-sm font-bold text-[#111111] bg-[#F4C95D] hover:bg-[#ffcf66] transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] shadow-[0_4px_22px_rgba(244,201,93,0.4)] hover:shadow-[0_8px_32px_rgba(244,201,93,0.6)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none cursor-pointer border-none"
                     >
                       <span
                         className="absolute inset-0 w-full h-full pointer-events-none transform -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"
@@ -507,6 +509,94 @@ export default function GiftingBannerSection() {
           </div>
         </div>
       </div>
+
+      {/* Instant Success Confirmation Popup Modal */}
+      {showSuccessModal && submittedData && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{
+            background: 'rgba(5, 10, 7, 0.75)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)'
+          }}
+          onClick={() => setShowSuccessModal(false)}
+        >
+          <div
+            className="relative w-full max-w-lg rounded-2xl p-6 sm:p-8 text-center animate-in fade-in zoom-in-95 duration-200"
+            style={{
+              background: '#15241B',
+              border: '1.5px solid rgba(244, 201, 93, 0.6)',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(244, 201, 93, 0.25)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close 'X' Button */}
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer border-none bg-transparent"
+              aria-label="Close dialog"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Glowing Golden Success Badge */}
+            <div className="w-16 h-16 rounded-full bg-[#F4C95D]/20 text-[#FFE082] mx-auto flex items-center justify-center border border-[#F4C95D]/60 shadow-[0_0_30px_rgba(244,201,93,0.4)] mb-4">
+              <CheckCircle2 className="w-9 h-9 text-[#FFE082]" />
+            </div>
+
+            <h3
+              className="font-heading text-2xl font-bold text-white tracking-wide mb-2"
+              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
+            >
+              Quote Request Submitted!
+            </h3>
+
+            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed mb-5">
+              Thank you, <span className="text-[#FFE082] font-semibold">{submittedData.name}</span>! Your bespoke hamper inquiry has been received and emailed to our curation team.
+            </p>
+
+            {/* Summary Details */}
+            <div
+              className="rounded-xl p-4 text-left border border-white/10 text-xs space-y-2 mb-5"
+              style={{ background: 'rgba(255, 255, 255, 0.05)' }}
+            >
+              <div className="text-[11px] uppercase font-bold text-[#FFE082] tracking-wider border-b border-white/10 pb-1.5 flex items-center justify-between">
+                <span>Inquiry Confirmation</span>
+                {submittedData.inquiryId && (
+                  <span className="text-white font-bold bg-[#F4C95D]/20 px-2 py-0.5 rounded border border-[#F4C95D]/40">
+                    ID #{submittedData.inquiryId}
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-between text-slate-300 pt-1">
+                <span>Contact Number:</span>
+                <span className="text-white font-medium">{submittedData.phone}</span>
+              </div>
+              <div className="flex justify-between text-slate-300">
+                <span>Delivery City / Pincode:</span>
+                <span className="text-white font-medium">{submittedData.city_pincode}</span>
+              </div>
+              <div className="flex justify-between text-slate-300">
+                <span>Notification Email:</span>
+                <span className="text-[#FFE082] font-medium">modient93@gmail.com</span>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-slate-400 mb-6">
+              Our team will review your requirements and connect with you via Phone / WhatsApp shortly.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full sm:w-auto px-8 py-3 rounded-full text-xs sm:text-sm font-bold text-[#111111] bg-[#F4C95D] hover:bg-[#ffcf66] transition-all transform hover:scale-105 shadow-[0_4px_20px_rgba(244,201,93,0.4)] cursor-pointer border-none"
+            >
+              Got it, Thank You
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

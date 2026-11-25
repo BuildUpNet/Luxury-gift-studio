@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import CategoryCollectionPage from './pages/CategoryCollectionPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -12,6 +13,14 @@ import AdminProtectedRoute from './components/AdminProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { ProductProvider } from './context/ProductContext';
 import { AdminAuthProvider } from './context/AdminAuthContext';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   const [toastMessage, setToastMessage] = useState('');
@@ -28,6 +37,7 @@ export default function App() {
       <ProductProvider>
         <ErrorBoundary>
           <Router>
+            <ScrollToTop />
             <div style={{ minHeight: '100vh', width: '100%', display: 'flex', flexDirection: 'column', background: '#15241B' }}>
               {toastMessage && (
                 <div
@@ -52,6 +62,7 @@ export default function App() {
 
               <Routes>
                 <Route path="/" element={<HomePage />} />
+                <Route path="/about" element={<AboutPage />} />
 
                 <Route path="/category" element={<CategoryCollectionPage />} />
                 <Route path="/category/:slug" element={<CategoryCollectionPage />} />

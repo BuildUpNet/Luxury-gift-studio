@@ -223,12 +223,7 @@ export default function HomeCarousels({
     return (
       <Link
         to={categoryTarget}
-        onClick={() => {
-          if (onSelectCategory) {
-            onSelectCategory(category.slug || category.id);
-          }
-        }}
-        className={`editorial-category-card group no-underline text-inherit ${isSelected ? 'selected ring-2 ring-[#8B2635]/60' : ''}`}
+        className="editorial-category-card group no-underline text-inherit"
       >
         <div className="editorial-card-image-wrap">
           {category.image_url && !imgFailed ? (
