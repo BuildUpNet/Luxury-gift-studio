@@ -186,7 +186,7 @@ const Header = ({
   const hasOverflow = navbarCategories.length > 6;
 
   return (
-    <header className="w-full relative z-50 shadow-xs" style={{ backgroundColor: '#182C20', borderBottom: '1px solid #2D4737' }}>
+    <header className="w-full sticky top-0 z-50 shadow-md backdrop-blur-xs" style={{ backgroundColor: '#182C20', borderBottom: '1px solid #2D4737' }}>
       <div style={{ borderBottom: '1px solid rgba(212, 175, 55, 0.15)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex items-center justify-between gap-4">
           

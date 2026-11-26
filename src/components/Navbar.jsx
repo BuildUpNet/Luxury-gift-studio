@@ -81,7 +81,7 @@ export default function Navbar({
   return (
     <nav
       aria-label="Main Store Navigation"
-      className="relative z-40"
+      className="sticky top-0 z-40 shadow-sm"
       style={{ backgroundColor: '#DBE6DC', borderTop: '1px solid rgba(27, 122, 67, 0.22)', borderBottom: '1px solid rgba(27, 122, 67, 0.22)' }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

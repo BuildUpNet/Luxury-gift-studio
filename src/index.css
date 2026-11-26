@@ -61,7 +61,7 @@ body {
   min-height: 100vh;
   background-color: var(--color-bg-primary);
   color: var(--color-text);
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Typography */
